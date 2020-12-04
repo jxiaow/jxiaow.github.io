@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://xiaowujiang.cn</id>
+    <title>Xiaowu</title>
+    <updated>2020-12-04T16:14:03.409Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://xiaowujiang.cn"/>
+    <link rel="self" href="https://xiaowujiang.cn/atom.xml"/>
+    <subtitle>心若没有栖息的地方，到哪里都是在流浪</subtitle>
+    <logo>https://xiaowujiang.cn/images/avatar.png</logo>
+    <icon>https://xiaowujiang.cn/favicon.ico</icon>
+    <rights>All rights reserved 2020, Xiaowu</rights>
+    <entry>
+        <title type="html"><![CDATA[Android通过Intent简单实现分享功能]]></title>
+        <id>https://xiaowujiang.cn/posts/73a6d0c4/</id>
+        <link href="https://xiaowujiang.cn/posts/73a6d0c4/">
+        </link>
+        <updated>2020-12-04T16:03:24.000Z</updated>
+        <summary type="html"><![CDATA[<p>现在大多数App的分享功能基本上使用的都是微信、QQ、微博的分享sdk或者是集成友盟分享sdk，如果想简单快速的实现分享功能，可以考虑通过<code>Intent</code>方式打开在系统中安装的具有分享功能的App的分享页面。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>现在大多数App的分享功能基本上使用的都是微信、QQ、微博的分享sdk或者是集成友盟分享sdk，如果想简单快速的实现分享功能，可以考虑通过<code>Intent</code>方式打开在系统中安装的具有分享功能的App的分享页面。</p>
+<!-- more -->
+<p>方法如下：</p>
+<pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
+    Intent intent = new Intent();
+    intent.setAction(Intent.ACTION_SEND);
+    intnet.setType(&quot;text/plain&quot;);
+    PackageManager packageManager = context.getPackageManager();
+    List&lt;ResolveInfo&gt; resolveInfos = packageManager.queryIntentActivities(intent, 0);
+    return resloveInfos;
+}
+</code></pre>
+<p>如果只需要QQ和微信分享，可以进行如下操作：</p>
+<pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
+    Intent intent = new Intent();
+    intent.setAction(Intent.ACTION_SEND);
+    intnet.setType(&quot;text/plain&quot;);
+    PackageManager packageManager = context.getPackageManager();
+    List&lt;ResolveInfo&gt; resolveInfos = packageManager.queryIntentActivities(intent, 0);
+    List&lt;ResolveInfo&gt; shareItems = new ArrayList();    
+    for(ResolveInfo info: resolveInfos) {
+        String name = info.activityInfo.packageName;
+        if (TextUtils.equals(packageName, &quot;com.tencent.mm&quot;)
+                    || TextUtils.equals(packageName, &quot;com.tencent.mobileqq&quot;)) {
+                shareItems.add(resolveInfo);
+        }
+    }
+    return shareItems;
+}
+</code></pre>
+<p>通过<code>ResolveInfo</code>获取图标<code>ICON</code>和<code>Label</code>:</p>
+<pre><code class="language-java">Drawable drawable = resloveInfo.loadIcon(packageManager);
+CharSequence label = resolveInfo.loadLabel(packageManager);
+</code></pre>
+<p>通过<code>Intent</code>发起分享：</p>
+<pre><code class="language-java">public static void share(Context context, 
+            ResolveInfo info, String shareContent){
+    Intent itnent = new Intent();
+    intnet.setAction(Intent.ACTION_SEND);
+    String pkg = resolveInfo.activityInfo.packageName;
+    String cls = resolveInfo.activityInfo.name;
+    intent.setComponent(new Component(pkg, cls));
+    intent.putExtra(Intent.EXTRA_TEXT, shareContent);
+    context.startActivity(intent);
+}
+</code></pre>
+]]></content>
+    </entry>
+</feed>
