@@ -1,0 +1,1041 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>Android DataBinding 从入门到进阶 | Xiaowu</title>
+
+<link rel="shortcut icon" href="https://xiaowujiang.cn/favicon.ico?v=1607101500628">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://xiaowujiang.cn/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Xiaowu
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/posts/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1607101500628" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    Android DataBinding 从入门到进阶
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-12-05 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p>DataBinding 是<code>google</code>发布的一个数据绑定框架，用于降低布局和逻辑的耦合性，使代码逻辑更加清晰。大量减少 Activity 内的代码，数据能够单向或双向绑定到 layout 文件中，有助于防止内存泄漏，而且能自动进行空检测以避免空指针异常。</p>
+<!-- more -->
+<h2 id="环境配置">环境配置</h2>
+<ol>
+<li>
+<p>详情内容请参考：<a href="https://developer.android.com/topic/libraries/data-binding/start">https://developer.android.com/topic/libraries/data-binding/start</a></p>
+</li>
+<li>
+<p>启用 DataBinding 的方法是在对应 Model 的 <strong><code>build.gradle</code></strong> 文件里加入以下代码，同步后就能引入对 DataBinding 的支持</p>
+<pre><code class="language-groovy">android {
+    ...
+   dataBinding {
+       enabled = true
+   }
+}
+</code></pre>
+</li>
+<li>
+<p>如果<code>Android Studio</code>的版本小于<code>3.2</code>的需要在<code>gradle.properties</code>中添加：</p>
+<pre><code class="language-groovy">android.databinding.enableV2=true
+</code></pre>
+</li>
+</ol>
+<p><strong>tips:</strong>   1. 推荐使用最新的<code>Android Studio</code>版本和<code>AndroidX</code>库。</p>
+<p>​            2.<code>build.gradle</code>中添加<code>'apply plugin : 'kotlin-kapt'</code>。</p>
+<h2 id="基础入门">基础入门</h2>
+<h3 id="改变布局文件-layout">改变布局文件 <strong><code>layout</code></strong></h3>
+<p>启用 DataBinding 后，打开原有的布局文件，选中根布局的 <strong>根布局</strong>，按住 <strong>Alt + 回车键</strong>，点击 “<strong>Convert to data binding layout</strong>”，就可以生成 DataBinding 需要的布局规则。</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/09-23-37-06-1560319999402.png" alt="1560319999402.png" loading="lazy"></figure>
+<p>转换后的内容为：</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;data&gt;
+    &lt;/data&gt;
+    &lt;androidx.constraintlayout.widget.ConstraintLayout
+            android:orientation=&quot;vertical&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<ul>
+<li>和原始布局的区别在于多出了一个 <strong>layout</strong> 标签将原布局包裹了起来；</li>
+<li><strong>data</strong> 标签用于声明要用到的变量以及变量类型，它搭建了 View 和 Model 之间的通道。</li>
+</ul>
+<h3 id="创建model">创建<code>Model</code></h3>
+<pre><code class="language-kotlin">package com.github.ixiaow.databindingsample.model
+
+data class User(val name:String, val password: String)
+</code></pre>
+<h3 id="model-与-布局文件关联"><strong><code>Model</code></strong> 与 布局文件关联</h3>
+<p>在 <strong>data</strong> 标签里声明要使用到的变量名、类的全路径</p>
+<pre><code class="language-xml">&lt;data&gt;
+    &lt;variable 
+         name=&quot;user&quot; 
+         type=&quot;com.github.ixiaow.databindingsample.model.User&quot;/&gt;
+&lt;/data&gt;
+</code></pre>
+<p>在 相应部分使用<code>User</code></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout
+        xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+        xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;&gt;
+
+    &lt;data&gt;
+        ...
+    &lt;/data&gt;
+
+    &lt;androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot;
+            android:orientation=&quot;vertical&quot;&gt;
+
+        &lt;TextView
+                  ...
+                android:text=&quot;@{user.name}&quot;/&gt;
+
+        &lt;TextView
+                   ...
+                android:text=&quot;@{user.password}&quot;/&gt;
+
+    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<h3 id="给model赋值">给<code>Model</code>赋值</h3>
+<p>写好布局文件后，在 <code>Android Studio</code>中执行<code>make project</code>或者<code>make app</code>, 完成后，在<code>Activity</code>中:</p>
+<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val dataBinding: ActivityMainBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_main)
+        // 给user初始化值
+        dataBinding.user = User(&quot;zhangsan&quot;, &quot;12345&quot;)
+    }
+}
+</code></pre>
+<p>运行<code>App</code>后就可以看到结果啦。</p>
+<h3 id="补充知识">补充知识</h3>
+<ul>
+<li>
+<p><strong><code>import</code></strong></p>
+<p>我们可以像使用<code>java</code>或者<code>kotlin</code>文件一样，导入需要的类名路径即可，比如说：</p>
+<ol>
+<li>
+<p>如果 User 类型要多处用到，也可以直接将之 <strong>import</strong> 进来，这样就不用每次都指明整个包名路径了，而 <code>java.lang.*</code> 包中的类会被自动导入，所以可以直接使用：</p>
+<pre><code class="language-xml">&lt;data&gt;
+   &lt;import type=&quot;com.github.ixiaow.databindingsample.model.User&quot;/&gt;
+   &lt;variable
+       name=&quot;user&quot;
+       type=&quot;User&quot;/&gt;
+&lt;/data&gt;
+</code></pre>
+</li>
+<li>
+<p>导入<code>java</code>或<code>kotlin</code>文件中的系统类，比如 <code>import</code> 集合 <code>list</code></p>
+<pre><code class="language-xml">&lt;data&gt;
+    &lt;import type=&quot;java.util.List&quot;/&gt;
+    &lt;import type=&quot;com.github.ixiaow.sample.model.User&quot;/&gt;
+    &lt;variable name=&quot;user&quot; type=&quot;User&quot;/&gt;
+    &lt;variable name=&quot;users&quot; type=&quot;List&lt;User&gt;&quot;/&gt;
+ &lt;/data&gt;
+</code></pre>
+<p><strong>❤️</strong> <code>&lt;</code>需要被替换成<code>&amp;lt;</code></p>
+</li>
+<li>
+<p>如果存在 <strong>import</strong> 的类名相同的情况，可以使用 <strong>alias</strong> 指定别名</p>
+<pre><code class="language-xml">&lt;data&gt;
+    &lt;import type=&quot;com.github.ixiaow.sample.model1.User&quot; /&gt;
+    &lt;import
+       alias=&quot;TempUser&quot;
+       type=&quot;com.github.ixiaow.sample.model2.User&quot; /&gt;
+    &lt;variable
+       name=&quot;user&quot;
+       type=&quot;User&quot; /&gt;
+    &lt;variable
+       name=&quot;tempUserInfo&quot;
+       type=&quot;TempUser&quot; /&gt;
+&lt;/data&gt;
+</code></pre>
+</li>
+</ol>
+</li>
+<li>
+<p>预览添加默认值</p>
+<p>由于 <code>@{user.name}</code>在布局文件中并没有明确的值，所以在预览视图中什么都不会显示，不便于观察文本的大小和字体颜色等属性，此时可以为之设定默认值（文本内容或者是字体大小等属性都适用），默认值将只在预览视图中显示，且默认值不能包含引号</p>
+<pre><code class="language-xml">android:text=&quot;@{userInfo.name,default=defaultValue}&quot;
+</code></pre>
+<p>此外，也可以通过 ActivityMainBinding 直接获取到指定 ID 的控件:</p>
+<pre><code class="language-java">dataBinding.mUserName.text = &quot;lisi&quot;
+</code></pre>
+</li>
+<li>
+<p>自定义生成的绑定类的类名</p>
+<p>每个数据绑定布局文件都会生成一个绑定类，<strong>ViewDataBinding</strong> 的实例名是根据布局文件名来生成，采用驼峰命名法来命名，并省略布局文件名包含的下划线。控件的获取方式类似，但首字母小写。</p>
+<p>通过如下方式自定义 ViewDataBinding 的实例名</p>
+<pre><code class="language-xml">&lt;data class=&quot;CustomBinding&quot;&gt;&lt;/data&gt;
+</code></pre>
+</li>
+<li>
+<p>在 <strong>Fragment</strong> 和 <strong>RecyclerView</strong> 中使用</p>
+<ol>
+<li>在 Fragment 中的使用</li>
+</ol>
+<pre><code class="language-kotlin">class BlankFragment : Fragment() {
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val blankFragmentBinding: BlankFragmentBinding =
+            DataBindingUtil.inflate(inflater, R.layout.blank_fragment, container, false)
+        return blankFragmentBinding.root
+    }
+}
+</code></pre>
+<ol start="2">
+<li>
+<p>在RecyclerView中使用</p>
+<p>具体使用请参考：<a href="https://blog.csdn.net/yehui928186846/article/details/78408294">DataBinding 应用于RecyclerView</a></p>
+</li>
+</ol>
+<pre><code class="language-kotlin">override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerViewHolder {
+        val itemMvvmBinding = DataBindingUtil.inflate&lt;ViewDataBinding&gt;(
+            LayoutInflater.from(parent.context),
+            R.layout.item_mvvm,
+            parent,
+            false
+        )
+        itemMvvmBinding.getRoot().setOnClickListener(this)
+        return RecyclerViewHolder(itemMvvmBinding)
+ }
+
+override fun onBindViewHolder(holder: RecyclerViewHolder, position: Int) {
+        val itemMvvmBinding = holder.getBinding()
+        val userBean = data.get(position)
+        itemMvvmBinding.setUser(userBean)
+        //将position保存在itemView的Tag中，以便点击时进行获取
+        itemMvvmBinding.getRoot().setTag(position)
+        itemMvvmBinding.btnUpdate.setOnClickListener(OnBtnClickListener(1, userBean))
+        itemMvvmBinding.btnDelete.setOnClickListener(OnBtnClickListener(2, position))
+        // 立刻执行绑定
+        itemMvvmBinding.executePendingBindings()
+}
+</code></pre>
+<p><strong>以上实现数据绑定的方式，每当绑定的变量发生变化的时候，都需要重新向 ViewDataBinding 传递新的变量值才能刷新 UI 。接下来看如何实现自动刷新 UI</strong></p>
+</li>
+</ul>
+<h2 id="单向数据绑定">单向数据绑定</h2>
+<p>实现数据变化自动驱动 UI 刷新的方式有三种：<code>BaseObservable</code>、<code>ObservableField</code>、<code>ObservableCollection</code></p>
+<h3 id="baseobservable">BaseObservable</h3>
+<p>一个简单的<code>ViewModel</code> 类被更新后，并不会让 UI 自动更新。而数据绑定后，我们自然会希望数据变更后 UI 会即时刷新，<code>Observable</code> 就是为此而生的概念。</p>
+<p><strong>BaseObservable</strong> 提供了 <strong>notifyChange()</strong> 和 <strong>notifyPropertyChanged()</strong> 两个方法。</p>
+<ul>
+<li><strong>notifyChange()</strong></li>
+</ul>
+<p>它会刷新所有的值。</p>
+<ul>
+<li><strong>notifyPropertyChanged()</strong></li>
+</ul>
+<p>它只会根据对应的<code>BR</code>的<code>flag</code>更新，该 <code>BR</code> 的生成通过注释 <strong><code>@Bindable</code></strong> 生成，可以通过 <strong>BR notify</strong> 特定属性关联的视图。</p>
+<ul>
+<li>由于<code>kotlin</code>的属性默认是<code>public</code>修饰，所以可以直接在属性上<code>@Bindable</code>, 如何设置了修饰符且不为<code>public</code>的话，则可使用<code>@get BIndable</code>（表示在<code>get()</code>方法上标记<code>@Bindable</code>）</li>
+</ul>
+<pre><code class="language-kotlin">import androidx.databinding.BaseObservable
+import androidx.databinding.Bindable
+import com.github.ixiaow.sample.BR
+
+class UserInfo : BaseObservable() {
+    // 对name进行@Bindable标志，然后会生成BR.name
+    @Bindable
+    var name: String = &quot;&quot;
+        set(value) {
+            field = value
+            // 当name,发生改变时只会刷新与name相关控件的值，不会刷新其他的值
+            notifyPropertyChanged(BR.name)
+        }
+
+    @get: Bindable
+    var password: String = &quot;&quot;
+        set(value) {
+            field = value
+            // 当password 发生改变时，也会刷新其他属性相关的控件的值
+            notifyChange()
+        }
+}
+</code></pre>
+<p>布局文件：</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+        xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
+    &lt;data&gt;
+        &lt;variable name=&quot;userInfo&quot; type=&quot;com.github.ixiaow.sample.model.UserInfo&quot;/&gt;
+    &lt;/data&gt;
+    &lt;androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot;
+            tools:context=&quot;.MainActivity&quot;&gt;
+
+        &lt;TextView
+                app:layout_constraintVertical_chainStyle=&quot;spread&quot;
+                android:id=&quot;@+id/mUserName&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:text=&quot;@{userInfo.name}&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;
+                app:layout_constraintTop_toTopOf=&quot;parent&quot;/&gt;
+
+        &lt;TextView
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:text=&quot;@{userInfo.password}&quot;
+                app:layout_constraintTop_toBottomOf=&quot;@id/mUserName&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
+
+    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<ol start="4">
+<li>
+<p><strong><code>OnPropertyChangedCallback</code></strong></p>
+<p>实现了 <strong>Observable</strong> 接口的类允许注册一个监听器<code>OnPropertyChangedCallback</code>，当可观察对象的属性更改时就会通知这个监听器。</p>
+<p>当中 <code>propertyId</code> 就用于标识特定的字段</p>
+</li>
+</ol>
+<pre><code class="language-kotlin">user.addOnPropertyChangedCallback(object : Observable.OnPropertyChangedCallback(){
+     override fun onPropertyChanged(sender: Observable, propertyId: Int) {
+
+     }
+})
+</code></pre>
+<h3 id="observablefield">ObservableField</h3>
+<p>继承于 <code>Observable</code> 类相对来说限制有点高，且也需要进行<code>notify</code> 操作，因此为了简单起见可以选择使用 <strong><code>ObservableField</code></strong>。 可以理解为官方对 <code>BaseObservable</code> 中字段的注解和刷新等操作的封装，官方原生提供了对基本数据类型的封装，例如 <strong><code>ObservableBoolean、ObservableByte、ObservableChar、ObservableShort、ObservableInt、ObservableLong、ObservableFloat、ObservableDouble</code></strong> 以及 <strong><code>ObservableParcelable</code></strong> ，也可通过 <strong><code>ObservableField</code></strong> 泛型来申明其他类型。</p>
+<pre><code class="language-kotlin">class ObservableUser {
+    val name = ObservableField&lt;String&gt;()
+    val password = ObservableField&lt;String&gt;()
+}
+</code></pre>
+<p>对 <code>ObservableUser</code>属性值的改变都会立即触发 UI 刷新，概念上与<code>Observable</code> 区别不大，具体效果可看下面提供的源代码，这里不再赘述</p>
+<h3 id="observablecollection">ObservableCollection</h3>
+<p><code>dataBinding</code> 也提供了包装类用于替代原生的 <code>List</code> 和 <code>Map</code>，分别是 <code>ObservableList</code> 和 <code>ObservableMap</code>,当其包含的数据发生变化时，绑定的视图也会随之进行刷新</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+        xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
+    &lt;data&gt;
+        &lt;import type=&quot;androidx.databinding.ObservableList&quot;/&gt;
+        &lt;import type=&quot;androidx.databinding.ObservableMap&quot;/&gt;
+        &lt;import type=&quot;com.github.ixiaow.sample.model.User&quot;/&gt;
+        &lt;variable name=&quot;index&quot; type=&quot;int&quot;/&gt;
+        &lt;variable name=&quot;key&quot; type=&quot;String&quot;/&gt;
+        &lt;variable name=&quot;list&quot; type=&quot;ObservableList&lt;User&gt;&quot;/&gt;
+        &lt;variable name=&quot;map&quot; type=&quot;ObservableMap&lt;String, User&gt;&quot;/&gt;
+    &lt;/data&gt;
+    &lt;androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot;
+            tools:context=&quot;.MainActivity&quot;&gt;
+
+        &lt;TextView
+                app:layout_constraintVertical_chainStyle=&quot;spread&quot;
+                android:id=&quot;@+id/mUserName&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:text=&quot;@{list[index].name}&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;
+                app:layout_constraintTop_toTopOf=&quot;parent&quot;/&gt;
+
+        &lt;TextView
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:text=&quot;@{map[key].password}&quot;
+                app:layout_constraintTop_toBottomOf=&quot;@id/mUserName&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
+
+    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val dataBinding: ActivityMainBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_main)
+
+        dataBinding.map = ObservableArrayMap&lt;String, User&gt;().apply {
+            &quot;android&quot; to User(&quot;android&quot;, &quot;12367&quot;)
+            &quot;java&quot; to User(&quot;java&quot;, &quot;12534&quot;)
+            &quot;c&quot; to User(&quot;c&quot;, &quot;12344&quot;)
+            &quot;c++&quot; to User(&quot;c++&quot;, &quot;14423&quot;)
+            &quot;c#&quot; to User(&quot;c#&quot;, &quot;12334&quot;)
+        }
+
+        dataBinding.key = &quot;c&quot;
+
+        dataBinding.list = ObservableArrayList&lt;User&gt;().apply {
+            add(User(&quot;android&quot;, &quot;123&quot;))
+            add(User(&quot;java&quot;, &quot;1234&quot;))
+            add(User(&quot;c&quot;, &quot;1235&quot;))
+            add(User(&quot;c++&quot;, &quot;123447&quot;))
+        }
+
+        dataBinding.index = 3
+    }
+}
+</code></pre>
+<h2 id="双向数据绑定">双向数据绑定</h2>
+<p>双向绑定的意思即为当数据改变时同时使视图刷新，而视图改变时也可以同时改变数据</p>
+<p>看以下例子，当 <code>EditText</code>的输入内容改变时，会同时同步到变量 <code>user</code>,绑定变量的方式比单向绑定多了一个等号：<code>android:text=&quot;@={user.name}&quot;</code></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+        xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
+    &lt;data&gt;
+        &lt;variable name=&quot;userInfo&quot; type=&quot;com.github.ixiaow.sample.model.ObservableUser&quot;/&gt;
+    &lt;/data&gt;
+    &lt;androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot;
+            tools:context=&quot;.MainActivity&quot;&gt;
+
+        &lt;EditText
+                app:layout_constraintVertical_chainStyle=&quot;spread&quot;
+                android:id=&quot;@+id/mUserName&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:text=&quot;@={userInfo.name, default=`name`}&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;
+                app:layout_constraintTop_toTopOf=&quot;parent&quot;/&gt;
+
+        &lt;EditText
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:text=&quot;@={userInfo.password, default=`1234`}&quot;
+                app:layout_constraintTop_toBottomOf=&quot;@id/mUserName&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
+
+    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val dataBinding: ActivityMainBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_main)
+        val observableUser = ObservableUser()
+        observableUser.name.set(&quot;我是name&quot;)
+        observableUser.password.set(&quot;我是password&quot;)
+
+        dataBinding.userInfo = observableUser
+    }
+}
+</code></pre>
+<h2 id="事件绑定">事件绑定</h2>
+<p>严格意义上来说，事件绑定也是一种变量绑定，只不过设置的变量是回调接口而已。</p>
+<p>事件绑定可用于以下多种回调事件：</p>
+<ul>
+<li>android:onClick</li>
+<li>android:onLongClick</li>
+<li>android:afterTextChanged</li>
+<li>android:onTextChanged</li>
+<li>...</li>
+</ul>
+<p>新建一个 <strong>UserPresenter</strong> 类来声明 <strong>onClick()</strong> 和 <strong>afterTextChanged()</strong> 事件相应的回调方法</p>
+<pre><code class="language-kotlin">class UserPresenter {
+
+    fun onUserNameClick(user: ObservableUser) {
+
+    }
+
+    fun afterTextChanged(s: Editable) {
+    }
+
+    fun saveUser(view: View, user: ObservableUser){
+
+    }
+}
+</code></pre>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+        xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
+    &lt;data&gt;
+        &lt;import type=&quot;com.github.ixiaow.sample.UserPresenter&quot;/&gt;
+        &lt;variable name=&quot;presenter&quot; type=&quot;UserPresenter&quot;/&gt;
+        &lt;variable name=&quot;userInfo&quot; type=&quot;com.github.ixiaow.sample.model.ObservableUser&quot;/&gt;
+    &lt;/data&gt;
+    &lt;androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot;
+            tools:context=&quot;.MainActivity&quot;&gt;
+
+        &lt;EditText
+                app:layout_constraintVertical_chainStyle=&quot;spread&quot;
+                android:id=&quot;@+id/mUserName&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:onClick=&quot;@{()-&gt; presenter.onUserNameClick(userInfo)}&quot;
+                android:text=&quot;@={userInfo.name, default=`name`}&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;
+                app:layout_constraintTop_toTopOf=&quot;parent&quot;/&gt;
+
+        &lt;EditText
+                android:id=&quot;@+id/mPassword&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:afterTextChanged=&quot;@{presenter::afterTextChanged}&quot;
+                android:text=&quot;@={userInfo.password, default=`1234`}&quot;
+                app:layout_constraintTop_toBottomOf=&quot;@id/mUserName&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
+
+        &lt;EditText
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:onClick=&quot;@{(theView)-&gt;presenter.saveUser(theView, userInfo)}&quot;
+                android:text=&quot;@={userInfo.password, default=`1234`}&quot;
+                app:layout_constraintTop_toBottomOf=&quot;@id/mPassword&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
+
+    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<p>方法引用的方式与调用函数的方式类似，</p>
+<ol>
+<li>可以选择保持事件回调方法的签名一致：<strong><code>@{presenter.afterTextChanged}</code></strong>，此时方法名可以不一样，但方法参数和返回值必须和原始的回调函数保持一致。</li>
+<li>可以引用不遵循默认签名的函数：<strong><code>@{()-&gt;presenter.onUserNameClick(userInfo)}</code></strong>，这里用到了 Lambda 表达式，这样就可以不遵循默认的方法签名，将<code>userInfo</code>对象直接传回点击方法中。此外，也可以使用方法引用 <strong><code>::</code></strong> 的形式来进行事件绑定</li>
+</ol>
+<h2 id="使用类方法">使用类方法</h2>
+<p>首先定义一个静态方法</p>
+<pre><code class="language-kotlin">object StringUtils {
+
+   fun toUpperCase( str:String):String {
+        return str.toUpperCase();
+   }
+}
+</code></pre>
+<p>在 data 标签中导入该工具类</p>
+<pre><code class="language-xml"> &lt;import type=&quot;com.github.ixiaow.sample.StringUtils&quot; /&gt;
+</code></pre>
+<p>然后就可以像对待一般的函数一样来调用了</p>
+<pre><code class="language-xml">&lt;TextView
+   android:layout_width=&quot;match_parent&quot;
+   android:layout_height=&quot;wrap_content&quot;
+   android:onClick=&quot;@{()-&gt;userPresenter.onUserNameClick(userInfo)}&quot;
+   android:text=&quot;@{StringUtils.toUpperCase(userInfo.name)}&quot; /&gt;
+</code></pre>
+<h2 id="运算符">运算符</h2>
+<h4 id="基础运算符">基础运算符</h4>
+<p>DataBinding 支持在布局文件中使用以下运算符、表达式和关键字</p>
+<ul>
+<li>算术 <code>+ - / * %</code></li>
+<li>字符串合并<code>+</code></li>
+<li>逻辑<code>&amp;&amp; ||</code></li>
+<li>二元<code>&amp; | ^</code></li>
+<li>一元 <code>+ - ! ~</code></li>
+<li>移位<code>&gt;&gt; &gt;&gt;&gt; &lt;&lt;</code></li>
+<li>比较<code>== &gt; &lt; &gt;= &lt;=</code></li>
+<li><code>Instanceof</code></li>
+<li><code>Grouping ()</code></li>
+<li><code>character, String, numeric, null</code></li>
+<li><code>Cast</code></li>
+<li>方法调用</li>
+<li><code>Field</code> 访问</li>
+<li><code>Array</code>访问 []</li>
+<li>三元<code>?:</code></li>
+</ul>
+<p>目前不支持以下操作</p>
+<ul>
+<li><code>this</code></li>
+<li><code>super</code></li>
+<li><code>new</code></li>
+<li>显示泛型调用</li>
+</ul>
+<p>此外，DataBinding 还支持以下几种形式的调用:</p>
+<h4 id="null-coalescing">Null Coalescing</h4>
+<p>空合并运算符 <strong><code>??</code></strong> 会取第一个不为 <code>null</code> 的值作为返回值</p>
+<pre><code class="language-xml">&lt;TextView
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:text=&quot;@{user.name ?? user.password}&quot; /&gt;
+</code></pre>
+<p>等价于</p>
+<pre><code class="language-xml">android:text=&quot;@{user.name != null ? user.name : user.password}&quot;
+</code></pre>
+<h4 id="属性控制">属性控制</h4>
+<p>可以通过变量值来控制 View 的属性</p>
+<pre><code class="language-xml">&lt;TextView
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:text=&quot;可见性变化&quot;
+    android:visibility=&quot;@{user.male  ? View.VISIBLE : View.GONE}&quot; /&gt;
+</code></pre>
+<h4 id="避免空指针异常">避免空指针异常</h4>
+<p>DataBinding 也会自动帮助我们避免空指针异常<br>
+例如，如果 <strong>&quot;@{userInfo.password}&quot;</strong> 中 <strong>userInfo</strong> 为 <strong>null</strong> 的话，<strong>userInfo.password</strong> 会被赋值为默认值 <strong>null</strong>，而不会抛出空指针异常</p>
+<h2 id="include-和-viewstub">include 和 viewStub</h2>
+<h4 id="include">include</h4>
+<p>对于 include 的布局文件，一样是支持通过 dataBinding 来进行数据绑定，此时一样需要在待 include 的布局中依然使用 layout 标签，声明需要使用到的变量</p>
+<p><code>view_include.xml</code></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;data&gt;
+        &lt;import type=&quot;com.github.ixiaow.databindingsample.model.User&quot; /&gt;
+        &lt;variable
+            name=&quot;userInfo&quot;
+            type=&quot;User&quot; /&gt;
+    &lt;/data&gt;
+    &lt;android.support.constraint.ConstraintLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:background=&quot;#acc&quot;&gt;
+
+        &lt;TextView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:gravity=&quot;center&quot;
+            android:padding=&quot;20dp&quot;
+            android:text=&quot;@{userInfo.name}&quot; /&gt;
+    &lt;/android.support.constraint.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<p>在主布局文件中将相应的变量传递给 include 布局，从而使两个布局文件之间共享同一个变量</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:bind=&quot;http://schemas.android.com/apk/res-auto&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
+    &lt;data&gt;
+        &lt;import type=&quot;com.github.ixiaow.databindingsample.model.User&quot; /&gt;
+        &lt;variable
+            name=&quot;userInfo&quot;
+            type=&quot;User&quot; /&gt;
+    &lt;/data&gt;
+    &lt;LinearLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;
+        android:orientation=&quot;vertical&quot;
+        tools:context=&quot;.Main6Activity&quot;&gt;
+        &lt;include
+            layout=&quot;@layout/view_include&quot;
+            bind:userInfo=&quot;@{userInfo}&quot; /&gt;
+    &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<h4 id="viewstub">viewStub</h4>
+<p>dataBinding 一样支持 ViewStub 布局</p>
+<p>在布局文件中引用 viewStub 布局</p>
+<pre><code class="language-xml">&lt;ViewStub
+    android:id=&quot;@+id/view_stub&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout=&quot;@layout/view_stub&quot;/&gt;
+</code></pre>
+<p>获取到 ViewStub 对象，由此就可以来控制 ViewStub 的可见性</p>
+<pre><code class="language-java">ActivityMain6Binding activityMain6Binding = DataBindingUtil.setContentView(this, R.layout.activity_main6);
+View view = activityMain6Binding.viewStub.getViewStub().inflate();
+</code></pre>
+<p>如果需要为 ViewStub 绑定变量值，则 ViewStub 文件一样要使用 layout 标签进行布局，主布局文件使用自定义的 bind 命名空间将变量传递给 ViewStub</p>
+<pre><code class="language-xml">&lt;ViewStub
+    android:id=&quot;@+id/view_stub&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout=&quot;@layout/view_stub&quot;
+    bind:userInfo=&quot;@{userInfo}&quot; /&gt;
+</code></pre>
+<p>如果在 xml 中没有使用 <code>bind:userInfo=&quot;@{userInf}&quot;</code>对 ViewStub 进行数据绑定，则可以等到当 ViewStub <strong>Inflate</strong> 时再绑定变量，此时需要为 ViewStub 设置 <code>setOnInflateListener</code>回调函数，在回调函数中进行数据绑定</p>
+<pre><code class="language-java">activityMain6Binding.viewStub.setOnInflateListener(new ViewStub.OnInflateListener() {
+    @Override
+    public void onInflate(ViewStub stub, View inflated) {
+        //如果在 xml 中没有使用 bind:userInfo=&quot;@{userInf}&quot; 对 viewStub 进行数据绑定
+        //那么可以在此处进行手动绑定
+        ViewStubBinding viewStubBinding = DataBindingUtil.bind(inflated);
+        viewStubBinding.setUserInfo(user);
+        Log.e(TAG, &quot;onInflate&quot;);
+    }
+});
+</code></pre>
+<h2 id="bindingadapter">BindingAdapter</h2>
+<p>dataBinding 提供了 <strong>BindingAdapter</strong> 这个注解用于支持自定义属性，或者是修改原有属性。注解值可以是已有的 xml 属性，例如 <code>android:src</code>、<code>android:text</code>等，也可以自定义属性然后在 xml 中使用</p>
+<p>例如，对于一个 ImageView ，我们希望在某个变量值发生变化时，可以动态改变显示的图片，此时就可以通过 BindingAdapter 来实现</p>
+<p>需要先定义一个静态方法，为之添加 BindingAdapter 注解，注解值是为 ImageView 控件自定义的属性名，而该静态方法的两个参数可以这样来理解：当 ImageView 控件的 url 属性值发生变化时，dataBinding 就会将 ImageView 实例以及新的 url 值传递给 loadImage() 方法，从而可以在此动态改变 ImageView 的相关属性</p>
+<pre><code class="language-java">@BindingAdapter({&quot;url&quot;})
+public static void loadImage(ImageView view, String url) {
+    Log.d(TAG, &quot;loadImage url : &quot; + url);
+}
+</code></pre>
+<p>在 xml 文件中关联变量值，当中，bind 这个名称可以自定义</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:bind=&quot;http://schemas.android.com/apk/res-auto&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
+
+    &lt;data&gt;
+        &lt;import type=&quot;com.github.ixiaow.databindingsample.model.Image&quot; /&gt;
+        &lt;variable
+            name=&quot;image&quot;
+            type=&quot;Image&quot; /&gt;
+    &lt;/data&gt;
+
+    &lt;android.support.constraint.ConstraintLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;&gt;
+
+        &lt;ImageView
+            android:id=&quot;@+id/image&quot;
+            android:layout_width=&quot;wrap_content&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:src=&quot;@drawable/ic_launcher_background&quot;
+            bind:url=&quot;@{image.url}&quot; /&gt;
+    &lt;/android.support.constraint.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<p>BindingAdapter 更为强大的一点是可以覆盖 Android 原先的控件属性。例如，可以设定每一个 Button 的文本都要加上后缀：“-Button”</p>
+<pre><code class="language-java">@BindingAdapter(&quot;android:text&quot;)
+public static void setText(Button view, String text) {
+    view.setText(text + &quot;-Button&quot;);
+}
+</code></pre>
+<pre><code class="language-xml">&lt;Button
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:onClick=&quot;@{()-&gt;handler.onClick(image)}&quot;
+    android:text='@{&quot;改变图片Url&quot;}'/&gt;
+</code></pre>
+<p>这样，整个工程中使用到了 <strong>&quot;android:text&quot;</strong> 这个属性的控件，其显示的文本就会多出一个后缀</p>
+<h2 id="bindingconversion">BindingConversion</h2>
+<p>dataBinding 还支持对数据进行转换，或者进行类型转换</p>
+<p>与 BindingAdapter 类似，以下方法会将布局文件中所有以<code>@{String}</code>方式引用到的<code>String</code>类型变量加上后缀<code>-conversionString</code></p>
+<pre><code class="language-java">@BindingConversion
+public static String conversionString(String text) {
+    return text + &quot;-conversionString&quot;;
+}
+</code></pre>
+<p>xml 文件</p>
+<pre><code class="language-xml">&lt;TextView
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:text='@{&quot;xxx&quot;}'
+    android:textAllCaps=&quot;false&quot;/&gt;
+</code></pre>
+<p>可以看到，对于 Button 来说，BindingAdapter 和 BindingConversion 同时生效了，而 BindingConversion 的优先级要高些, 此外，BindingConversion 也可以用于转换属性值的类型</p>
+<p>看以下布局，此处在向 <code>background</code> 和 <code>textColor</code> 两个属性赋值时，直接就使用了字符串，按正常情况来说这自然是会报错的，但有了 BindingConversion 后就可以自动将字符串类型的值转为需要的 <code>Drawable</code> 和 <code>Color</code> 了</p>
+<pre><code class="language-xml">&lt;TextView
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:background='@{&quot;红色&quot;}'
+    android:padding=&quot;20dp&quot;
+    android:text=&quot;红色背景蓝色字&quot;
+    android:textColor='@{&quot;蓝色&quot;}'/&gt;
+
+&lt;TextView
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout_marginTop=&quot;20dp&quot;
+    android:background='@{&quot;蓝色&quot;}'
+    android:padding=&quot;20dp&quot;
+    android:text=&quot;蓝色背景红色字&quot;
+    android:textColor='@{&quot;红色&quot;}'/&gt;
+</code></pre>
+<pre><code class="language-java">@BindingConversion
+public static Drawable convertStringToDrawable(String str) {
+    if (str.equals(&quot;红色&quot;)) {
+        return new ColorDrawable(Color.parseColor(&quot;#FF4081&quot;));
+    }
+
+    if (str.equals(&quot;蓝色&quot;)) {
+        return new ColorDrawable(Color.parseColor(&quot;#3F51B5&quot;));
+    }
+    return new ColorDrawable(Color.parseColor(&quot;#344567&quot;));
+}
+
+@BindingConversion
+public static int convertStringToColor(String str) {
+    if (str.equals(&quot;红色&quot;)) {
+        return Color.parseColor(&quot;#FF4081&quot;);
+    }
+
+    if (str.equals(&quot;蓝色&quot;)) {
+        return Color.parseColor(&quot;#3F51B5&quot;);
+    }
+    return Color.parseColor(&quot;#344567&quot;);
+}
+</code></pre>
+<h2 id="array-list-set-map">Array、List、Set、Map ...</h2>
+<p>dataBinding 也支持在布局文件中使用 <strong>数组、Lsit、Set 和 Map</strong>，且在布局文件中都可以通过 <code>list[index]</code> 的形式来获取元素</p>
+<p>而为了和 <strong>variable</strong> 标签的尖括号区分开，在声明 <strong>Lsit&lt; String &gt;</strong> 之类的数据类型时，需要使用尖括号的转义字符</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
+
+    &lt;data&gt;
+        &lt;import type=&quot;java.util.List&quot; /&gt;
+        &lt;import type=&quot;java.util.Map&quot; /&gt;
+        &lt;import type=&quot;java.util.Set&quot; /&gt;
+        &lt;import type=&quot;android.util.SparseArray&quot; /&gt;
+        &lt;variable
+            name=&quot;array&quot;
+            type=&quot;String[]&quot; /&gt;
+
+        &lt;variable
+            name=&quot;list&quot;
+            type=&quot;List&lt;String&gt;&quot; /&gt;
+
+        &lt;variable
+            name=&quot;map&quot;
+            type=&quot;Map&lt;String, String&gt;&quot; /&gt;
+
+        &lt;variable
+            name=&quot;set&quot;
+            type=&quot;Set&lt;String&gt;&quot; /&gt;
+
+        &lt;variable
+            name=&quot;sparse&quot;
+            type=&quot;SparseArray&lt;String&gt;&quot; /&gt;
+
+        &lt;variable
+            name=&quot;index&quot;
+            type=&quot;int&quot; /&gt;
+
+        &lt;variable
+            name=&quot;key&quot;
+            type=&quot;String&quot; /&gt;
+    &lt;/data&gt;
+
+    &lt;LinearLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;
+        android:orientation=&quot;vertical&quot;&gt;
+
+        &lt;TextView
+            ···
+            android:text=&quot;@{array[1]}&quot; /&gt;
+
+        &lt;TextView
+            ···
+            android:text=&quot;@{sparse[index]}&quot; /&gt;
+
+        &lt;TextView
+            ···
+            android:text=&quot;@{list[index]}&quot; /&gt;
+
+        &lt;TextView
+            ···
+            android:text=&quot;@{map[key]}&quot; /&gt;
+
+        &lt;TextView
+            ···
+            android:text='@{map[&quot;leavesC&quot;]}' /&gt;
+
+        &lt;TextView
+            ···
+            android:text='@{set.contains(&quot;xxx&quot;)?&quot;xxx&quot;:key}' /&gt;
+    &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<h2 id="资源引用">资源引用</h2>
+<p>dataBinding 支持对尺寸和字符串这类资源的访问</p>
+<p><code>dimens.xml</code></p>
+<pre><code class="language-xml">&lt;dimen name=&quot;paddingBig&quot;&gt;190dp&lt;/dimen&gt;
+&lt;dimen name=&quot;paddingSmall&quot;&gt;150dp&lt;/dimen&gt;
+</code></pre>
+<p><code>string.xml</code></p>
+<pre><code class="language-xml">&lt;string name=&quot;format&quot;&gt;%s is %s&lt;/string&gt;
+</code></pre>
+<p><code>layout.xml</code></p>
+<pre><code class="language-xml">&lt;data&gt;
+    &lt;variable
+       name=&quot;flag&quot;
+       type=&quot;boolean&quot; /&gt;
+&lt;/data&gt; 
+
+&lt;Button
+      android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:paddingLeft=&quot;@{flag ? @dimen/paddingBig:@dimen/paddingSmall}&quot;
+    android:text='@{@string/format(&quot;leavesC&quot;, &quot;Ye&quot;)}'
+    android:textAllCaps=&quot;false&quot; /&gt;
+</code></pre>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://xiaowujiang.cn/posts/6c01e784/" class="post-title gt-a-link">
+                    360加固Gradle插件实现
+                </a>
+            </div>
+        
+
+        
+            <span id="/posts/3c6ea6b6/" class="leancloud_visitors" data-flag-title="Android DataBinding 从入门到进阶">
+                <em class="post-meta-item-text">阅读量 </em>
+                <i class="leancloud-visitors-count">0</i>
+            </span>
+        
+
+        
+
+        
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'monsterid',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/jxiaow" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+    <div class="footer-info">
+        
+    </div>
+    <div>
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://xiaowujiang.cn/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

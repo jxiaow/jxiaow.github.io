@@ -1,11 +1,10 @@
 <html>
-
 <head>
     <meta charset="utf-8"/>
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>友情链接 - Xiaowu</title>
+<title>Git切换分支保存修改的代码 | Xiaowu</title>
 
 <link rel="shortcut icon" href="https://xiaowujiang.cn/favicon.ico?v=1607101500628">
 
@@ -26,12 +25,11 @@
 
 
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
 </head>
-
 <body>
 <div class="main gt-bg-theme-color-first">
-        <div class="main-content">
-            <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg">
     <div class="navbar-brand">
         <img class="user-avatar" src="/images/avatar.png" alt="头像">
         <div class="site-name gt-c-content-color-first">
@@ -87,28 +85,97 @@
     </div>
 </nav>
 
-            <div class="post-container">
-                <div class="post-detail">
-                    <article>
-                        <!-- <div class="post-content-wrapper"> -->
-                            <div class="post-content">
-                                <div class="friends-desc">
-                                    
-                                </div>
-                                <h3 id="linklist">友链列表</h3>
-                                
-                                    
-                                
-                            </div>
-                        <!-- </div> -->
-                    </article>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    Git切换分支保存修改的代码
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2018-07-15 ·
+                    </time>
+                    
                 </div>
-                
-            </div>
+                <div class="post-content">
+                    <p>在使用git同步代码的过程中，也许会碰到一个项目有好几个分支的情况，就拿我最近的项目来说，我创建了两个分支：<code>master</code>和<code>dev</code>。</p>
+<p>经常是在<code>dev</code>分支上开发好了，然后切换到<code>master</code>分支上进行<code>merge</code>, 但是有时候在<code>dev</code>分支上开发了一半，忽然又需要去<code>master</code>上改个需求或者<code>bug</code>，这时候该当如何呢？</p>
+<!--more-->
+<p>在这个场景下，我查找到了两种方式：</p>
+<h2 id="及时commit代码">及时<code>commit</code>代码</h2>
+<p>在<code>dev</code>分支上把已经完成的部分<code>commit</code>后，不<code>push</code>，然后切换到<code>master</code>分支，改完后再<code>commit</code></p>
+<h2 id="使用-git-stash">使用 <code>git stash</code></h2>
+<p>有时候，在<code>dev</code>分支上写的代码，没有编译通过，就需要切换到<code>master</code>分支， 在这种情况下（代码还没有经过测试通过，还无法<code>commit</code>）可以使用<code>git stash</code>。</p>
+<ul>
+<li>
+<p>保存<code>dev</code>当前的修改</p>
+<p>在命令行输入：</p>
+<pre><code class="language-shell">git stash //会生成一个hash值作为版本标志
+</code></pre>
+<p>或者</p>
+<pre><code class="language-shell">git stash save &quot;修改的信息&quot; //会将`修改的信息`作为版本标志
+</code></pre>
+<p>这样你的代码就回到了上一个<code>commit</code>了。接下来就可以切换到<code>master</code>分支了。</p>
+</li>
+<li>
+<p>返回到<code>dev</code>分支</p>
+<p>当修改完<code>master</code>分支后，可以通过</p>
+<pre><code class="language-shell">git stash pop //将栈中的最后一个取出来
+</code></pre>
+<p>或者</p>
+<pre><code class="language-shell">git stash list //可以看到所有的版本信息
+</code></pre>
+<p>然后选择列表项，执行</p>
+<pre><code class="language-shell">git stash apply stash@{0} //git stash apply stash@{0}的作用是可以指定栈中的一个版本
+</code></pre>
+</li>
+</ul>
+
+                </div>
+            </article>
+        </div>
+
+        
+
+        
+            <span id="/posts/ec91b04f/" class="leancloud_visitors" data-flag-title="Git切换分支保存修改的代码">
+                <em class="post-meta-item-text">阅读量 </em>
+                <i class="leancloud-visitors-count">0</i>
+            </span>
+        
+
+        
+
+        
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
 
 
+	<div id="vcomments"></div>
 
-            <div class="site-footer gt-c-content-color-first">
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'monsterid',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
     
     <div class="social-container">
         
@@ -142,8 +209,7 @@
   hljs.initHighlightingOnLoad()
 </script>
 
-        </div>
     </div>
+</div>
 </body>
-
 </html>

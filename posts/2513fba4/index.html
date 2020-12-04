@@ -4,7 +4,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Android通过Intent简单实现分享功能 | Xiaowu</title>
+<title>PicGo搭建github图床 | Xiaowu</title>
 
 <link rel="shortcut icon" href="https://xiaowujiang.cn/favicon.ico?v=1607101500628">
 
@@ -89,77 +89,90 @@
         <div class="post-detail gt-bg-theme-color-second">
             <article class="gt-post-content">
                 <h2 class="post-title">
-                    Android通过Intent简单实现分享功能
+                    PicGo搭建github图床
                 </h2>
                 <div class="post-info">
                     <time class="post-time gt-c-content-color-first">
-                        · 2020-12-05 ·
+                        · 2020-04-13 ·
                     </time>
                     
                 </div>
                 <div class="post-content">
-                    <p>现在大多数App的分享功能基本上使用的都是微信、QQ、微博的分享sdk或者是集成友盟分享sdk，如果想简单快速的实现分享功能，可以考虑通过<code>Intent</code>方式打开在系统中安装的具有分享功能的App的分享页面。</p>
+                    <p>使用图床可以节省本地服务器空间，加快图片打开速度，对于写博客或者一些网站使用很有必要，本次介绍的是PicGo的使用。</p>
 <!-- more -->
-<p>方法如下：</p>
-<pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
-    Intent intent = new Intent();
-    intent.setAction(Intent.ACTION_SEND);
-    intnet.setType(&quot;text/plain&quot;);
-    PackageManager packageManager = context.getPackageManager();
-    List&lt;ResolveInfo&gt; resolveInfos = packageManager.queryIntentActivities(intent, 0);
-    return resloveInfos;
-}
-</code></pre>
-<p>如果只需要QQ和微信分享，可以进行如下操作：</p>
-<pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
-    Intent intent = new Intent();
-    intent.setAction(Intent.ACTION_SEND);
-    intnet.setType(&quot;text/plain&quot;);
-    PackageManager packageManager = context.getPackageManager();
-    List&lt;ResolveInfo&gt; resolveInfos = packageManager.queryIntentActivities(intent, 0);
-    List&lt;ResolveInfo&gt; shareItems = new ArrayList();    
-    for(ResolveInfo info: resolveInfos) {
-        String name = info.activityInfo.packageName;
-        if (TextUtils.equals(packageName, &quot;com.tencent.mm&quot;)
-                    || TextUtils.equals(packageName, &quot;com.tencent.mobileqq&quot;)) {
-                shareItems.add(resolveInfo);
-        }
-    }
-    return shareItems;
-}
-</code></pre>
-<p>通过<code>ResolveInfo</code>获取图标<code>ICON</code>和<code>Label</code>:</p>
-<pre><code class="language-java">Drawable drawable = resloveInfo.loadIcon(packageManager);
-CharSequence label = resolveInfo.loadLabel(packageManager);
-</code></pre>
-<p>通过<code>Intent</code>发起分享：</p>
-<pre><code class="language-java">public static void share(Context context, 
-            ResolveInfo info, String shareContent){
-    Intent itnent = new Intent();
-    intnet.setAction(Intent.ACTION_SEND);
-    String pkg = resolveInfo.activityInfo.packageName;
-    String cls = resolveInfo.activityInfo.name;
-    intent.setComponent(new Component(pkg, cls));
-    intent.putExtra(Intent.EXTRA_TEXT, shareContent);
-    context.startActivity(intent);
-}
-</code></pre>
+<ol>
+<li>
+<p>下载<a href="https://github.com/Molunerfinn/PicGo/releases">PicGo</a>并安装；</p>
+</li>
+<li>
+<p>生成<a href="https://github.com/">Github</a>token</p>
+</li>
+</ol>
+<p>步骤如下：</p>
+<ul>
+<li>
+<p>点击个人中心，选择<code>Settings</code>,打开个人设置页面；</p>
+</li>
+<li>
+<p>在个人设置页面选择<code>Developer Settings</code></p>
+</li>
+</ul>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-52-50-github-developer-settings.png" alt="github-developer-settings.png" loading="lazy"></figure>
+<ul>
+<li>进入<code>Developer settings</code>页后，点击<code>Personal access tokens</code>打开新的页面后,并点击右边的<code>Generate new token</code> 生成<code>token</code></li>
+</ul>
+<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-54-02-image-20200413170324831.png" alt="image-20200413170324831.png" loading="lazy"></figure>
+<ul>
+<li>在生成<code>token</code>页面，勾选<code>repo</code></li>
+</ul>
+<figure data-type="image" tabindex="3"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-54-38-image-20200413170138935.png" alt="image-20200413170138935.png" loading="lazy"></figure>
+<ol start="3">
+<li>创建公共仓库，用来存放相关资源图片</li>
+</ol>
+<p>​    在github上创建一个仓库，用来存放一些资源</p>
+<figure data-type="image" tabindex="4"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-55-22-image-20200413172848852.png" alt="image-20200413172848852.png" loading="lazy"></figure>
+<ol start="4">
+<li>在PicGo中配置github图床相关信息</li>
+</ol>
+<ul>
+<li>
+<p>打开PicGo 后，先安装一个插件<code>github-plus</code>，该插件是用来将图片上传到<code>gitee</code>或<code>github</code>上，比自带的<code>github</code>图床方便(自带的没有办法删除远程记录)</p>
+</li>
+<li>
+<p>安装完成后，插件配置：</p>
+<figure data-type="image" tabindex="5"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-55-54-picgo-logo.png" alt="picgo-logo.png" loading="lazy"></figure>
+<p>① 处是需要存放图片的仓库，格式为 <code>github用户名/ 仓库名</code>;</p>
+<p>② 处是存放图片路径的仓库下的分支，默认<code>master</code>分支；</p>
+<p>③ token 为第二步骤上生成的<strong>github token</strong>；</p>
+<p>④ 远程仓库存放图片的的路径，可自定义，可不填；</p>
+<p>⑤ 自定义的图片路径，由于我使用了<code>jsDelivr</code>来实现github的<code>cdn缓存</code>，所以设置了此路径，如果不需要可不填；</p>
+<p><strong>jsDelivr路径规则：</strong> <code>https://cdn.jsdelivr.net/gh/用户名/仓库名@版本号</code>，我这边版本号设置的是<code>latest</code>表示获取最新资源。</p>
+<p>⑥ origin 表示 仓库可以是gitee或<code>github</code>,根据前面的步骤，此处只能是github；</p>
+<p>⑦ 将其设置为默认图床</p>
+</li>
+</ul>
+<h1 id="注意事项">注意事项</h1>
+<ul>
+<li>
+<p>如果仓库需要设置自定义域名，需要将我们的资源提交到一个<code>gh-pages</code>分区</p>
+</li>
+<li>
+<p>如果你的自定义域名配置dns区分了境外和国内，那么就需要注意，访问该仓库可能会出现404的情况</p>
+<p>解决办法：</p>
+<ul>
+<li>创建一条新的cname解析，添加一个二级域名即可</li>
+</ul>
+</li>
+</ul>
 
                 </div>
             </article>
         </div>
 
         
-            <div class="next-post">
-                <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://xiaowujiang.cn/posts/b8c700d2/" class="post-title gt-a-link">
-                    Dart 语言简述
-                </a>
-            </div>
-        
 
         
-            <span id="/posts/73a6d0c4/" class="leancloud_visitors" data-flag-title="Android通过Intent简单实现分享功能">
+            <span id="/posts/2513fba4/" class="leancloud_visitors" data-flag-title="PicGo搭建github图床">
                 <em class="post-meta-item-text">阅读量 </em>
                 <i class="leancloud-visitors-count">0</i>
             </span>

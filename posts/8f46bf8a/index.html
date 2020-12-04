@@ -1,11 +1,10 @@
 <html>
-
 <head>
     <meta charset="utf-8"/>
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>友情链接 - Xiaowu</title>
+<title>Java中的静态代码块在kotlin中的表现形式 | Xiaowu</title>
 
 <link rel="shortcut icon" href="https://xiaowujiang.cn/favicon.ico?v=1607101500628">
 
@@ -26,12 +25,11 @@
 
 
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
 </head>
-
 <body>
 <div class="main gt-bg-theme-color-first">
-        <div class="main-content">
-            <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg">
     <div class="navbar-brand">
         <img class="user-avatar" src="/images/avatar.png" alt="头像">
         <div class="site-name gt-c-content-color-first">
@@ -87,28 +85,117 @@
     </div>
 </nav>
 
-            <div class="post-container">
-                <div class="post-detail">
-                    <article>
-                        <!-- <div class="post-content-wrapper"> -->
-                            <div class="post-content">
-                                <div class="friends-desc">
-                                    
-                                </div>
-                                <h3 id="linklist">友链列表</h3>
-                                
-                                    
-                                
-                            </div>
-                        <!-- </div> -->
-                    </article>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    Java中的静态代码块在kotlin中的表现形式
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2019-07-17 ·
+                    </time>
+                    
                 </div>
-                
-            </div>
+                <div class="post-content">
+                    <p>在<code>java</code>中我们有时候会用到类的静态代码块来初始化一些变量，那么在<code>kotlin</code>中如何表示呢？</p>
+<!--more-->
+<p>看以下代码：</p>
+<p><code>TestStatic.java</code></p>
+<pre><code class="language-java">public class TestStatic {
+    static {
+        System.out.println(&quot;static test&quot;);
+    }
+}
+</code></pre>
+<p>这段代码，在<code>kotlin</code>中可以这样表示：</p>
+<p><code>TestStatic.kt</code></p>
+<pre><code class="language-kotlin">class TestStatic {
+
+    companion oject {
+        init {
+            println(&quot;static test&quot;)
+        }
+
+        fun test(){
+            println(&quot;test&quot;)
+        }
+    }
+}
+</code></pre>
+<p>编译后的<code>java</code>代码:</p>
+<pre><code class="language-java">...
+public final class StaticTest {
+   public static final StaticTest.Companion Companion = new StaticTest.Companion((DefaultConstructorMarker)null);
+
+   static {
+      String var0 = &quot;static&quot;;
+      System.out.println(var0);
+   }
+...
+   public static final class Companion {
+      public final void test() {
+         String var1 = &quot;test&quot;;
+         System.out.println(var1);
+      }
+
+      private Companion() {
+      }
+
+      // $FF: synthetic method
+      public Companion(DefaultConstructorMarker $constructor_marker) {
+         this();
+      }
+   }
+}
+</code></pre>
+<p>可以看到，<code>init</code>方法最终被编译成了<code>static</code>代码块。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+
+        
+            <span id="/posts/8f46bf8a/" class="leancloud_visitors" data-flag-title="Java中的静态代码块在kotlin中的表现形式">
+                <em class="post-meta-item-text">阅读量 </em>
+                <i class="leancloud-visitors-count">0</i>
+            </span>
+        
+
+        
+
+        
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
 
 
+	<div id="vcomments"></div>
 
-            <div class="site-footer gt-c-content-color-first">
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'monsterid',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
     
     <div class="social-container">
         
@@ -142,8 +229,7 @@
   hljs.initHighlightingOnLoad()
 </script>
 
-        </div>
     </div>
+</div>
 </body>
-
 </html>

@@ -1,0 +1,802 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>Http框架封装 | Xiaowu</title>
+
+<link rel="shortcut icon" href="https://xiaowujiang.cn/favicon.ico?v=1607101500628">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://xiaowujiang.cn/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Xiaowu
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/posts/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1607101500628" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    Http框架封装
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-04-26 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p>用过了现有的一些<code>http</code>请求框架，决定自己也来简单的封装一个。本文只是基于一些http请求框架二次封装的，高手勿喷。<a href="https://github.com/ixiaow/ppjoke/tree/master/network/src/main/java/com/mooc/network">源码</a></p>
+<!-- more -->
+<h2 id="http的请求和响应">http的请求和响应</h2>
+<p>一个http的请求通常包含请求头、请求体、响应头和响应体，考虑到这些因素，<code>HttpConfig</code>和 <code>ApiResponse</code>就诞生了: <a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/http/HttpConfig.java">HttpConfig</a></p>
+<h3 id="httpconfig">HttpConfig</h3>
+<p>http参数配置类，应该包含如下属性:</p>
+<ul>
+<li>baseUrl/url</li>
+</ul>
+<p>如果使用restful形式，baseUrl是不能为空并且url为业务path, 如果是非restful,url必须为请求全路径</p>
+<ul>
+<li>GET/POST</li>
+</ul>
+<p>有了url，接下来需要有请求的方法类型，由于我这边只用到了<code>GET</code>和<code>POST</code>,所以只对此做了封装。</p>
+<p><strong>特别说明：</strong> POST 有三种提交方式（form表单、json形式和 复杂形式）</p>
+<pre><code class="language-java">FORM_DATA(&quot;application/x-www-form-urlencoded;charset=utf-8&quot;),
+JSON_DATA(&quot;application/json;charset=utf-8&quot;),
+MULTI_PART_DATA(&quot;multipart/form-data;charset=utf-8&quot;);
+</code></pre>
+<ul>
+<li>headers</li>
+</ul>
+<p>http的请求头封装，采用<code>(Map&lt;String,String&gt;)</code>集合</p>
+<ul>
+<li>params</li>
+</ul>
+<p>http的请求参数，采用<code>(Map&lt;String,Object&gt;)</code>如果请求方法是<code>GET</code>形式，那么采用拼接字符串的形式将参数拼接到url中; 如果请求方法是<code>POST</code>形式，则需要根据提交参数的方式不同，会有不同的请求体。</p>
+<ul>
+<li>cacheStrategy</li>
+</ul>
+<p>考虑到App的使用交互和服务器减压，我们要考虑有一些请求可以做一些缓存，那么常用的缓存策略有<code>CACHE_ONLY</code>、<code>CACHE_FIRST</code>、<code>NET_ONLY</code>和<code>NET_CACHE</code></p>
+<ul>
+<li>type</li>
+</ul>
+<p>type是响应数据的type,这个主要用在Http请求结果返回后将json转为bean对象的映射类型，需要考虑泛型和非泛型（Class和ParamizableType）</p>
+<ul>
+<li>tag</li>
+</ul>
+<p>给每一个请求链接打一个标签，可用于一些其它的操作，如根据tag取消请求</p>
+<ul>
+<li>isAsync</li>
+</ul>
+<p>当前请求是同步执行还是异步执行的标志，异步执行会在子线程中进行http请求，同步执行在当前线程中执行http请求。</p>
+<h4 id="apiresponset">ApiResponse<T></h4>
+<p>使用<a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/ApiResponse.java">ApiResponse</a>的原因是为了规范请求结果返回的表现形式，他有一个<code>T</code>类型的数据。</p>
+<ul>
+<li>code</li>
+</ul>
+<p>状态码,与http请求响应状态码一致，200~300 请求成功，304 使用缓存</p>
+<ul>
+<li>message</li>
+</ul>
+<p>请求响应的错误信息</p>
+<ul>
+<li>data</li>
+</ul>
+<p>响应的数据，泛型T, 根据<code>httpConfig</code>中的type,映射 json--&gt; bean</p>
+<h2 id="http引擎">Http引擎</h2>
+<p><a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/http/IHttpEngine.java">IHttpEngine</a>是一个接口，使用者可以根据实际的情况做具体的实现。</p>
+<pre><code class="language-java">public interface IHttpEngine {
+
+    // 开始执行 http请求
+    &lt;T&gt; execute(HttpConfig config, MultableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData);
+    // 根据tag取消
+    void cancel(Object tag);
+}
+</code></pre>
+<p>由于http请求有同步和异步两种情况并且又牵扯到了缓存策略问题（如果先进行缓存返回在执行网络请求并返回数据），在异步回调的情况下这些问题可以通过回调解决，但是在同步情况下，这些问题并不能很好的处理，曾经有使用过将当前请求<code>clone</code>,然后再次调用请求服务器的方法，但是在使用过<code>jetpack</code>的<code>LiveData</code>框架后这些问题都可以解决了。</p>
+<h2 id="okhttpengine">OkhttpEngine</h2>
+<p>Android开发目前来说大多数项目使用的都是<code>Okhttp</code>来做请求，本次我使用的默认引擎也是使用它来作为默认的实现。<a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/http/okhttp/OkHttpEngine.java">OkHttpEngine</a></p>
+<h3 id="okhttp简单配置">okhttp简单配置</h3>
+<p>对okhttp进行一些简单的配置就可以进行网络请求了，如下：</p>
+<ul>
+<li>创建okHttpClient</li>
+</ul>
+<pre><code class="language-java"> private static final OkHttpClient OK_HTTP_CLIENT;
+
+ // 添加日志拦截器
+ HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+ loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+ OK_HTTP_CLIENT = new OkHttpClient.Builder()
+               .connectTimeout(15, TimeUnit.SECONDS)
+               .readTimeout(15, TimeUnit.SECONDS)
+               .writeTimeout(15, TimeUnit.SECONDS)
+               .addInterceptor(loggingInterceptor)
+               .build();
+</code></pre>
+<ul>
+<li>添加证书管理</li>
+</ul>
+<pre><code class="language-java">TrustManager[] trustManagers = new TrustManager[]{
+    new X509TrustManager() {
+        @Override
+        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+        @Override
+        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[0];
+        }
+     }
+};
+
+SSLContext sslContext = SSLContext.getInstance(&quot;SSL&quot;);
+sslContext.init(null, trustManagers, new SecureRandom());
+HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -&gt; true);
+</code></pre>
+<h3 id="实现http请求">实现Http请求</h3>
+<p>IHttpEngine中的<code>execute</code>方法是具体的http请求方法，所有实现<code>IHttpEngine</code>的方法都需要实现此方法。</p>
+<pre><code class="language-java">@NonNull
+@Override
+public &lt;T&gt; void execute(@NonNull Config config, 
+                        @NonNull MutableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData) {
+    Request request = generateRequest(config);
+    Call call = OK_HTTP_CLIENT.newCall(request);
+    if (!config.isAsync) {
+        execute(call, config, liveData);
+    } else {
+        enqueue(call, config, liveData);
+    }
+}
+</code></pre>
+<p><code>execute</code>方法中大致需要做以下事：</p>
+<ul>
+<li>创建request--&gt; genearteRequest</li>
+<li>发送http请求 ---&gt; execute/enqueue</li>
+</ul>
+<h4 id="创建httprequest">创建httpRequest</h4>
+<p><code>generateRequest()</code>根据<code>HttpConfig</code>中的请求方式来创建不同的http请求。</p>
+<pre><code class="language-java">/**
+ * 根据配置信息生成request
+ *
+ * @param config 配置信息
+ * @return request
+ */
+ @NonNull
+ private Request generateRequest(@NonNull Config config) {
+    switch (config.method) {
+       case Config.GET:
+           return generateGetRequest(config);
+       case Config.POST:
+           return generatePostRequest(config);
+
+       default:
+           throw new IllegalStateException(&quot;this request method invalidate: &quot; + config.method);
+    }
+}
+</code></pre>
+<h5 id="get请求的创建方式">GET请求的创建方式</h5>
+<p><code>genearteGetReques()</code>方法，利用okhttp的Request类创建request实例，并利用<a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/http/UrlCreator.java">UrlCreator</a>将参数拼接到url中。Url拼接时需要注意使用<code>UrlEncoder</code>编码，不然可能会造成服务器和客户端解析数据不一致的情况。</p>
+<pre><code class="language-java">/**
+ * 生成get方式的请求
+ *
+ * @param config 请求配置
+ * @return 返回get方式的request
+ */
+@NonNull
+private Request generateGetRequest(@NonNull Config config) {
+   Request.Builder builder = new Request.Builder().get();
+   builder.tag(config.tag);
+   addHeader(builder, config);
+   String url = UrlCreator.generateUrlForParams(config.url(), config.getParams());
+   return builder.url(url).build();
+}
+</code></pre>
+<h5 id="post请求的创建方式">POST请求的创建方式</h5>
+<p>POST请求方式提交内容时相对于GET方式要复杂许多，他需要根据提交方式的不同添加不同的<code>header</code>和内容<code>body</code>, 在<code>generatePostRequest()</code>方法中先利用okhttp的request类创建request实例，根据调用者在<code>HttpConfig</code>中设置<code>formData</code>来创建不同形式的<code>body</code>。</p>
+<pre><code class="language-java">/**
+ * 生成post请求
+ *
+ * @param config http请求配置信息
+ * @return 请求request
+ */
+@NonNull
+private Request generatePostRequest(@NonNull Config config) {
+   Request.Builder builder = new Request.Builder().url(config.url());
+   builder.tag(config.tag);
+   addHeader(builder, config);
+
+   // 根据提交方式添加header信息
+   Pair&lt;String, String&gt; header = config.formData.getHeader();
+   builder.addHeader(header.first, header.second);
+
+   // 创建body
+   RequestBody body = generatePostRequestBody(config);
+   return builder.post(body).build();
+}
+</code></pre>
+<p>判断<code>formData</code>类型，创建不同的<code>request body</code>。</p>
+<pre><code class="language-java">/**
+ * 获取post提交体
+ *
+ * @param config 请求配置信息
+ * @return RequestBody
+ */
+@NonNull
+private RequestBody generatePostRequestBody(@NonNull Config config) {
+   FormData formData = config.formData;
+   switch (formData) {
+       case FORM_DATA:
+           return getFormDataRequestBody(config);
+       case JSON_DATA:
+           return getJsonDataRequestBody(config);
+       case MULTI_PART_DATA:
+           return getMultiDataRequestBody(config);
+       default:
+           throw new IllegalArgumentException(&quot;post formData is invalidate: &quot; + formData);
+   }
+}
+</code></pre>
+<h6 id="创建formdata表单">创建FormData(表单)</h6>
+<p>form表单形式比较简单，只需要创建一个okhttp的FormBody并将param添加，需要注意的是添加param时调用的是<code>addEncoded</code>方法。</p>
+<pre><code class="language-java">/**
+ * 生成form data形式的post数据
+ *
+ * @param config 请求配置
+ * @return FromBody
+ */
+ @NonNull
+ private RequestBody getFormDataRequestBody(@NonNull Config config) {
+     FormBody.Builder builder = new FormBody.Builder(StandardCharsets.UTF_8);
+     Map&lt;String, Object&gt; params = config.getParams();
+     for (Map.Entry&lt;String, Object&gt; entry : params.entrySet()) {
+          builder.addEncoded(entry.getKey(), String.valueOf(entry.getValue()));
+     }
+     return builder.build();
+ }
+</code></pre>
+<h6 id="json形式">json形式</h6>
+<p>利用okHttp中的<code>RequestBody.create()</code>方法创建一个json形式的body,需要传递json和json形式的header。</p>
+<pre><code class="language-java">/**
+ * 生成json形式的post数据
+ *
+ * @param config 请求配置
+ * @return RequestBody
+ */
+ @NonNull
+ private RequestBody getJsonDataRequestBody(@NonNull Config config) {
+   if (config.getParams().isEmpty()) {
+        throw new IllegalArgumentException(&quot;json data is null&quot;);
+   }
+   Object json = config.getParams().get(Config.JSON_KEY);
+   return RequestBody.create(String.valueOf(json), MediaType.parse(config.formData.getValue()));
+ }
+</code></pre>
+<h6 id="复杂形式的body">复杂形式的body</h6>
+<p>复杂形式的body，主要是用在文件上传这一块儿。它需要判断当前param是普通key-value、单文件和多文件。</p>
+<p>利用okhttp的MultiparBody创建body对象并根据内容类型调用的不同的body,然后调用<code>addFormDataPart</code>添加到MultipartBody中。</p>
+<pre><code class="language-java">/**
+ * 获取复杂的post提交体
+ *
+ * @param config 请求配置信息
+ * @return MultipartBody
+ */
+@NonNull
+@SuppressWarnings(&quot;unchecked&quot;)
+private RequestBody getMultiDataRequestBody(@NonNull Config config) {
+
+    MultipartBody.Builder builder = new MultipartBody.Builder();
+    builder.setType(MultipartBody.FORM);
+
+    for (Map.Entry&lt;String, Object&gt; entry : config.getParams().entrySet()) {
+        String key = entry.getKey();
+        Object value = entry.getValue();
+
+        if (value instanceof File) {
+            File file = (File) value;
+            RequestBody requestBody = MultipartBody.create(file, getFileMediaType(file));
+            builder.addFormDataPart(key, file.getName(), requestBody);
+        } else if (value instanceof List) {
+            List&lt;File&gt; files = (List&lt;File&gt;) value;
+            for (int i = 0; i &lt; files.size(); i++) {
+                File file = files.get(i);
+                RequestBody requestBody = MultipartBody.create(file, getFileMediaType(file));
+                builder.addFormDataPart(key + i, file.getName(), requestBody);
+            }
+        } else {
+            builder.addFormDataPart(key, String.valueOf(value));
+        }
+    }
+    return builder.build();
+}
+</code></pre>
+<p>添加文件时需要有文件的类型，文件类型的获取方式是通过<code>UrlConnection</code>的getFileNameMap方法获取。</p>
+<pre><code class="language-java">/**
+ * 获取文件的type类型
+ *
+ * @param file 文件
+ * @return MediaType
+ */
+@Nullable
+private MediaType getFileMediaType(@NonNull File file) {
+    FileNameMap fileNameMap = URLConnection.getFileNameMap();
+    String contentTypeFor = fileNameMap.getContentTypeFor(file.getAbsolutePath());
+    if (contentTypeFor == null) {
+        contentTypeFor = &quot;application/octet-stream&quot;;
+    }
+    return MediaType.parse(contentTypeFor);
+</code></pre>
+<p>通过以上的几种方式就可以创建一个http请求了，接下来需要发送请求了，发送请求需要通过httpConfig中的<code>isAsync</code>来判断是开启一个子线程还是在当前线程中执行操作（同步与异步）。</p>
+<h4 id="发送http请求">发送http请求</h4>
+<p>发送http请求会有同步请求(execute)和异步请求(enqueue), 同步请求是在当前线程中发送http请求，异步请求采用okhttp线程池发送请求。处理请求时在合适的地方需要判断该请求是否被取消。</p>
+<pre><code class="language-java"> if (call.isCanceled()) {
+    return;
+ }
+</code></pre>
+<h5 id="同步请求execute">同步请求(execute)</h5>
+<p>在发送http请求时会根据缓存策略进行响应的处理，而同步请求没有办法做到<code>return</code>后可以继续进行网络请求，所以引入了<code>LiveData</code>来发送数据。</p>
+<p>目前缓存策略有四种，我们需要根据判断来进行不同的操作，关于缓存的创建和获取后续会有说明，这块儿只有根据缓存策略处理数据。</p>
+<pre><code class="language-java">/**
+ * 同步执行的方法
+ */
+@SuppressWarnings(&quot;unchecked&quot;)
+private &lt;T&gt; void execute(Call call, Config config, MutableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData) {
+    ApiResponse&lt;T&gt; apiResponse;
+    Logs.d(&quot;execute before cache: &quot; + Thread.currentThread().getName());
+    // 只访问本地数据
+    if (config.cacheStrategy == Config.CACHE_ONLY) {
+        apiResponse = readCache(call.request().url().toString());
+        liveData.postValue(apiResponse);
+        return;
+    }
+
+    // 先访问本地数据，然后再发起网络请求
+    if (config.cacheStrategy == Config.CACHE_FIRST) {
+        apiResponse = readCache(call.request().url().toString());
+        liveData.postValue(apiResponse);
+    }
+
+    Logs.d(&quot;execute current thread: &quot; + Thread.currentThread().getName());
+    // ..... 此处开始进行http网络请求
+
+
+    if (call.isCanceled()) {
+        return;
+    }
+    // liveData发送数据
+    liveData.postValue(apiResponse);
+    if (config.cacheStrategy != Config.NET_ONLY) {
+        saveCache(call.request().url().toString(), apiResponse);
+    }
+}
+</code></pre>
+<p>使用okhttp的<code>execute</code>方法发送http请求,并利用<code>ConvertFactory</code>进行数据解析，ConvertFactory后续会介绍。</p>
+<pre><code class="language-java"> try {
+      Response response = call.execute();
+      IConvert&lt;Response, T&gt; convert = ConvertFactory.create();
+      apiResponse = convert.convert(response, config.type);
+ } catch (IOException e) {
+      e.printStackTrace();
+      apiResponse = new ApiResponse&lt;&gt;();
+      apiResponse.status = 500;
+      apiResponse.message = e.getMessage();
+ }
+</code></pre>
+<h5 id="异步请求enqueue">异步请求(enqueue)</h5>
+<p>异步请求与同步请求一样也需要进行缓存策略进行缓存处理，这块儿的处理逻辑一致，所以下面的代码块将这部分省略。使用okhttp的<code>enqueue</code>方法发送http请求,在<code>onResponse</code>中并利用<code>ConvertFactory</code>进行数据的解析，在<code>onFailure</code>中自定义错误信息的返回。</p>
+<pre><code class="language-java">private &lt;T&gt; void enqueue(Call call, Config config, MutableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData) {
+        //... 缓存策略判断数据处理返回
+        ...
+        // 开始请求服务器
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                if (call.isCanceled()) {
+                    return;
+                }
+                ApiResponse&lt;T&gt; apiResponse = new ApiResponse&lt;&gt;();
+                apiResponse.status = 500;
+                apiResponse.message = e.getMessage();
+                liveData.postValue(apiResponse);
+            }
+
+            @SuppressWarnings(&quot;unchecked&quot;)
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (call.isCanceled()) {
+                    return;
+                }
+                IConvert&lt;Response, T&gt; convert = ConvertFactory.create();
+                ApiResponse&lt;T&gt; apiResponse = convert.convert(response, config.type);
+                liveData.postValue(apiResponse);
+                if (config.cacheStrategy != Config.NET_ONLY) {
+                    saveCache(call.request().url().toString(), apiResponse);
+                }
+            }
+        });
+    }
+</code></pre>
+<h3 id="取消请求">取消请求</h3>
+<p><code>cancle()</code>方法中，利用Okhttp来取消请求，主要是比对tag, 如下：</p>
+<pre><code class="language-java">@Override
+public void cancel(@NonNull Object tag) {
+    if (OK_HTTP_CLIENT == null) {
+        return;
+    }
+
+    //查找当前需要取消的tag是否在未执行的请求中
+    for (Call call : OK_HTTP_CLIENT.dispatcher().queuedCalls()) {
+        if (tag.equals(call.request().tag())) {
+            call.cancel();
+        }
+    }
+
+    //查找当前需要请求的tag是否在正在执行的请求中
+    for (Call call : OK_HTTP_CLIENT.dispatcher().runningCalls()) {
+        if (tag.equals(call.request().tag())) {
+            call.cancel();
+        }
+    }
+}
+</code></pre>
+<h2 id="响应数据转换">响应数据转换</h2>
+<p>从服务器返回数据后，需要将数据格式进行转换成数据模型bean，由于数据返回的形式有多种，所以解析方式也会有多种，所以这块儿可以考虑使用数据解析工厂类去做数据解析，不同的解析数据做不同的逻辑实现，达到解偶。</p>
+<p>定义一个<code>Convert</code>类，利用泛型的方式进行参数传递。</p>
+<pre><code class="language-java">public interface IConvert&lt;T, R&gt; {
+    // 数据的返回形式必须是ApiResponse, type即为泛型T的类型
+    @NonNull
+    ApiResponse&lt;R&gt; convert(@NonNull T t, @NonNull Type type);
+}
+</code></pre>
+<p>这边提供了一种简单的convert调用方式，后面可以要考虑进行扩展选择：</p>
+<pre><code class="language-java"> IConvert&lt;Response, T&gt; convert = ConvertFactory.create();
+ apiResponse = convert.convert(response, config.type);
+</code></pre>
+<p><code>ConverFactory</code>为<code>IConvert</code>的实现类。</p>
+<pre><code class="language-java">public class ConvertFactory&lt;R&gt; implements IConvert&lt;Response, R&gt; {
+    private static ConvertFactory convertFactory;
+
+
+    public static ConvertFactory create() {
+        if (convertFactory == null) {
+            convertFactory = new ConvertFactory();
+        }
+        return convertFactory;
+    }
+
+    ...........
+}
+</code></pre>
+<h2 id="本地缓存">本地缓存</h2>
+<p>数据缓存采用的是<code>Room</code>数据库进行数据的存储，room是jetpack中的一种组件。它的创建方式也很简单。</p>
+<h3 id="创建数据库表">创建数据库表</h3>
+<pre><code class="language-java">// Entity 表示该对象是一张数据库表
+@Entity(tableName = &quot;cache&quot;)
+public class Cache {
+    // primarykey表示表的主键
+    @PrimaryKey
+    @NonNull
+    public String key;
+    // ColumnInfo表示该字段在表中显示的字段名
+    @ColumnInfo(name = &quot;_data&quot;)
+    public byte[] data;
+}
+</code></pre>
+<h3 id="创建数据库">创建数据库</h3>
+<pre><code class="language-java">// entities 表示 需要在该数据库中创建的表，可以创建多张
+// version 数据库的版本号
+// exportSchema 导出表创建的语句
+@Database(entities = Cache.class, version = 1, exportSchema = true)
+public abstract class CacheDatabase extends RoomDatabase {
+    private static final CacheDatabase cacheDatabase;
+
+    static {
+        Application application = AppGlobals.getApplication();
+        cacheDatabase = Room.databaseBuilder(application, CacheDatabase.class, &quot;net_cache.db&quot;)
+                .allowMainThreadQueries()
+                .build();
+    }
+
+    // 数据库与Dao关联
+    public abstract CacheDao getCacheDao();
+
+    public static CacheDatabase get() {
+        return cacheDatabase;
+    }
+} 
+</code></pre>
+<h3 id="创建数据库表操作类dao">创建数据库表操作类Dao</h3>
+<pre><code class="language-java">// Dao 用来表示当前类是数据库表的操作类
+@Dao
+public interface CacheDao {
+    // Insert 表示增加一条记录到数据库表中
+    // onConflict 表示如果添加数据时出现冲突的解决策略
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void save(@NonNull Cache cache);
+
+    // Delete 表示删除一条记录
+    @Delete
+    int delete(@NonNull Cache cache);
+
+    // Update 表示更新一条记录
+    // onConflict 表示如果更新数据时出现冲突的解决策略
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    int update(@NonNull Cache cache);
+
+    // Query 查找一条记录
+    @Query(&quot;SELECT * FROM cache WHERE `key`=:key&quot;)
+    Cache query(@NonNull String key);
+}
+</code></pre>
+<h2 id="type类型">Type类型</h2>
+<p>由于java中的泛型在编译完毕后会擦除该类型，所以我们无法在同步执行或者多级泛型嵌套的情况下拿到泛型的实际类型。目前的解决方式有两种。</p>
+<h3 id="调用者传入实际类型">调用者传入实际类型</h3>
+<p>提供可以传入实际类型的方法，调用处将明确类型传递。</p>
+<h3 id="利用子类实现的方式获取实际类型">利用子类实现的方式获取实际类型</h3>
+<p>Java代码在编译成字节码class文件时会保留子类的泛型信息。所以大部分的json数据解析都是采用的此方法，如：Gson中的TypeToken 以及fasjson中的TypeReference。</p>
+<pre><code class="language-java">public abstract class TypeToken&lt;T&gt; {
+    // 泛型T的实际类型
+    protected Type type;
+
+    public TypeToken() {
+        Type superClass = getClass().getGenericSuperclass();
+        // 获取泛型的实际类型
+        Type oriType = ((ParameterizedType) superClass).getActualTypeArguments()[0];
+
+        if (oriType instanceof Class) {
+            type = oriType;
+        } else {
+            //修复在安卓环境中问题
+            type = putCacheTypeIfAbsent(oriType);
+        }
+    }
+}
+</code></pre>
+<p>由于本次封装的返回的数据类型是<code>ApiResponse&lt;T&gt;</code>所以需要对泛型进行二次解析，所以新建了一个ApiResponseToken。</p>
+<pre><code class="language-java">public abstract class ApiResponseToken&lt;T&gt; extends TypeToken&lt;T&gt; {
+
+    public ApiResponseToken() {
+        Type superClass = getClass().getGenericSuperclass();
+
+        Type oriType = ((ParameterizedType) superClass).getActualTypeArguments()[0];
+
+        if (oriType instanceof Class) {
+            type = oriType;
+        } else {
+            // 解决ApiResponse&lt;T&gt;这种情况
+            if (oriType instanceof ParameterizedType) {
+                oriType = ((ParameterizedType) oriType).getActualTypeArguments()[0];
+            }
+            type = putCacheTypeIfAbsent(oriType);
+        }
+    }
+}
+</code></pre>
+<p>由于本次框架的数据返回使用了<code>LiveData&lt;T&gt;</code>的形式，并通过订阅的方式实现数据返回，所以又添加了一个类型，用于自行获取type。</p>
+<pre><code class="language-java">public abstract class HttpObserver&lt;T&gt; extends ApiResponseToken&lt;T&gt; 
+        implements Observer&lt;T&gt; {
+}
+</code></pre>
+<p>在使用LiveData的observe方法订阅时，在创建一个HttpObserserver实例，在构造方法中就可以解析出T的类型，就不需要我们手动传入T的真实类型了。</p>
+<pre><code class="language-java"> /**
+ * 开始订阅请求网络数据
+ */
+public &lt;T&gt; void observe(LifecycleOwner owner,
+                        HttpObserver&lt;ApiResponse&lt;T&gt;&gt; observer) {
+    // 由于HttpObserver是继承ApiResponseToken的，
+    // 所以可以快速的获取到泛型T的实际类型
+    Type type = observer.getType();
+    mConfig.type = type;
+    Logs.e(&quot;type: &quot; + type);
+}
+</code></pre>
+<p>使用方式：</p>
+<pre><code class="language-java">.observe(owner, 
+        // 通过new HtppObserver的方式就可以拿到具体的泛型值
+         new HttpObserver&lt;ApiResponse&lt;JSONObject&gt;&gt;() {
+             @Override
+             public void onChanged(ApiResponse&lt;JSONObject&gt; apiResponse) {
+                  .....
+              }
+        }
+);
+</code></pre>
+<h2 id="http请求入口类">Http请求入口类</h2>
+<p>LiveHttp的封装，LiveHttp主要提供了以下功能：</p>
+<ul>
+<li>
+<p>持有一个默认的http引擎</p>
+</li>
+<li>
+<p>可支持设置baseUrl和设置引擎的入口</p>
+</li>
+<li>
+<p>设置HttpConfig中的参数</p>
+</li>
+<li>
+<p>执行Http请求入口</p>
+</li>
+<li>
+<p>提供取消http请求的入口</p>
+</li>
+<li>
+<p>支持链式调用</p>
+</li>
+</ul>
+<p>以上几点都很简单，主要是来说一下执行http请求入口：</p>
+<pre><code class="language-java">/**
+ * 开始订阅请求网络数据
+ */
+public &lt;T&gt; void observe(LifecycleOwner owner,
+                        HttpObserver&lt;ApiResponse&lt;T&gt;&gt; observer) {
+    // 获取泛型实际类型
+    Type type = observer.getType();
+    mConfig.type = type;
+    Logs.d(&quot;type: &quot; + type);
+
+    if (TextUtils.isEmpty(mConfig.url())) {
+        throw new IllegalArgumentException(&quot;请求路径不能为空&quot;);
+    }
+
+    MutableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData = new MutableLiveData&lt;&gt;();
+    // liveData的订阅必须是要在主线程中
+    TaskExecutor.get().postToMain(() -&gt; liveData.observe(owner, observer));
+    sHttpEngine.execute(mConfig, liveData);
+}
+</code></pre>
+
+                </div>
+            </article>
+        </div>
+
+        
+
+        
+            <span id="/posts/84a009ed/" class="leancloud_visitors" data-flag-title="Http框架封装">
+                <em class="post-meta-item-text">阅读量 </em>
+                <i class="leancloud-visitors-count">0</i>
+            </span>
+        
+
+        
+
+        
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'monsterid',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/jxiaow" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+    <div class="footer-info">
+        
+    </div>
+    <div>
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://xiaowujiang.cn/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://xiaowujiang.cn</id>
     <title>Xiaowu</title>
-    <updated>2020-12-04T16:14:03.409Z</updated>
+    <updated>2020-12-04T17:05:18.266Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://xiaowujiang.cn"/>
     <link rel="self" href="https://xiaowujiang.cn/atom.xml"/>
@@ -10,6 +10,2269 @@
     <logo>https://xiaowujiang.cn/images/avatar.png</logo>
     <icon>https://xiaowujiang.cn/favicon.ico</icon>
     <rights>All rights reserved 2020, Xiaowu</rights>
+    <entry>
+        <title type="html"><![CDATA[Dagger2在Android中的使用]]></title>
+        <id>https://xiaowujiang.cn/posts/e781e647/</id>
+        <link href="https://xiaowujiang.cn/posts/e781e647/">
+        </link>
+        <updated>2020-12-04T16:24:44.000Z</updated>
+        <summary type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
+]]></summary>
+        <content type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
+<!-- more -->
+<blockquote>
+<p>本系列文章是基于 Google Dagger 2.23.2 版本， Kotlin 1.3.21版本</p>
+</blockquote>
+<p>在Android项目中使用Dagger2时，像 <code>Activity</code>和<code>Fragment</code>这种类型的初始化操作都是有Android系统提供的，如果要往其注入对象，不免会有这样的写法：</p>
+<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var activity: MainActivity
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        DaggerMainActivityComponent.builder()
+            .mainActivityModule(MainActivityModule(this))
+            .appComponent(
+                (application as MyApplication)
+                    .daggerAppComponent
+            ).build()
+            .inject(this)
+    }
+}
+</code></pre>
+<p>上述写法，会有以下几个我们几乎无法避免的问题：</p>
+<ol>
+<li>
+<p>上述Dagger部分的代码存在<strong>模板代码</strong>，在每个Activity中都会这么写到，即便抽取到BaseActivity中，也有一些特殊部分需要在每个Activity中单独处理，随着业务的增加后期维护不易；</p>
+</li>
+<li>
+<p>从上面的代码可以看出，<code>MainActivityModule</code>中持有了<code>MainActivity</code>实例，并且需要在<code>MainActivity</code>传入参数，它打破了依赖注入的核心原则：<strong>类不应该知道它是如何注入的。</strong></p>
+</li>
+</ol>
+<p>因此为了解决上面的问题，谷歌官方推出了<code>dagger.android</code>。</p>
+<p>下面是基本的使用方式，包括如何注入<code>Activity</code>和<code>Fragment</code>,本篇只讲如何使用，后续再分析其原理。</p>
+<h2 id="引入daggerandroid依赖">引入<code>Dagger.android</code>依赖</h2>
+<p>在<code>build.gradle</code>中添加：</p>
+<pre><code class="language-groovy">implementation 'com.google.dagger:dagger-android:2.23.2'
+implementation 'com.google.dagger:dagger-android-support:2.23.2'
+kapt 'com.google.dagger:dagger-android-processor:2.23.2'
+</code></pre>
+<h2 id="注入activity">注入Activity</h2>
+<p>以<code>MainActivity</code>为例</p>
+<h3 id="dagger2中的写法">Dagger2中的写法</h3>
+<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
+    // 这里只是做了一个例子
+    @Inject
+    lateinit var activity: MainActivity
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        DaggerMainActivityComponent.builder()
+            .mainActivityModule(MainActivityModule(this))
+            .appComponent(
+                (application as MyApplication)
+                    .daggerAppComponent
+            ).build()
+            .inject(this)
+    }
+}
+
+@ActivityScope
+@Component(modules = [MainActivityModule::class], dependencies = [AppComponent::class])
+interface MainActivityComponent {
+    fun inject(activity: MainActivity)
+}
+
+@Module
+class MainActivityModule(private val activity: MainActivity) {
+    @Provides
+    fun provideMainActivity(): MainActivity = activity
+}
+
+@Scope
+annotation class ActivityScope
+</code></pre>
+<h3 id="dagger2-android中的写法">Dagger2-Android中的写法</h3>
+<h4 id="修改mainactivitycomponent">修改<code>MainActivityComponent</code></h4>
+<pre><code class="language-kotlin">@ActivityScope
+@Subcomponent
+interface MainActivityComponent : AndroidInjector&lt;MainActivity&gt; {
+    // 声明MainActivity创建的工厂接口
+    @dagger.Subcomponent.Factory
+    interface Factory : AndroidInjector.Factory&lt;MainActivity&gt;
+}
+</code></pre>
+<h4 id="修改mainactivitymodule">修改<code>MainActivityModule</code></h4>
+<pre><code class="language-kotlin">@Module(subcomponents = [MainActivityComponent::class])
+abstract class MainActivityModule {
+    // module中提供绑定工厂方法
+    @Binds
+    @IntoMap
+    @ClassKey(MainActivity::class)
+    abstract fun bind(
+        factory: MainActivityComponent.Factory
+    ): AndroidInjector.Factory&lt;*&gt;
+}
+</code></pre>
+<h4 id="修改oncreate中的dagger注入">修改<code>onCreate()</code>中的Dagger注入</h4>
+<pre><code class="language-kotlin">override fun onCreate(savedInstanceState: Bundle?) {
+   // 在super.onCreate前添加
+   AndroidInjection.inject(this)
+   super.onCreate(savedInstanceState)
+   setContentView(R.layout.activity_main)
+}
+</code></pre>
+<h4 id="修改myapplication">修改<code>MyApplication</code></h4>
+<p>通过<code>dagger.android</code>注入时，Application中也发生了相应的变化</p>
+<pre><code class="language-kotlin">class MyApplication : Application(), HasAndroidInjector {
+
+    @Inject
+    lateinit var dispatchingAndroidInjector: DqispatchingAndroidInjector&lt;Any&gt;
+
+    override fun onCreate() {
+        super.onCreate()
+        DaggerAppComponent.factory().create(this).inject(this)
+    }
+
+    override fun androidInjector(): AndroidInjector&lt;Any&gt; {
+        return dispatchingAndroidInjector
+    }
+}
+
+@dagger.Component(
+    modules = [AndroidInjectionModule::class,// 引入框架提供的InjectionModule
+        AndroidSupportInjectionModule::class,// 如果使用了support相关的类，也需要引入
+        MainActivityModule::class // 这是我们自定义的Module
+    ]
+)
+interface AppComponent : AndroidInjector&lt;MyApplication&gt; {
+    @dagger.Component.Factory
+    interface Factory : AndroidInjector.Factory&lt;MyApplication&gt;
+}
+</code></pre>
+<p>我们需要将我们在<code>MainActivity</code>中的<code>MainActivityModule</code>加入到<code>Application</code>中的<code>AppComponent</code>的<code>module</code>,然后<code>Make Project</code>或<code>Make App</code>或<code>build project</code>，如果未报错即成功。</p>
+<h3 id="简洁写法">简洁写法</h3>
+<p>如果相应的<code>ActivityComponent</code>中只有以下操作时：</p>
+<pre><code class="language-kotlin">@ActivityScope
+@Subcomponent
+interface MainActivityComponent : AndroidInjector&lt;MainActivity&gt; {
+    // 声明MainActivity创建的工厂接口
+    @dagger.Subcomponent.Factory
+    interface Factory : AndroidInjector.Factory&lt;MainActivity&gt;
+}
+</code></pre>
+<p>我们可以新建一个module类， 将满足以上条件的Component 集中到一起，并删除对应的Component，如：</p>
+<pre><code class="language-kotlin">@Module
+abstract class ActivityBindingModule {
+    @ActivityScoped
+    @ContributesAndroidInjector(modules = [MainActivityModule.class])
+    abstract fun mainActivity() : MainActivity
+
+    @ActivityScoped
+    @ContributesAndroidInjector(modules = [AddEditTaskModule.class])
+    abstract fun addEditTaskActivity(): AddEditTaskActivity 
+}
+</code></pre>
+<p>删除 原有module中的<code>bind*</code>方法</p>
+<pre><code class="language-java">@Module
+public class MainActivityModule{
+
+}
+</code></pre>
+<h2 id="注入fragment">注入Fragment</h2>
+<p>注入<code>Fragment</code>与注入<code>Activity</code>类似，唯一不同的地方在于我们需要在<code>onAttach</code>方法中执行<code>AndroidSupportInject.inject(this)</code></p>
+<pre><code class="language-kotlin">class BlankFragment : Fragment() {
+
+    override fun onAttach(context: Context?) {
+        AndroidSupportInjection.inject(this)
+        super.onAttach(context)
+    }
+}
+
+@dagger.Module
+abstract class FragmentBindModule {
+    @ContributesAndroidInjector
+    abstract fun blankFragment(): BlankFragment
+}
+
+
+@dagger.Component(
+    modules = [AndroidInjectionModule::class,
+        AndroidSupportInjectionModule::class,
+        ActivityBinder::class,
+        FragmentBindModule::class
+    ]
+)
+interface AppComponent : AndroidInjector&lt;MyApplication&gt; {
+
+    @dagger.Component.Factory
+    interface Factory : AndroidInjector.Factory&lt;MyApplication&gt;
+}
+</code></pre>
+<p>对于<code>FragmentBindModule</code>不仅可以放入到<code>AppComponent</code>中，也可以放入到<code>MainActivityComponent</code>,或者<code>FragmentComponent</code>如：</p>
+<pre><code class="language-kotlin">@dagger.Subcomponent(modules = [FragmentBindModule::class])
+interface MainActivityComponent : AndroidInjector&lt;MainActivity&gt;{
+
+    @dagger.Subcomponent.Factory
+    interface Factory: AndroidInjector.Factory&lt;MainActivity&gt;
+}
+
+
+@dagger.Module(subcomponents = [
+    MainActivityComponent::class // 将fragment放入到了activity对应的Component
+])
+abstract class MainActivityModule{
+
+    @Binds
+    @IntoMap
+    @ClassKey(MainActivity::class)
+    abstract fun bind(factory:MainActivityComponent.Factory):AndroidInjector.Factory&lt;*&gt;
+}
+</code></pre>
+<h2 id="一些问题">一些问题</h2>
+<h3 id="model-注解的是抽象类时-provides-标注的必须是静态方法">@Model  注解的是抽象类时  @provides 标注的必须是静态方法</h3>
+<blockquote>
+<p>A @Module may not contain both non-static @Provides methods and abstract @Binds or @Multibinds declarations</p>
+</blockquote>
+<p>这个错误提示是将<code>Module</code>定义成了抽象类，这在<code>java</code>中只需要将<code>@Provide</code>标注的方法设置为静态方法即可，但是在<code>Kotlin</code>中是行不通的，因为在<code>kotlin</code>中静态方法是写在<code>companion object</code>代码块内，所以解决方法有两种：</p>
+<ul>
+<li>
+<p>用<code>Module</code>标注<code>companion object</code></p>
+<pre><code class="language-kotlin">@dagger.Module
+abstract class MainActivityModule() {
+    @dagger.Module
+    companion object {
+        @JvmStatic
+        @Provides
+        fun provideFragment() = BlankFragment()
+    }
+
+    @Binds
+    abstract fun context(activity: MainActivity): Context
+}
+</code></pre>
+</li>
+<li>
+<p>使用多个<code>Module</code>将抽象方法和<code>@provide</code>标注的方法分开，如：</p>
+<pre><code class="language-kotlin">@Module
+abstract class MainActivityBindsModule {
+    @Binds
+    abstract fun context(activity: MainActivity): Context
+}
+
+@Module(includes = arrayOf(MainActivityBindsModule ::class))
+class MainActivityProvidesModule {
+      @Provides
+      fun provideFragment() = BlankFragment()
+}
+</code></pre>
+</li>
+</ul>
+<h2 id="总结">总结</h2>
+<p>通过前面的例子我们亦可以看出：</p>
+<ol>
+<li>Dagger2-android 使用的是Dagger2中的<strong>继承关系</strong>；</li>
+<li>使用它，我们就可以不用写那么多的模版代码，相对于<code>Dagger2</code>方便了许多；</li>
+<li>Dagger2-Android 比Dagger2更强大，我们使用<code>@Binds</code>绑定抽象方法来注入一些提供初始化的类等。</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Dagger 2 Component 与 SubComponent]]></title>
+        <id>https://xiaowujiang.cn/posts/e30bee8a/</id>
+        <link href="https://xiaowujiang.cn/posts/e30bee8a/">
+        </link>
+        <updated>2020-12-04T16:23:48.000Z</updated>
+        <summary type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
+]]></summary>
+        <content type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
+<!-- more -->
+<blockquote>
+<p>本系列文章是基于 Google Dagger 2.23.2 版本， Kotlin 1.3.21版本</p>
+</blockquote>
+<p>理解前面两篇文章后，可以使用 <code>Dagger 2</code>框架完成一个对象的依赖注入。但是在实战中会存在多个需要注入依赖的对象，也就是说会有多个 <code>Component</code>，它们之间会有相同的依赖，那么该如何处理它们之间的关系呢？</p>
+<p>我们先来看一个简单的例子：</p>
+<p>假如有三个类：<code>A</code>、<code>B</code>和<code>C</code>, <code>A</code>和<code>B</code>都各自持有<code>C</code>的实例，并且通过<code>Dagger2</code>进行注入</p>
+<pre><code class="language-kotlin">class A {
+    @Inject
+    lateinit var c: C
+}
+
+class B {
+    @Inject
+    lateinit var c: C
+}
+
+class C @Inject constructor()
+</code></pre>
+<p>Component:</p>
+<pre><code class="language-kotlin">@Component
+interface AComponent {
+    fun injectA(a: A)
+}
+
+@Component
+interface BComponent {
+    fun injectA(b: B)
+}
+</code></pre>
+<p>如果要让<code>A</code>、<code>B</code>持有的实例<code>C</code>相同的话，我们该如何处理？</p>
+<p>很多人第一时间会想到下面这种设计：</p>
+<pre><code class="language-kotlin">@Singleton
+@Component(modules = [CModule::class])
+interface AComponent {
+    fun injectA(a: A)
+}
+
+@Singleton
+@Component(modules = [CModule::class])
+interface BComponent {
+    fun injectA(b: B)
+}
+
+@Module
+class CModule {
+
+    companion object {
+        private var c: C? = null
+    }
+
+    @Singleton
+    @Provides
+    fun provideC(): C {
+        if (c == null) {
+            c = C()
+        }
+        return c!!
+    }
+}
+</code></pre>
+<p>把 Component 需要的依赖都在<code>modules</code>属性中声明，但是这样有两个问题：</p>
+<p>（1）有时依赖实例需要共享，例如上面场景中，<code>A</code>和<code>C</code>都持有<code>C</code>的实例，并且根据<code>Module</code>里的实现，会存在谁先创建<code>C</code>实例的问题。</p>
+<p>（2）Scope 作用域容易失效，例如 <code>CModule</code> 的<code>provideCar()</code>使用 <code>@Singleton</code> 作用域，<code>AComponent</code>和<code>BComponent</code>也要用 <code>Singleton</code> 标注，但它们都会持有一个<code>C</code>实例。</p>
+<p>假如<code>A</code>先创建了<code>C</code>那么，<code>BComponent</code>需要依赖 <code>AComponent</code>提供的 <code>C</code>实例，这就是 <code>Component</code> 组织关系中的一种。</p>
+<h2 id="component-的组织关系">Component 的组织关系</h2>
+<p>Component 管理着依赖实例，根据依赖实例之间的关系就能确定 Component 的关系。这些关系可以用<code>object graph</code>描述，我称之为依赖关系图。在 Dagger 2 中 Component 的组织关系分为两种：</p>
+<ul>
+<li>依赖关系，一个 Component 依赖其他 Compoent<code>公开</code>的依赖实例，用 Component 中的<code>dependencies</code>声明。</li>
+<li>继承关系，一个 Component 继承（也可以叫扩展）某 Component 提供更多的依赖，SubComponent 就是继承关系的体现。</li>
+</ul>
+<p>所以前文中<code>AComponent</code>和<code>BComponent</code>是依赖关系。</p>
+<h3 id="依赖关系">依赖关系</h3>
+<p>具体的实现代码：</p>
+<pre><code class="language-kotlin">@Component(modules = [CModule::class])
+interface AComponent {
+    fun injectA(a: A)
+
+    fun c(): C
+}
+
+@Component(dependencies = [AComponent::class])
+interface BComponent {
+    fun injectA(b: B)
+}
+
+@Module
+class CModule {
+    @Provides
+    fun provideC(): C = C()
+}
+</code></pre>
+<p><strong>注</strong>：<strong>因为 BComponent和 AComponent是依赖关系，如果<code>AComponent</code>声明了作用域的话，那么<code>BComponent</code>也必须声明（反之可以），而且它们的 Scope 不能相同，并且两个都有作用域的情况下 @Singleton 修饰的 Component （BComponent）不能依赖其他的 Component。</strong></p>
+<pre><code class="language-java">public final class DaggerBComponent implements BComponent {
+  private final AComponent aComponent;
+
+  private DaggerBComponent(AComponent aComponentParam) {
+    this.aComponent = aComponentParam;
+  }
+ ....
+
+  @Override
+  public void injectA(B b) {
+    injectB(b);}
+
+  private B injectB(B instance) {
+      // 注入时，使用了aComponent.c()
+    B_MembersInjector.injectC(instance, Preconditions.checkNotNull(aComponent.c(), &quot;Cannot return null from a non-@Nullable component method&quot;));
+    return instance;
+  }
+...
+}
+</code></pre>
+<p>编译时生成的代码 DaggerBComponent 中会调用<code>aComponent.c()</code>，如果 AComponent 没有向外提供C 实例的接口的话，DaggerBComponent 就会注入失败。</p>
+<p>依赖注入：</p>
+<pre><code>val aComponent = DaggerAComponent.builder().build()
+DaggerBComponent.builder().aComponent(aComponent).build().inject(b)
+</code></pre>
+<p>依赖关系就跟生活中的朋友关系相当，注意事项如下：</p>
+<ol>
+<li>被依赖的 Component 需要把暴露的依赖实例用显式的接口声明。</li>
+<li>依赖关系中的 Component 的 Scope 不能相同，因为它们的生命周期不同。</li>
+</ol>
+<h3 id="继承关系">继承关系</h3>
+<p>继承关系跟面向对象中的继承的概念有点像，<code>SubComponent</code>称为<code>子 Component</code>，类似于平常说的子类。下面先看看下面这个场景：</p>
+<pre><code class="language-kotlin">class Parent {
+    @Inject
+    lateinit var car: Car
+}
+
+class Child {
+    @Inject
+    lateinit var car: Car
+    @Inject
+    lateinit var bike: Bike
+}
+
+class Car @Inject constructor()
+class Bike @Inject constructor()
+</code></pre>
+<p>Child 可以开Parent的车 car，也可以骑自己的自行车 bike。依赖关系图：</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-48-48-1561371949435.png" alt="1561371949435.png" loading="lazy"></figure>
+<p>上图中 ChildComponent 在 ParentComponent之中，ChildComponent子承父业，可以访问 ParentComponent 的依赖，而 ParentComponent只知道 ChildComponent 是它的子类，可以访问 SubComponent.Builder，却无法访问 SubComponent 中的依赖。</p>
+<pre><code class="language-kotlin">@Component(modules = [CarModule::class])
+interface ParentComponent {
+    fun inject(parent: Parent)
+}
+
+@Subcomponent(modules = [BikeModule::class])
+interface ChildComponent {
+    fun inject(child: Child)
+
+    // SubComponent 必须显式地声明 Subcomponent.Builder，parentComponent 需要用 Builder 来创建 ChildComponent
+    @Subcomponent.Builder
+    interface Builder {
+        fun build(): ChildComponent
+    }
+}
+</code></pre>
+<p><code>@SubComponent</code>的写法与<code>@Component</code>一样，只能标注接口或抽象类，与依赖关系一样，SubComponent 与 parent Component 的 Scope 不能相同，只是 SubComponent 表明它是继承扩展某 Component 的。怎么表明一个 SubComponent 是属于哪个 parent Component 的呢？只需要在 parent Component 依赖的 Module 中的<code>subcomponents</code>加上 SubComponent 的 class，然后就可以在 parent Component 中请求 SubComponent.Builder。</p>
+<pre><code class="language-kotlin">@Component(modules = [CarModule::class])
+interface ParentComponent {
+    ...
+    // 用来创建childComponent
+    fun childComponent(): ChildComponent.Builder
+}
+
+@Subcomponent(modules = [BikeModule::class])
+interface ChildComponent {
+    ...
+    // SubComponent 必须显式地声明 Subcomponent.Builder，parentComponent 需要用 Builder 来创建 ChildComponent
+    @Subcomponent.Builder
+    interface Builder {
+        fun build(): ChildComponent
+    }
+}
+// 在CarModule上添加subComponents
+@Module(subcomponents = [ChildComponent::class])
+class CarModule {
+    @Provides
+    fun provideCar() = Car()
+}
+
+@Module
+class BikeModule {
+    @Provides
+    fun provideBike() = Bike()
+}
+</code></pre>
+<p>上面的代码经过<code>make project</code>后，dagger2生成的代码：</p>
+<pre><code class="language-java">public final class DaggerParentComponent implements ParentComponent {
+  ...
+  @Override
+  public ChildComponent.Builder childComponent() {
+    return new ChildComponentBuilder();}
+  ...
+  private final class ChildComponentBuilder implements ChildComponent.Builder {
+    @Override
+    public ChildComponent build() {
+      return new ChildComponentImpl(new BikeModule());
+    }
+  }
+
+  private final class ChildComponentImpl implements ChildComponent {
+    private final BikeModule bikeModule;
+
+    private ChildComponentImpl(BikeModule bikeModuleParam) {
+      this.bikeModule = bikeModuleParam;
+    }
+   ...
+    private Child injectChild(Child instance) {
+      // 注入car时，调用的parentComponent的carModule提供
+      Child_MembersInjector.injectCar(instance, CarModule_ProvideCarFactory.provideCar(DaggerParentComponent.this.carModule));
+      Child_MembersInjector.injectBike(instance, BikeModule_ProvideBikeFactory.provideBike(bikeModule));
+      return instance;
+    }
+  }
+}
+</code></pre>
+<p>SubComponent 编译时不会生成 DaggerChildComponent，需要通过 parentComponent 的获取 SubComponent.Builder 方法获取 ChildComponent 实例。</p>
+<pre><code class="language-kotlin">val parentComponent = DaggerParentComponent.builder().build()
+parentComponent.childComponent().build().inject(child)
+</code></pre>
+<p><strong>继承关系和依赖关系最大的区别就是：继承关系中不用显式地提供依赖实例的接口，SubComponent 继承 parent Component 的所有依赖。</strong></p>
+<h3 id="依赖关系-vs-继承关系">依赖关系 vs 继承关系</h3>
+<p>相同点：</p>
+<ul>
+<li>两者都能复用其他 Component 的依赖</li>
+<li>有依赖关系和继承关系的 Component 不能有相同的 Scope</li>
+</ul>
+<p>区别：</p>
+<ul>
+<li>依赖关系中被依赖的 Component 必须显式地提供公开依赖实例的接口，而 SubComponent 默认继承 parent Component 的依赖。</li>
+<li>依赖关系会生成两个独立的 DaggerXXComponent 类，而 SubComponent 不会生成 独立的 DaggerXXComponent 类。</li>
+</ul>
+<p>在 Android 开发中，Activity 是 App 运行中组件，Fragment 又是 Activity 一部分，这种组件化思想适合继承关系，所以在 Android 中一般使用 SubComponent。</p>
+<h2 id="subcomponent-的其他问题">SubComponent 的其他问题</h2>
+<h3 id="抽象工厂方法定义继承关系">抽象工厂方法定义继承关系</h3>
+<p>除了使用 Module 的<code>subcomponents</code>属性定义继承关系，还可以在 parent Component 中声明返回 SubComponent 的抽象工厂方法来定义：</p>
+<pre><code class="language-kotlin">@Component(modules = [CarModule::class])
+interface ParentComponent {
+    ...
+    // 用来创建childComponent
+    //// 这个抽象工厂方法表明 ChildComponent 继承 ParentComponent
+    fun childComponent(): ChildComponent
+}
+
+@Subcomponent(modules = [BikeModule::class])
+interface ChildComponent {
+    ...
+}
+
+@Module
+class CarModule {
+    @Provides
+    fun provideCar() = Car()
+}
+
+@Module
+class BikeModule {
+    @Provides
+    fun provideBike() = Bike()
+}
+</code></pre>
+<p>这种定义方式不能很明显地表明继承关系，一般推荐使用 Module 的<code>subcomponents</code>属性定义。</p>
+<h3 id="重复的-module">重复的 Module</h3>
+<p>当相同的 Module 注入到 parent Component 和它的 SubComponent 中时，则每个 Component 都将自动使用这个 Module 的同一实例。也就是如果在 SubComponent.Builder 中调用相同的 Module 或者在返回 SubComponent 的抽象工厂方法中以重复 Module 作为参数时，会出现错误。（前者在编译时不能检测出，是运行时错误）</p>
+<pre><code class="language-java">@Component(modules = {RepeatedModule.class, ...})
+interface ComponentOne {
+  ComponentTwo componentTwo(RepeatedModule repeatedModule); // 编译时报错
+  ComponentThree.Builder componentThreeBuilder();
+}
+
+@Subcomponent(modules = {RepeatedModule.class, ...})
+interface ComponentTwo { ... }
+
+@Subcomponent(modules = {RepeatedModule.class, ...})
+interface ComponentThree {
+  @Subcomponent.Builder
+  interface Builder {
+    Builder repeatedModule(RepeatedModule repeatedModule);
+    ComponentThree build();
+  }
+}
+
+DaggerComponentOne.create().componentThreeBuilder()
+    .repeatedModule(new RepeatedModule()) // 运行时报错 UnsupportedOperationException!
+    .build();
+</code></pre>
+<h2 id="总结">总结</h2>
+<p>Component 之间共用相同依赖，可以有两种组织关系：依赖关系与继承关系。至于如何选择试具体情况而定，但在 Android 开发中，一般使用继承关系，以 AppComponent 作为 root Component，AppComponent 一般还会使用 @Singleton 作用域，而 ActivityComponent 为 SubComponent。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Dagger 2 进阶使用]]></title>
+        <id>https://xiaowujiang.cn/posts/b74c4b6c/</id>
+        <link href="https://xiaowujiang.cn/posts/b74c4b6c/">
+        </link>
+        <updated>2020-12-04T16:22:57.000Z</updated>
+        <summary type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
+]]></summary>
+        <content type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
+<!-- more -->
+<blockquote>
+<p>本系列文章是基于 Google Dagger 2.23.2 版本， Kotlin 1.3.21版本</p>
+</blockquote>
+<p>在<a href="/post/cbb172f8.html">Dagger 2 完全解析（一）,基本使用与原理</a>中介绍了 <code>Dagger 2</code> 基本使用，但是在实战中基本使用是远远不够的，我们还需要掌握一些其它的知识，下面由简入繁地讲解这几个概念，同时结合 Dagger 2 的编译时生成代码分析背后的原理（示例代码沿用第一篇的）。</p>
+<p>下面开始对<code>Lazy</code>、<code>Provider</code>、<code>Qualifier</code>和 <code>Scope</code>进行分析。</p>
+<h2 id="lazy-延迟注入">Lazy （延迟注入）</h2>
+<p>有时我们想注入的依赖在使用时再完成初始化，提高加载速度，就可以使用注入<code>Lazy&lt;T&gt;</code>。只有在调用<code>Lazy</code>的 <code>get()</code> 方法时才会初始化依赖实例注入依赖。</p>
+<pre><code class="language-java">public interface Lazy&lt;T&gt; {
+  T get();
+}
+</code></pre>
+<p>在<code>A</code>中使用：</p>
+<pre><code class="language-kotlin">class A {
+    ...
+    @Inject
+    lateinit var lazyD: Lazy&lt;D&gt;
+
+    fun doWork(){
+        lazyD.get() // 返回D的实例
+    }
+}
+</code></pre>
+<p><code>Make app</code>后，在<code>DaggerAComponent</code>中：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private final AModule aModule;
+
+ ...
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+  private A injectA2(A instance) {
+    A_MembersInjector.injectB(instance, AModule_ProvideBFactory.provideB(aModule));
+    A_MembersInjector.injectC(instance, new C());
+    // DoubleCheck 是线程安全的Lazy实例初始化类
+    A_MembersInjector.injectLazyD(instance, DoubleCheck.lazy(D_Factory.create()));
+    return instance;
+  }
+
+...
+</code></pre>
+<p><code>DoubleCheck</code> 是线程安全的<code>Lazy</code>实例初始化工具类</p>
+<pre><code class="language-java">public static &lt;P extends Provider&lt;T&gt;, T&gt; Lazy&lt;T&gt; lazy(P provider) {
+    if (provider instanceof Lazy) {
+      @SuppressWarnings(&quot;unchecked&quot;)
+      final Lazy&lt;T&gt; lazy = (Lazy&lt;T&gt;) provider;
+      return lazy;
+    }
+    return new DoubleCheck&lt;T&gt;(checkNotNull(provider));
+  }
+
+// 在需要使用的时候调用此方法进行返回相应的实例
+  @Override
+  public T get() {
+    Object result = instance;
+    if (result == UNINITIALIZED) {
+      synchronized (this) {
+        result = instance;
+        if (result == UNINITIALIZED) {
+          result = provider.get();
+          instance = reentrantCheck(instance, result);
+          provider = null;
+        }
+      }
+    }
+    return (T) result;
+  }
+</code></pre>
+<h2 id="provider-注入">Provider 注入</h2>
+<p>有时候不仅仅是注入单个实例，我们需要多个实例，这时可以使用注入<code>Provider&lt;T&gt;</code>，每次调用它的 <code>get()</code> 方法都会调用到 <code>@Inject 构造函数</code>创建新实例或者<code>Module 的 provide 方法</code>返回实例。</p>
+<pre><code class="language-kotlin">class A {
+
+    @Inject
+    lateinit var providerD: Provider&lt;D&gt;
+
+    fun createDFactory(): MutableList&lt;D&gt; {
+        val ds = mutableListOf&lt;D&gt;()
+        for (i in 0..10) {
+            ds.add(providerD.get())
+        }
+        return ds
+    }
+}
+</code></pre>
+<p><code>Make app</code>后，在<code>DaggerAComponent</code>中：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private final AModule aModule;
+
+ ...
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+ private A injectA2(A instance) {
+    A_MembersInjector.injectB(instance, AModule_ProvideBFactory.provideB(aModule));
+    A_MembersInjector.injectC(instance, new C());
+    A_MembersInjector.injectLazyD(instance, DoubleCheck.lazy(D_Factory.create()));
+    // 注入provider ,将`Factory`传入
+    A_MembersInjector.injectProviderD(instance, D_Factory.create());
+    return instance;
+  }
+...
+</code></pre>
+<p>再来看看<code>D_Factory</code>：</p>
+<pre><code class="language-java">public final class D_Factory implements Factory&lt;D&gt; {
+  private static final D_Factory INSTANCE = new D_Factory();
+
+  // 每次调用get方法都会重新创建实例
+  @Override
+  public D get() {
+    return new D();
+  }
+
+  public static D_Factory create() {
+    return INSTANCE;
+  }
+
+  public static D newInstance() {
+    return new D();
+  }
+}
+</code></pre>
+<p>通过上面可以看到，每次调用<code>get</code>方法都会重新创建实例, <code>D_Factory</code>实现了<code>Factory&lt;D&gt;</code>而<code>Factory&lt;D&gt;</code>继承自<code>Provider&lt;D&gt;</code>。</p>
+<pre><code class="language-java">public final class D_Factory implements Factory&lt;D&gt; {}
+
+public interface Factory&lt;T&gt; extends Provider&lt;T&gt; {}
+</code></pre>
+<h2 id="qualifier限定符">Qualifier（限定符）</h2>
+<p>试想这样一种情况：在 <code>AModule</code>提供了两个生成<code>B</code> 实例的<code>provide</code> 方法，如果使用 <code>Dagger 2</code> 在 <code>A</code> 中注入<code>B</code>实例时应该选择哪一个方法呢？</p>
+<pre><code class="language-kotlin">@Module
+class AModule {
+
+    @Provides
+    fun provideB(): B = B()
+
+    @Provides
+    fun provideOther(): B = B()
+}
+</code></pre>
+<p>这时 Dagger 2 不知道使用<code>provideB</code>还是<code>provideOther</code>提供的实例，在编译时就会出现：</p>
+<pre><code class="language-java">[Dagger/DuplicateBindings] *.data.B is bound multiple times:
+</code></pre>
+<p>而<code>@Qualifier</code>注解就是用来解决这个问题，使用注解来确定使用哪种 provide 方法。</p>
+<pre><code class="language-java">@Target(ANNOTATION_TYPE)
+@Retention(RUNTIME)
+@Documented
+public @interface Qualifier {}
+</code></pre>
+<p>我们可以发现<code>@Qualifier</code>是用来修饰注解的，所以它是不能直接作用到<code>provide</code>方法上。</p>
+<p>下面是自定义的<code>@Named</code>注解，你也可以用自定义的其他 Qualifier 注解：</p>
+<pre><code class="language-java">@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface Named {
+  String value() default &quot;&quot;;
+}
+</code></pre>
+<p>在 provide 方法上加上<code>@Named</code>注解，用来区分</p>
+<pre><code class="language-kotlin">@Module
+class AModule {
+
+    @Named(&quot;b&quot;)
+    @Provides
+    fun provideB(): B = B()
+
+    @Named(&quot;other&quot;)
+    @Provides
+    fun provideOther(): B = B()
+}
+</code></pre>
+<p>还需要在<code>Inject</code> 注入的地方加上<code>@field:Named</code>注解:</p>
+<pre><code class="language-kotlin">class A {
+    @Inject
+    @field:Named(&quot;other&quot;)
+    lateinit var b: B
+     ...
+}
+</code></pre>
+<p>**tips: ** 在<code>kotlin</code>中使用<code>@Name</code>给属性注入时需要添加<code>@field</code>，不然注解不生效。</p>
+<p>这样在依赖注入时，Dagger 2 就会使用<code>provideB</code>方法提供的实例，所以<strong>Qualifier（限定符）的作用相当于起了个区分的别名。</strong></p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private final AModule aModule;
+  ...
+
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+  private A injectA2(A instance) {
+    // 使用的是 provide方法
+    A_MembersInjector.injectB(instance, AModule_ProvideBFactory.provideB(aModule));
+    ...
+    return instance;
+  }
+  ...
+}
+</code></pre>
+<p>当然啦，我们也可以自定义注解进行区分，比如：</p>
+<pre><code class="language-kotlin">@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.FIELD)
+annotation class Other
+</code></pre>
+<p>然后在<code>provideOther</code>和<code>lateinit var b: B</code>上加上<code>@Other</code>即可。</p>
+<h2 id="scope作用域">Scope（作用域）</h2>
+<p>Scope 是用来确定注入的实例的生命周期的，如果没有使用 Scope 注解，Component 每次调用 Module 中的 provide 方法或 <code>Inject 构造函数</code>生成的工厂时都会创建一个新的实例，而使用 Scope 后可以复用之前的依赖实例。下面先介绍 Scope 的基本概念与原理，再分析 Singleton、Reusable 等作用域。</p>
+<h3 id="scope-基本概念">Scope 基本概念</h3>
+<p>先介绍 Scope 的用法，<code>@Scope</code>是元注解，是用来标注自定义注解的，如下：</p>
+<pre><code class="language-java">@Target(ANNOTATION_TYPE)
+@Retention(RUNTIME)
+@Documented
+public @interface Scope {}
+</code></pre>
+<p>**Scope 注解只能标注目标类、@provide 方法和 Component。**Scope 注解要生效的话，需要同时标注在 <code>Component</code> 和提供依赖实例的<code>Module 或目标类</code>上。<strong>Module 中 provide 方法中的 Scope 注解必须和 与之绑定的 Component 的 Scope 注解一样，否则作用域不同会导致编译时会报错。</strong></p>
+<p>那么 Scope 注解又是如何产生作用的呢，怎么保证生成的依赖实例的生命周期呢？</p>
+<p>在 Dagger 2 官方文档中我找到一句话，非常清楚地描述了<code>@Scope</code>的原理：</p>
+<blockquote>
+<p>When a binding uses a scope annotation, that means that the component object holds a reference to the bound object until the component object itself is garbage-collected.</p>
+</blockquote>
+<p>当 Component 与 Module、目标类（需要被注入依赖）使用 Scope 注解绑定时，意味着 Component 对象持有绑定的依赖实例的一个引用直到 Component 对象本身被回收。<strong>也就是作用域的原理，其实是让生成的依赖实例的生命周期与 Component 绑定，Scope 注解并不能保证生命周期，要想保证赖实例的生命周期，需要确保 Component 的生命周期。</strong></p>
+<p>下面以<code>@AScope</code>为例，看 Scope 注解背后的代码：</p>
+<p>先定义<code>AScope</code></p>
+<pre><code class="language-kotlin">@Scope
+@Retention(RUNTIME)
+@Target(FIELD, FUNCTION, CLASS)
+annotation class AScope
+</code></pre>
+<h4 id="使用module方式">使用Module方式</h4>
+<p>在<code>AModule</code>中：</p>
+<pre><code class="language-kotlin">@Module
+class AModule {
+    @AScope
+    @Provides
+    fun provideB(): B = B()
+}
+</code></pre>
+<p>在<code>AComponent</code>中</p>
+<pre><code class="language-kotlin">@Component(modules = [AModule::class])
+@AScope
+interface AComponent {
+    fun injectA(a: A)
+}
+</code></pre>
+<p>这样生成的 <code>B</code>实例就与 <code>AComponent</code> 绑定了。下面看编译时生成的代码：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private Provider&lt;B&gt; provideBProvider;
+
+  private DaggerAComponent(AModule aModuleParam) {
+    initialize(aModuleParam);
+  }
+
+  ...
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private void initialize(final AModule aModuleParam) {
+    this.provideOtherProvider = DoubleCheck.provider(AModule_ProvideBFactory.create(aModuleParam));
+  }
+
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+  private A injectA2(A instance) {
+    // provideOtherProvider 不再由Factory创建，而是DobuleCheck
+    A_MembersInjector.injectB(instance, provideBProvider.get());
+    return instance;
+  }
+ ...
+}
+</code></pre>
+<p>从上面 <code>DaggerAComponent</code>的代码可以看出使用了 <code>AScope</code> 作用域后，<code>provideBProvider</code>由<code>AModule_ProvideCarFactory.create()</code>变为了<code>DoubleCheck.provider(AModule_ProvideBFactory.create())</code>。而 DoubleCheck 包装的意义在于持有了 <code>B</code>的实例，而且只会生成一次实例，也就是说：没有用 MyScope 作用域之前，<code>DaggerAComponent</code> 每次注入依赖都会新建一个 <code>B</code>实例，而用 <code>AScope</code> 作用之后，每次注入依赖都只会返回第一次生成的实例。通过生成的代码可以发现这和<code>Lazy</code>的方式很相似。</p>
+<h4 id="注解到目标类方式">注解到目标类方式</h4>
+<pre><code class="language-kotlin">class A {
+    @AScope
+    @Inject
+    lateinit var b: B
+}
+
+
+@AScope
+class B  @Inject constructor()
+
+
+@AScope
+@Component(modules = [AModule::class])
+interface AComponent {
+    fun injectA(a: A)
+}
+
+@Module
+class AModule {
+}
+</code></pre>
+<p>使用这种方式生成的代码：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private Provider&lt;B&gt; bProvider;
+
+  private DaggerAComponent() {
+
+    initialize();
+  }
+ ...
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private void initialize() {
+     // 此处使用的是Factory,不是AModule_ProvideBFactory
+    this.bProvider = DoubleCheck.provider(B_Factory.create());
+  }
+
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+  private A injectA2(A instance) {
+    A_MembersInjector.injectB(instance, bProvider.get());
+    return instance;
+  }
+  ...
+}
+</code></pre>
+<p><strong>Scope 作用域的本质：Component 间接持有依赖实例的引用，把实例的作用域与 Component 绑定</strong></p>
+<h3 id="singleton">Singleton</h3>
+<p>在了解作用域的原理后，再来理解 Dagger 2 提供的自带作用域就容易了。<code>@Singleton</code>顾名思义保证单例，那么它又是如何实现的呢，实现了单例模式那样只返回一个实例吗？</p>
+<p>把上面例子中<code>@AScope</code>换成<code>@Singleton</code>，发现生成的 DaggerAComponent 和其他类没有变化。也只是用<code>DoubleCheck</code>包装了工厂而已，并没有什么特殊实现。所以 Singleton 作用域可以保证一个 Component 中的单例，但是如果产生多个 Component 实例，那么实例的单例就无法保证了。</p>
+<p>所以在网上一些例子中，有看到<code>AppComponent</code>使用 Singleton 作用域，保证绑定的依赖实例的单例。它生效的原因是<code>AppComponent</code>只会在 Application 中创建一次，由<code>AppComponent</code>的单例来保证绑定的依赖实例的单例。</p>
+<p>**注意：Component 可以同时被多个 Scope 标记。**即 Component 可以和多个 Scope 的 Moudle 或目标类绑定。</p>
+<h3 id="reusable">Reusable</h3>
+<p>上文中的自定义的<code>@AScope</code>和<code>@Singleton</code>都可以使得绑定的 Component 缓存依赖的实例，但是与之绑定 Component 必须有相同的 Scope 标记。假如我只想单纯缓存依赖的实例，可以复用之前的实例，不想关心与之绑定是什么 Component，应该怎么办呢？。</p>
+<p>这时就可以使用<code>@Reusable</code>作用域，**Reusable 作用域不关心绑定的 Component，Reusable 作用域只需要标记目标类或 provide 方法，不用标记 Component。**下面先看看使用 Reusable 作用域后，生成的 <code>DaggerAComponent</code> 的变化：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private Provider&lt;B&gt; provideBProvider;
+
+  private DaggerAComponent(AModule aModuleParam) {
+    initialize(aModuleParam);
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private void initialize(final AModule aModuleParam) {
+    this.provideBProvider = SingleCheck.provider(AModule_ProvideBFactory.create(aModuleParam));
+  }
+
+  @Override
+  public void injectA(A a) {
+    injectA2(a);
+  }
+
+  private A injectA2(A instance) {
+    A_MembersInjector.injectB(instance, provideBProvider.get());
+    return instance;
+  }
+ ...
+}
+</code></pre>
+<p>从上面代码可以看出使用<code>@Reusable</code>作用域后，利用到 Reusable 实例的 Component 会间接持有实例的引用。但是这里是用<code>SingleCheck</code>而不是<code>DoubleCheck</code>，在多线程情况下可能会生成多个实例。因为<code>@Reusable</code>作用域目的只是可以复用之前的实例，并不需要严格地保证实例的唯一，所以使用 <code>SingleCheck</code> 就足够了。</p>
+<h3 id="releasable-references可释放引用"><s>Releasable references（可释放引用）</s></h3>
+<p>相关内容在新版<code>Dagger2</code>已经废除。</p>
+<h2 id="binding-instances">Binding Instances</h2>
+<p>通过前面作用域的讲解，可以清楚 Component 可以间接持有 Module 或 Inject 目标类构造函数提供的依赖实例，除了这两种方式，Component 还可以在创建 Component 的时候绑定依赖实例，用以注入。这就是<code>@BindsInstance</code>注解的作用，只能在 Component.Builder 中使用。</p>
+<p>在 Android 中使用 Dagger 2 时，activity 实例经常也需要作为依赖实例用以注入，在之前只能使用 Module：</p>
+<pre><code class="language-kotlin">@Module
+class MainActivityModule {
+    private val mainActivity: MainActivity
+
+    constructor(mainActivity: MainActivity) {
+        this.mainActivity = mainActivity
+    }
+
+    @Provides
+    fun provideMainActivity(): MainActivity {
+        return this.mainActivity
+    }
+}
+</code></pre>
+<p>而使用<code>@BindsInstance</code>的话会更加简单：</p>
+<pre><code class="language-kotlin">@Component
+interface MainActivityComponent {
+
+    fun injectMainActivity(activity: MainActivity)
+
+    @Component.Builder
+    interface Builder {
+
+        @BindsInstance
+        fun activity(activity: Activity): Builder
+
+        fun build(): MainActivityComponent
+    }
+}
+</code></pre>
+<p>注意在调用<code>build()</code>创建 Component 之前，所有<code>@BindsInstance</code>方法必须先调用。上面例子中 <code>MainActivityComponent</code>还可以注入 Activity 类型的依赖，但是不能注入 <code>MainActivity</code>，因为 Dagger 2 是使用具体类型作为依据的（也就是只能使用<code>@Inject Activity activity</code>而不是<code>@Inject MainActivity activity</code>）。</p>
+<p>如果<code>@BindsInstance</code>方法的参数可能为 null，需要再用<code>@Nullable</code>标记，同时标注 Inject 的地方也需要用<code>@Nullable</code>标记。这时 Builder 也可以不调用<code>@BindsInstance</code>方法，这样 Component 会默认设置 instance 为 null。</p>
+<h2 id="总结">总结</h2>
+<ul>
+<li>Lazy 可以延时注入，Provider 可以创建多个实例</li>
+<li>Qualifier 限定符用来解决同一个实例不同方法提供冲突的问题，可以依赖实例起个别名用来区分，或者自定义注解</li>
+<li>Scope 作用域的本质是 Component 会持有与之绑定的依赖实例的引用，要想确保实例的生命周期，关键在于控制 Component 的生命周期。</li>
+<li>推荐优先使用<code>@BindsInstance</code>方法，相对于写一个带有构造函数带有参数的 Module。</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Dagger 2 的基本使用与原理]]></title>
+        <id>https://xiaowujiang.cn/posts/cbb172f8/</id>
+        <link href="https://xiaowujiang.cn/posts/cbb172f8/">
+        </link>
+        <updated>2020-12-04T16:21:41.000Z</updated>
+        <summary type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
+]]></summary>
+        <content type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
+<!-- more -->
+<blockquote>
+<p>本系列文章是基于 Google Dagger 2.23.2 版本， Kotlin 1.3.21版本</p>
+</blockquote>
+<h2 id="依赖注入">依赖注入</h2>
+<h3 id="什么是依赖">什么是依赖</h3>
+<blockquote>
+<p><strong>依赖(Dependency)</strong> 是类与类之间的联接。依赖关系表示一个类依赖于另一个类的定义, 一般而言，依赖关系在语言中体现为局部变量、方法的形参，或者对静态方法的调用。</p>
+</blockquote>
+<p>我们在<code>Android</code>开发中 经常会在<code>build.gradle</code>中引入第三方包的依赖包，然后就完成了对第三方的依赖。那么到底什么是依赖呢？下面我举个例子：</p>
+<p>假如有两个<code>类</code> : <code>A</code>和<code>B</code>, <code>A</code>中持有<code>B</code>的实例，则可认为 <code>A</code>依赖<code>B</code></p>
+<pre><code class="language-kotlin">// Class A
+class A(
+    private val b: B = B()// A中定义了b,并创建了B实例
+)
+
+// Class B
+class B
+</code></pre>
+<p>上面这种写法是最常见的写法，但是在下面几个场景中存在一些问题：</p>
+<ol>
+<li>如果要修改 <code>B</code> 的构造函数，例如需要使用<code>b= B(name)</code>的方式构造时，还要修改 <code>A</code>的代码；</li>
+<li>不利于单元测试，如单元测试中使用 mock 的 <code>B</code>测试<code>A</code> 。</li>
+</ol>
+<h3 id="什么是依赖注入dependency-injection">什么是依赖注入(Dependency Injection)</h3>
+<p><strong>依赖注入</strong>（简称 DI）是用于实现<strong>控制反转</strong>（ <code>IOC</code>）最常见的方式之一，<code>IOC</code>是面向对象编程中的一种设计思想，用以降低代码之间耦合度。控制反转的基本思想是：借助“第三方”实现具有依赖关系的对象之间的解耦。</p>
+<p>就拿上面的例子来说，我们在<code>A</code>中创建并持有<code>B</code>的实例，<code>A</code>依赖<code>B</code> ，并且创建的主动权在<code>A</code>, 实现了 Ioc 后，对象 <code>A</code> 依赖于<code>IOC</code> 容器，对象 A 被动地接受容器提供的对象 B 实例，由主动变为被动，因此称为控制反转。</p>
+<p><strong>注意，控制反转不等同于依赖注入，控制反转还有一种实现方式叫“依赖查找”（Denpendency Lookup）</strong></p>
+<p><strong>依赖注入</strong>就是将对象实例传入到一个对象中去（Denpendency injection means giving an object its instance variables）。依赖注入是一种设计模式，降低了依赖和被依赖对象之间的耦合，方便扩展和单元测试。</p>
+<h3 id="依赖注入的实现方式">依赖注入的实现方式</h3>
+<p>其实在平常编码的过程中，已经不知觉地使用了依赖注入</p>
+<ul>
+<li>基于构造函数，在构造对象时注入所依赖的对象。</li>
+</ul>
+<pre><code class="language-kotlin">class A(
+    private val b: B // 由创建A 是 传入B的实例
+)
+</code></pre>
+<ul>
+<li>基于 set 方法，使用 setter 方法来让外部容器调用传入所依赖的对象。</li>
+</ul>
+<pre><code class="language-kotlin">class A {
+    private lateinit var b: B
+
+    // 通过外部调用setB()实现实例注入
+    fun setB(b: B) {
+        this.b = b
+    }
+}
+</code></pre>
+<ul>
+<li>基于接口，使用接口来提供 setter 方法。</li>
+</ul>
+<pre><code class="language-kotlin">interface BInjector {
+    fun injectB(b: B)
+}
+
+class A : BInjector {
+    private var b: B? = null
+
+    override fun injectB(b: B) {
+        this.b = b
+    }
+}
+</code></pre>
+<ul>
+<li>基于注解，Dagger 2 依赖注入框架就是使用<code>@Inject</code>完成注入。</li>
+</ul>
+<pre><code class="language-kotlin">class A {
+    @Inject
+    lateinit var b: B
+}
+</code></pre>
+<h2 id="dagger-2">Dagger 2</h2>
+<p><code>Dagger 2</code> 是 <code>Java</code> 和<code>Android</code>下的一个完全静态、编译时生成代码的依赖注入框架，由 Google 维护，早期的版本 <a href="https://github.com/square/dagger">Dagger</a> 是由 Square 创建的。</p>
+<p>Dagger 2 是基于 Java Specification Request(JSR) 330标准。利用 JSR 注解在编译时生成代码，来注入实例完成依赖注入。</p>
+<p>下面是 Dagger 2 的一些资源地址：</p>
+<p>Github：<a href="https://github.com/google/dagger">https://github.com/google/dagger</a></p>
+<p>官方文档：<a href="https://google.github.io/dagger//">https://google.github.io/dagger//</a></p>
+<p>API：<a href="http://google.github.io/dagger/api/latest/">http://google.github.io/dagger/api/latest/</a></p>
+<h2 id="dagger-2-的基本使用">Dagger 2 的基本使用</h2>
+<p>上面介绍了依赖注入和 Dagger 2，下面由简单的示例开始一步一步地解析 Dagger 2 的基本使用与原理。</p>
+<h3 id="引入-dagger-2">引入 Dagger 2</h3>
+<p>在<code>build.gradle</code>中添加依赖和<code>plugin</code>：</p>
+<pre><code class="language-groovy">apply plugin: 'kotlin-kapt'
+
+dependencies {
+    implementation 'com.google.dagger:dagger:2.23.2'
+    kapt 'com.google.dagger:dagger-compiler:2.32.2'
+}
+</code></pre>
+<p>如果 Android gradle plugin 的版本低于<code>2.2</code>，还需要引入 <a href="https://bitbucket.org/hvisser/android-apt">android-apt</a> 插件。</p>
+<h3 id="使用-inject-标注需要注入的依赖">使用 @Inject 标注需要注入的依赖</h3>
+<h4 id="inject"><code>@Inject</code></h4>
+<pre><code class="language-java">package javax.inject;
+
+@Target({ METHOD, CONSTRUCTOR, FIELD })
+@Retention(RUNTIME)
+@Documented
+public @interface Inject {}
+</code></pre>
+<p>继续使用上面 A 的例子：</p>
+<pre><code class="language-kotlin">class A {
+    @Inject
+    lateinit var b: B
+}
+</code></pre>
+<p>使用<code>javax.inject.Inject</code>注解来标注需要 <code>Dagger 2</code> 注入的依赖，<code>make module</code>或者<code>build</code>后可以在<code>build/generated/source/kapt</code>目录下看到 Dagger 2 编译时生成的成员属性注入类。</p>
+<pre><code class="language-java">public final class A_MembersInjector implements MembersInjector&lt;A&gt; {
+  private final Provider&lt;B&gt; bProvider;
+
+  public A_MembersInjector(Provider&lt;B&gt; bProvider) {
+    this.bProvider = bProvider;
+  }
+
+  public static MembersInjector&lt;A&gt; create(Provider&lt;B&gt; bProvider) {
+    return new A_MembersInjector(bProvider);}
+
+  @Override
+  public void injectMembers(A instance) {
+    injectB(instance, bProvider.get());
+  }
+
+  public static void injectB(A instance, B b) {
+    instance.b = b;
+  }
+}
+</code></pre>
+<p>从上面的<code>injectMembers</code>方法中可以看到注入依赖的代码是<code>instance.b= bProvider.get();</code>，所以<code>@Inject</code>标注的成员属性不能是<code>private</code>的，不然无法注入。<code>A</code>中<code>@Inject</code>注解了<code>n</code>不同的类型变量，那么<code>A_MembersInjector</code>就会持有<code>n</code>个<code>Provider</code>。</p>
+<h3 id="创建所依赖对象的实例">创建所依赖对象的实例</h3>
+<p>用<code>@Inject</code>标注构造函数时，Dagger 2 会完成实例的创建。</p>
+<pre><code class="language-kotlin">class B @Inject constructor()
+</code></pre>
+<p>build 后可以在<code>build/generated/source/kapt</code>目录下看到 Dagger 2 编译时生成的工厂类。</p>
+<pre><code class="language-java">public final class B_Factory implements Factory&lt;B&gt; {
+  private static final B_Factory INSTANCE = new B_Factory();
+
+  @Override
+  public B get() {
+    return new B();
+  }
+
+  public static B_Factory create() {
+    return INSTANCE;
+  }
+
+  public static B newInstance() {
+    return new B();
+  }
+}
+</code></pre>
+<p>依赖注入是<code>依赖的对象实例</code>–&gt;<code>需要注入的实例属性</code>，上面完成两步，通过 Dagger 2 生成的代码代码可以知道，生成了 <code>A</code>的成员属性注入类和 <code>B</code>的工厂类，接下来需要的就是新建工厂实例并调用成员属性注入类完成 <code>B</code>的实例注入。完成这个过程的桥梁就是<code>dagger.Component</code>。</p>
+<h3 id="component-桥梁">Component 桥梁</h3>
+<p><code>@Component</code>可以标注接口或抽象类</p>
+<pre><code class="language-java">@Retention(RUNTIME) 
+@Target(TYPE)
+@Documented
+public @interface Component {
+  @Target(TYPE)
+  @Documented
+  @interface Builder {}
+
+  @Target(TYPE)
+  @Documented
+  @interface Factory {}
+}
+</code></pre>
+<p><code>Component</code>可以完成依赖注入过程，其中最重要的是定义注入接口，调用注入接口就可以完成 <code>A</code> 所需依赖的注入。</p>
+<pre><code class="language-kotlin">@Component
+interface AComponent {
+    fun injectA(a: A)
+}
+</code></pre>
+<p>build 后会生成带有<code>Dagger</code>前缀的实现该接口的类：DaggerManComponent</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private DaggerAComponent() {
+
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static AComponent create() {
+    return new Builder().build();
+  }
+
+  @Override
+  public void injectA(A a) {
+    injectA2(a);
+  }
+
+  private A injectA2(A instance) {
+    A_MembersInjector.injectB(instance, new B());
+    return instance;
+  }
+
+  public static final class Builder {
+    private Builder() {
+    }
+
+    public AComponent build() {
+      return new DaggerAComponent();
+    }
+  }
+}
+</code></pre>
+<p>从上面生成的代码可以看出来 <code>DaggerAComponent</code>就是连接<code>依赖的对象A实例</code>和<code>需要注入的B实例属性</code>之间的桥梁。<code>DaggerAComponent</code>会查找目标类对应的成员属性注入类（即<code>A_MembersInjector</code>），然后调用<code>A_MembersInjector.injectB(instance, new B())</code>就能完成依赖注入。<strong>注意，Component 中注入接口的参数必须为需要注入依赖的类型，不能是 要注入类型的父类或子类，注入接口返回值为 void，接口名可以任意。</strong></p>
+<p>接下来只需要在 A中调用<code>injectA</code>方法就能完成注入。</p>
+<pre><code class="language-kotlin">class A {
+    init{
+        DaggerManComponent.create().injectA(this)
+    } 
+}
+</code></pre>
+<h3 id="module">Module</h3>
+<p>使用<code>@Inject</code>标注构造函数来提供依赖的对象实例的方法，不是万能的，在以下几种场景中无法使用：</p>
+<ul>
+<li>接口没有构造函数</li>
+<li>第三方库的类不能被标注</li>
+<li>构造函数中的参数必须配置</li>
+</ul>
+<p>为了解决上面的问题，<code>Dagger</code>又提供了一种新的注解方式：<code>Module</code></p>
+<p>在<code>Module</code>中，Module 即用<code>@Module</code>标注的类。所以 Module 是提供依赖的对象实例的另一种方式。</p>
+<pre><code class="language-java">@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface Module {
+
+  Class&lt;?&gt;[] includes() default {};
+
+  @Beta
+  Class&lt;?&gt;[] subcomponents() default {};
+}
+</code></pre>
+<p>在<code>Module</code>可以用<code>@Provides</code>标注的方法来提供依赖实例，方法的返回值就是依赖的对象实例。</p>
+<pre><code class="language-kotlin">@Module
+class AModule {
+    @Provides
+    fun provideB(): B = B()
+}
+</code></pre>
+<p>约定俗成的是<code>@Provides</code>方法一般以<code>provide</code>为前缀，Moudle 类以<code>Module</code>为后缀，一个 Module 类中可以有多个<code>@Provides</code>方法。</p>
+<p>接下来，关联Module与Component：</p>
+<pre><code class="language-kotlin">@Component(modules = [AModule::class])
+interface AComponent {
+    fun injectA(a: A)
+}
+</code></pre>
+<p>build之后，Module 和 Component 生成的类为：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private final AModule aModule;
+
+  private DaggerAComponent(AModule aModuleParam) {
+    this.aModule = aModuleParam;
+  }
+  ....
+
+private A injectA2(A instance) {
+    A_MembersInjector.injectB(instance, AModule_ProvideBFactory.provideB(aModule));
+    return instance;
+  }
+
+  public static final class Builder {
+    private AModule aModule;
+
+    private Builder() {
+    }
+
+    public Builder aModule(AModule aModule) {
+      this.aModule = Preconditions.checkNotNull(aModule);
+      return this;
+    }
+
+    public AComponent build() {
+      if (aModule == null) {
+        this.aModule = new AModule();
+      }
+      return new DaggerAComponent(aModule);
+    }
+  }
+}
+</code></pre>
+<p>生成的 DaggerAComponent 和之前相比主要是<code>injectA2()</code>方法不一样，具体体现在：</p>
+<p>没有<code>Module</code>时：</p>
+<pre><code class="language-java">A_MembersInjector.injectB(instance, new B());
+</code></pre>
+<p>有<code>Module</code>时：</p>
+<pre><code class="language-java"> A_MembersInjector.injectB(instance, AModule_ProvideBFactory.provideB(aModule));
+</code></pre>
+<p><strong>AModule_ProvideBFactory</strong>实现 Factory 接口。</p>
+<pre><code class="language-java">public final class AModule_ProvideBFactory implements Factory&lt;B&gt; {
+  private final AModule module;
+
+  public AModule_ProvideBFactory(AModule module) {
+    this.module = module;
+  }
+
+  @Override
+  public B get() {
+    return provideB(module);
+  }
+
+  public static AModule_ProvideBFactory create(AModule module) {
+    return new AModule_ProvideBFactory(module);
+  }
+
+  public static B provideB(AModule instance) {
+    return Preconditions.checkNotNull(instance.provideB(), &quot;Cannot return null from a non-@Nullable @Provides method&quot;);
+  }
+}
+</code></pre>
+<h2 id="总结">总结</h2>
+<p>现在再来看 Dagger 2 最核心的三个部分：</p>
+<ol>
+<li>需要注入依赖的目标类，需要注入的实例属性由<code>@Inject</code>标注。</li>
+<li>提供依赖对象实例的工厂，用<code>@Inject</code>标注构造函数或定义<code>Module</code>这两种方式都能提供依赖实例，Dagger 2 的注解处理器会在编译时生成相应的工厂类。<strong>Module的优先级比@Inject标注构造函数的高，意味着 Dagger 2 会先从 Module 寻找依赖实例。</strong></li>
+<li>把依赖实例工厂创建的实例注入到目标类中的 Component。</li>
+</ol>
+<p>下面再讲述上面提到的在 Dagger 2 种几个注解的用法：</p>
+<ul>
+<li><code>@Inject</code> 一般情况下是标注成员属性和构造函数，标注的成员属性不能是<code>private</code>，Dagger 2 还支持方法注入，<code>@Inject</code>还可以标注方法。</li>
+<li><code>@Provides</code> 只能标注方法，必须在 Module 中。</li>
+<li><code>@Module</code> 用来标注 Module 类</li>
+<li><code>@Component</code> 只能标注接口或抽象类，声明的注入接口的参数类型必须和目标类一致。</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Android DataBinding 从入门到进阶]]></title>
+        <id>https://xiaowujiang.cn/posts/3c6ea6b6/</id>
+        <link href="https://xiaowujiang.cn/posts/3c6ea6b6/">
+        </link>
+        <updated>2020-12-04T16:19:45.000Z</updated>
+        <summary type="html"><![CDATA[<p>DataBinding 是<code>google</code>发布的一个数据绑定框架，用于降低布局和逻辑的耦合性，使代码逻辑更加清晰。大量减少 Activity 内的代码，数据能够单向或双向绑定到 layout 文件中，有助于防止内存泄漏，而且能自动进行空检测以避免空指针异常。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>DataBinding 是<code>google</code>发布的一个数据绑定框架，用于降低布局和逻辑的耦合性，使代码逻辑更加清晰。大量减少 Activity 内的代码，数据能够单向或双向绑定到 layout 文件中，有助于防止内存泄漏，而且能自动进行空检测以避免空指针异常。</p>
+<!-- more -->
+<h2 id="环境配置">环境配置</h2>
+<ol>
+<li>
+<p>详情内容请参考：<a href="https://developer.android.com/topic/libraries/data-binding/start">https://developer.android.com/topic/libraries/data-binding/start</a></p>
+</li>
+<li>
+<p>启用 DataBinding 的方法是在对应 Model 的 <strong><code>build.gradle</code></strong> 文件里加入以下代码，同步后就能引入对 DataBinding 的支持</p>
+<pre><code class="language-groovy">android {
+    ...
+   dataBinding {
+       enabled = true
+   }
+}
+</code></pre>
+</li>
+<li>
+<p>如果<code>Android Studio</code>的版本小于<code>3.2</code>的需要在<code>gradle.properties</code>中添加：</p>
+<pre><code class="language-groovy">android.databinding.enableV2=true
+</code></pre>
+</li>
+</ol>
+<p><strong>tips:</strong>   1. 推荐使用最新的<code>Android Studio</code>版本和<code>AndroidX</code>库。</p>
+<p>​            2.<code>build.gradle</code>中添加<code>'apply plugin : 'kotlin-kapt'</code>。</p>
+<h2 id="基础入门">基础入门</h2>
+<h3 id="改变布局文件-layout">改变布局文件 <strong><code>layout</code></strong></h3>
+<p>启用 DataBinding 后，打开原有的布局文件，选中根布局的 <strong>根布局</strong>，按住 <strong>Alt + 回车键</strong>，点击 “<strong>Convert to data binding layout</strong>”，就可以生成 DataBinding 需要的布局规则。</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/09-23-37-06-1560319999402.png" alt="1560319999402.png" loading="lazy"></figure>
+<p>转换后的内容为：</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;data&gt;
+    &lt;/data&gt;
+    &lt;androidx.constraintlayout.widget.ConstraintLayout
+            android:orientation=&quot;vertical&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<ul>
+<li>和原始布局的区别在于多出了一个 <strong>layout</strong> 标签将原布局包裹了起来；</li>
+<li><strong>data</strong> 标签用于声明要用到的变量以及变量类型，它搭建了 View 和 Model 之间的通道。</li>
+</ul>
+<h3 id="创建model">创建<code>Model</code></h3>
+<pre><code class="language-kotlin">package com.github.ixiaow.databindingsample.model
+
+data class User(val name:String, val password: String)
+</code></pre>
+<h3 id="model-与-布局文件关联"><strong><code>Model</code></strong> 与 布局文件关联</h3>
+<p>在 <strong>data</strong> 标签里声明要使用到的变量名、类的全路径</p>
+<pre><code class="language-xml">&lt;data&gt;
+    &lt;variable 
+         name=&quot;user&quot; 
+         type=&quot;com.github.ixiaow.databindingsample.model.User&quot;/&gt;
+&lt;/data&gt;
+</code></pre>
+<p>在 相应部分使用<code>User</code></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout
+        xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+        xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;&gt;
+
+    &lt;data&gt;
+        ...
+    &lt;/data&gt;
+
+    &lt;androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot;
+            android:orientation=&quot;vertical&quot;&gt;
+
+        &lt;TextView
+                  ...
+                android:text=&quot;@{user.name}&quot;/&gt;
+
+        &lt;TextView
+                   ...
+                android:text=&quot;@{user.password}&quot;/&gt;
+
+    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<h3 id="给model赋值">给<code>Model</code>赋值</h3>
+<p>写好布局文件后，在 <code>Android Studio</code>中执行<code>make project</code>或者<code>make app</code>, 完成后，在<code>Activity</code>中:</p>
+<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val dataBinding: ActivityMainBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_main)
+        // 给user初始化值
+        dataBinding.user = User(&quot;zhangsan&quot;, &quot;12345&quot;)
+    }
+}
+</code></pre>
+<p>运行<code>App</code>后就可以看到结果啦。</p>
+<h3 id="补充知识">补充知识</h3>
+<ul>
+<li>
+<p><strong><code>import</code></strong></p>
+<p>我们可以像使用<code>java</code>或者<code>kotlin</code>文件一样，导入需要的类名路径即可，比如说：</p>
+<ol>
+<li>
+<p>如果 User 类型要多处用到，也可以直接将之 <strong>import</strong> 进来，这样就不用每次都指明整个包名路径了，而 <code>java.lang.*</code> 包中的类会被自动导入，所以可以直接使用：</p>
+<pre><code class="language-xml">&lt;data&gt;
+   &lt;import type=&quot;com.github.ixiaow.databindingsample.model.User&quot;/&gt;
+   &lt;variable
+       name=&quot;user&quot;
+       type=&quot;User&quot;/&gt;
+&lt;/data&gt;
+</code></pre>
+</li>
+<li>
+<p>导入<code>java</code>或<code>kotlin</code>文件中的系统类，比如 <code>import</code> 集合 <code>list</code></p>
+<pre><code class="language-xml">&lt;data&gt;
+    &lt;import type=&quot;java.util.List&quot;/&gt;
+    &lt;import type=&quot;com.github.ixiaow.sample.model.User&quot;/&gt;
+    &lt;variable name=&quot;user&quot; type=&quot;User&quot;/&gt;
+    &lt;variable name=&quot;users&quot; type=&quot;List&lt;User&gt;&quot;/&gt;
+ &lt;/data&gt;
+</code></pre>
+<p><strong>❤️</strong> <code>&lt;</code>需要被替换成<code>&amp;lt;</code></p>
+</li>
+<li>
+<p>如果存在 <strong>import</strong> 的类名相同的情况，可以使用 <strong>alias</strong> 指定别名</p>
+<pre><code class="language-xml">&lt;data&gt;
+    &lt;import type=&quot;com.github.ixiaow.sample.model1.User&quot; /&gt;
+    &lt;import
+       alias=&quot;TempUser&quot;
+       type=&quot;com.github.ixiaow.sample.model2.User&quot; /&gt;
+    &lt;variable
+       name=&quot;user&quot;
+       type=&quot;User&quot; /&gt;
+    &lt;variable
+       name=&quot;tempUserInfo&quot;
+       type=&quot;TempUser&quot; /&gt;
+&lt;/data&gt;
+</code></pre>
+</li>
+</ol>
+</li>
+<li>
+<p>预览添加默认值</p>
+<p>由于 <code>@{user.name}</code>在布局文件中并没有明确的值，所以在预览视图中什么都不会显示，不便于观察文本的大小和字体颜色等属性，此时可以为之设定默认值（文本内容或者是字体大小等属性都适用），默认值将只在预览视图中显示，且默认值不能包含引号</p>
+<pre><code class="language-xml">android:text=&quot;@{userInfo.name,default=defaultValue}&quot;
+</code></pre>
+<p>此外，也可以通过 ActivityMainBinding 直接获取到指定 ID 的控件:</p>
+<pre><code class="language-java">dataBinding.mUserName.text = &quot;lisi&quot;
+</code></pre>
+</li>
+<li>
+<p>自定义生成的绑定类的类名</p>
+<p>每个数据绑定布局文件都会生成一个绑定类，<strong>ViewDataBinding</strong> 的实例名是根据布局文件名来生成，采用驼峰命名法来命名，并省略布局文件名包含的下划线。控件的获取方式类似，但首字母小写。</p>
+<p>通过如下方式自定义 ViewDataBinding 的实例名</p>
+<pre><code class="language-xml">&lt;data class=&quot;CustomBinding&quot;&gt;&lt;/data&gt;
+</code></pre>
+</li>
+<li>
+<p>在 <strong>Fragment</strong> 和 <strong>RecyclerView</strong> 中使用</p>
+<ol>
+<li>在 Fragment 中的使用</li>
+</ol>
+<pre><code class="language-kotlin">class BlankFragment : Fragment() {
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val blankFragmentBinding: BlankFragmentBinding =
+            DataBindingUtil.inflate(inflater, R.layout.blank_fragment, container, false)
+        return blankFragmentBinding.root
+    }
+}
+</code></pre>
+<ol start="2">
+<li>
+<p>在RecyclerView中使用</p>
+<p>具体使用请参考：<a href="https://blog.csdn.net/yehui928186846/article/details/78408294">DataBinding 应用于RecyclerView</a></p>
+</li>
+</ol>
+<pre><code class="language-kotlin">override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerViewHolder {
+        val itemMvvmBinding = DataBindingUtil.inflate&lt;ViewDataBinding&gt;(
+            LayoutInflater.from(parent.context),
+            R.layout.item_mvvm,
+            parent,
+            false
+        )
+        itemMvvmBinding.getRoot().setOnClickListener(this)
+        return RecyclerViewHolder(itemMvvmBinding)
+ }
+
+override fun onBindViewHolder(holder: RecyclerViewHolder, position: Int) {
+        val itemMvvmBinding = holder.getBinding()
+        val userBean = data.get(position)
+        itemMvvmBinding.setUser(userBean)
+        //将position保存在itemView的Tag中，以便点击时进行获取
+        itemMvvmBinding.getRoot().setTag(position)
+        itemMvvmBinding.btnUpdate.setOnClickListener(OnBtnClickListener(1, userBean))
+        itemMvvmBinding.btnDelete.setOnClickListener(OnBtnClickListener(2, position))
+        // 立刻执行绑定
+        itemMvvmBinding.executePendingBindings()
+}
+</code></pre>
+<p><strong>以上实现数据绑定的方式，每当绑定的变量发生变化的时候，都需要重新向 ViewDataBinding 传递新的变量值才能刷新 UI 。接下来看如何实现自动刷新 UI</strong></p>
+</li>
+</ul>
+<h2 id="单向数据绑定">单向数据绑定</h2>
+<p>实现数据变化自动驱动 UI 刷新的方式有三种：<code>BaseObservable</code>、<code>ObservableField</code>、<code>ObservableCollection</code></p>
+<h3 id="baseobservable">BaseObservable</h3>
+<p>一个简单的<code>ViewModel</code> 类被更新后，并不会让 UI 自动更新。而数据绑定后，我们自然会希望数据变更后 UI 会即时刷新，<code>Observable</code> 就是为此而生的概念。</p>
+<p><strong>BaseObservable</strong> 提供了 <strong>notifyChange()</strong> 和 <strong>notifyPropertyChanged()</strong> 两个方法。</p>
+<ul>
+<li><strong>notifyChange()</strong></li>
+</ul>
+<p>它会刷新所有的值。</p>
+<ul>
+<li><strong>notifyPropertyChanged()</strong></li>
+</ul>
+<p>它只会根据对应的<code>BR</code>的<code>flag</code>更新，该 <code>BR</code> 的生成通过注释 <strong><code>@Bindable</code></strong> 生成，可以通过 <strong>BR notify</strong> 特定属性关联的视图。</p>
+<ul>
+<li>由于<code>kotlin</code>的属性默认是<code>public</code>修饰，所以可以直接在属性上<code>@Bindable</code>, 如何设置了修饰符且不为<code>public</code>的话，则可使用<code>@get BIndable</code>（表示在<code>get()</code>方法上标记<code>@Bindable</code>）</li>
+</ul>
+<pre><code class="language-kotlin">import androidx.databinding.BaseObservable
+import androidx.databinding.Bindable
+import com.github.ixiaow.sample.BR
+
+class UserInfo : BaseObservable() {
+    // 对name进行@Bindable标志，然后会生成BR.name
+    @Bindable
+    var name: String = &quot;&quot;
+        set(value) {
+            field = value
+            // 当name,发生改变时只会刷新与name相关控件的值，不会刷新其他的值
+            notifyPropertyChanged(BR.name)
+        }
+
+    @get: Bindable
+    var password: String = &quot;&quot;
+        set(value) {
+            field = value
+            // 当password 发生改变时，也会刷新其他属性相关的控件的值
+            notifyChange()
+        }
+}
+</code></pre>
+<p>布局文件：</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+        xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
+    &lt;data&gt;
+        &lt;variable name=&quot;userInfo&quot; type=&quot;com.github.ixiaow.sample.model.UserInfo&quot;/&gt;
+    &lt;/data&gt;
+    &lt;androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot;
+            tools:context=&quot;.MainActivity&quot;&gt;
+
+        &lt;TextView
+                app:layout_constraintVertical_chainStyle=&quot;spread&quot;
+                android:id=&quot;@+id/mUserName&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:text=&quot;@{userInfo.name}&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;
+                app:layout_constraintTop_toTopOf=&quot;parent&quot;/&gt;
+
+        &lt;TextView
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:text=&quot;@{userInfo.password}&quot;
+                app:layout_constraintTop_toBottomOf=&quot;@id/mUserName&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
+
+    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<ol start="4">
+<li>
+<p><strong><code>OnPropertyChangedCallback</code></strong></p>
+<p>实现了 <strong>Observable</strong> 接口的类允许注册一个监听器<code>OnPropertyChangedCallback</code>，当可观察对象的属性更改时就会通知这个监听器。</p>
+<p>当中 <code>propertyId</code> 就用于标识特定的字段</p>
+</li>
+</ol>
+<pre><code class="language-kotlin">user.addOnPropertyChangedCallback(object : Observable.OnPropertyChangedCallback(){
+     override fun onPropertyChanged(sender: Observable, propertyId: Int) {
+
+     }
+})
+</code></pre>
+<h3 id="observablefield">ObservableField</h3>
+<p>继承于 <code>Observable</code> 类相对来说限制有点高，且也需要进行<code>notify</code> 操作，因此为了简单起见可以选择使用 <strong><code>ObservableField</code></strong>。 可以理解为官方对 <code>BaseObservable</code> 中字段的注解和刷新等操作的封装，官方原生提供了对基本数据类型的封装，例如 <strong><code>ObservableBoolean、ObservableByte、ObservableChar、ObservableShort、ObservableInt、ObservableLong、ObservableFloat、ObservableDouble</code></strong> 以及 <strong><code>ObservableParcelable</code></strong> ，也可通过 <strong><code>ObservableField</code></strong> 泛型来申明其他类型。</p>
+<pre><code class="language-kotlin">class ObservableUser {
+    val name = ObservableField&lt;String&gt;()
+    val password = ObservableField&lt;String&gt;()
+}
+</code></pre>
+<p>对 <code>ObservableUser</code>属性值的改变都会立即触发 UI 刷新，概念上与<code>Observable</code> 区别不大，具体效果可看下面提供的源代码，这里不再赘述</p>
+<h3 id="observablecollection">ObservableCollection</h3>
+<p><code>dataBinding</code> 也提供了包装类用于替代原生的 <code>List</code> 和 <code>Map</code>，分别是 <code>ObservableList</code> 和 <code>ObservableMap</code>,当其包含的数据发生变化时，绑定的视图也会随之进行刷新</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+        xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
+    &lt;data&gt;
+        &lt;import type=&quot;androidx.databinding.ObservableList&quot;/&gt;
+        &lt;import type=&quot;androidx.databinding.ObservableMap&quot;/&gt;
+        &lt;import type=&quot;com.github.ixiaow.sample.model.User&quot;/&gt;
+        &lt;variable name=&quot;index&quot; type=&quot;int&quot;/&gt;
+        &lt;variable name=&quot;key&quot; type=&quot;String&quot;/&gt;
+        &lt;variable name=&quot;list&quot; type=&quot;ObservableList&lt;User&gt;&quot;/&gt;
+        &lt;variable name=&quot;map&quot; type=&quot;ObservableMap&lt;String, User&gt;&quot;/&gt;
+    &lt;/data&gt;
+    &lt;androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot;
+            tools:context=&quot;.MainActivity&quot;&gt;
+
+        &lt;TextView
+                app:layout_constraintVertical_chainStyle=&quot;spread&quot;
+                android:id=&quot;@+id/mUserName&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:text=&quot;@{list[index].name}&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;
+                app:layout_constraintTop_toTopOf=&quot;parent&quot;/&gt;
+
+        &lt;TextView
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:text=&quot;@{map[key].password}&quot;
+                app:layout_constraintTop_toBottomOf=&quot;@id/mUserName&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
+
+    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val dataBinding: ActivityMainBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_main)
+
+        dataBinding.map = ObservableArrayMap&lt;String, User&gt;().apply {
+            &quot;android&quot; to User(&quot;android&quot;, &quot;12367&quot;)
+            &quot;java&quot; to User(&quot;java&quot;, &quot;12534&quot;)
+            &quot;c&quot; to User(&quot;c&quot;, &quot;12344&quot;)
+            &quot;c++&quot; to User(&quot;c++&quot;, &quot;14423&quot;)
+            &quot;c#&quot; to User(&quot;c#&quot;, &quot;12334&quot;)
+        }
+
+        dataBinding.key = &quot;c&quot;
+
+        dataBinding.list = ObservableArrayList&lt;User&gt;().apply {
+            add(User(&quot;android&quot;, &quot;123&quot;))
+            add(User(&quot;java&quot;, &quot;1234&quot;))
+            add(User(&quot;c&quot;, &quot;1235&quot;))
+            add(User(&quot;c++&quot;, &quot;123447&quot;))
+        }
+
+        dataBinding.index = 3
+    }
+}
+</code></pre>
+<h2 id="双向数据绑定">双向数据绑定</h2>
+<p>双向绑定的意思即为当数据改变时同时使视图刷新，而视图改变时也可以同时改变数据</p>
+<p>看以下例子，当 <code>EditText</code>的输入内容改变时，会同时同步到变量 <code>user</code>,绑定变量的方式比单向绑定多了一个等号：<code>android:text=&quot;@={user.name}&quot;</code></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+        xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
+    &lt;data&gt;
+        &lt;variable name=&quot;userInfo&quot; type=&quot;com.github.ixiaow.sample.model.ObservableUser&quot;/&gt;
+    &lt;/data&gt;
+    &lt;androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot;
+            tools:context=&quot;.MainActivity&quot;&gt;
+
+        &lt;EditText
+                app:layout_constraintVertical_chainStyle=&quot;spread&quot;
+                android:id=&quot;@+id/mUserName&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:text=&quot;@={userInfo.name, default=`name`}&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;
+                app:layout_constraintTop_toTopOf=&quot;parent&quot;/&gt;
+
+        &lt;EditText
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:text=&quot;@={userInfo.password, default=`1234`}&quot;
+                app:layout_constraintTop_toBottomOf=&quot;@id/mUserName&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
+
+    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val dataBinding: ActivityMainBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_main)
+        val observableUser = ObservableUser()
+        observableUser.name.set(&quot;我是name&quot;)
+        observableUser.password.set(&quot;我是password&quot;)
+
+        dataBinding.userInfo = observableUser
+    }
+}
+</code></pre>
+<h2 id="事件绑定">事件绑定</h2>
+<p>严格意义上来说，事件绑定也是一种变量绑定，只不过设置的变量是回调接口而已。</p>
+<p>事件绑定可用于以下多种回调事件：</p>
+<ul>
+<li>android:onClick</li>
+<li>android:onLongClick</li>
+<li>android:afterTextChanged</li>
+<li>android:onTextChanged</li>
+<li>...</li>
+</ul>
+<p>新建一个 <strong>UserPresenter</strong> 类来声明 <strong>onClick()</strong> 和 <strong>afterTextChanged()</strong> 事件相应的回调方法</p>
+<pre><code class="language-kotlin">class UserPresenter {
+
+    fun onUserNameClick(user: ObservableUser) {
+
+    }
+
+    fun afterTextChanged(s: Editable) {
+    }
+
+    fun saveUser(view: View, user: ObservableUser){
+
+    }
+}
+</code></pre>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+        xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
+    &lt;data&gt;
+        &lt;import type=&quot;com.github.ixiaow.sample.UserPresenter&quot;/&gt;
+        &lt;variable name=&quot;presenter&quot; type=&quot;UserPresenter&quot;/&gt;
+        &lt;variable name=&quot;userInfo&quot; type=&quot;com.github.ixiaow.sample.model.ObservableUser&quot;/&gt;
+    &lt;/data&gt;
+    &lt;androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot;
+            tools:context=&quot;.MainActivity&quot;&gt;
+
+        &lt;EditText
+                app:layout_constraintVertical_chainStyle=&quot;spread&quot;
+                android:id=&quot;@+id/mUserName&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:onClick=&quot;@{()-&gt; presenter.onUserNameClick(userInfo)}&quot;
+                android:text=&quot;@={userInfo.name, default=`name`}&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;
+                app:layout_constraintTop_toTopOf=&quot;parent&quot;/&gt;
+
+        &lt;EditText
+                android:id=&quot;@+id/mPassword&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:afterTextChanged=&quot;@{presenter::afterTextChanged}&quot;
+                android:text=&quot;@={userInfo.password, default=`1234`}&quot;
+                app:layout_constraintTop_toBottomOf=&quot;@id/mUserName&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
+
+        &lt;EditText
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:onClick=&quot;@{(theView)-&gt;presenter.saveUser(theView, userInfo)}&quot;
+                android:text=&quot;@={userInfo.password, default=`1234`}&quot;
+                app:layout_constraintTop_toBottomOf=&quot;@id/mPassword&quot;
+                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
+                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
+                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
+
+    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<p>方法引用的方式与调用函数的方式类似，</p>
+<ol>
+<li>可以选择保持事件回调方法的签名一致：<strong><code>@{presenter.afterTextChanged}</code></strong>，此时方法名可以不一样，但方法参数和返回值必须和原始的回调函数保持一致。</li>
+<li>可以引用不遵循默认签名的函数：<strong><code>@{()-&gt;presenter.onUserNameClick(userInfo)}</code></strong>，这里用到了 Lambda 表达式，这样就可以不遵循默认的方法签名，将<code>userInfo</code>对象直接传回点击方法中。此外，也可以使用方法引用 <strong><code>::</code></strong> 的形式来进行事件绑定</li>
+</ol>
+<h2 id="使用类方法">使用类方法</h2>
+<p>首先定义一个静态方法</p>
+<pre><code class="language-kotlin">object StringUtils {
+
+   fun toUpperCase( str:String):String {
+        return str.toUpperCase();
+   }
+}
+</code></pre>
+<p>在 data 标签中导入该工具类</p>
+<pre><code class="language-xml"> &lt;import type=&quot;com.github.ixiaow.sample.StringUtils&quot; /&gt;
+</code></pre>
+<p>然后就可以像对待一般的函数一样来调用了</p>
+<pre><code class="language-xml">&lt;TextView
+   android:layout_width=&quot;match_parent&quot;
+   android:layout_height=&quot;wrap_content&quot;
+   android:onClick=&quot;@{()-&gt;userPresenter.onUserNameClick(userInfo)}&quot;
+   android:text=&quot;@{StringUtils.toUpperCase(userInfo.name)}&quot; /&gt;
+</code></pre>
+<h2 id="运算符">运算符</h2>
+<h4 id="基础运算符">基础运算符</h4>
+<p>DataBinding 支持在布局文件中使用以下运算符、表达式和关键字</p>
+<ul>
+<li>算术 <code>+ - / * %</code></li>
+<li>字符串合并<code>+</code></li>
+<li>逻辑<code>&amp;&amp; ||</code></li>
+<li>二元<code>&amp; | ^</code></li>
+<li>一元 <code>+ - ! ~</code></li>
+<li>移位<code>&gt;&gt; &gt;&gt;&gt; &lt;&lt;</code></li>
+<li>比较<code>== &gt; &lt; &gt;= &lt;=</code></li>
+<li><code>Instanceof</code></li>
+<li><code>Grouping ()</code></li>
+<li><code>character, String, numeric, null</code></li>
+<li><code>Cast</code></li>
+<li>方法调用</li>
+<li><code>Field</code> 访问</li>
+<li><code>Array</code>访问 []</li>
+<li>三元<code>?:</code></li>
+</ul>
+<p>目前不支持以下操作</p>
+<ul>
+<li><code>this</code></li>
+<li><code>super</code></li>
+<li><code>new</code></li>
+<li>显示泛型调用</li>
+</ul>
+<p>此外，DataBinding 还支持以下几种形式的调用:</p>
+<h4 id="null-coalescing">Null Coalescing</h4>
+<p>空合并运算符 <strong><code>??</code></strong> 会取第一个不为 <code>null</code> 的值作为返回值</p>
+<pre><code class="language-xml">&lt;TextView
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:text=&quot;@{user.name ?? user.password}&quot; /&gt;
+</code></pre>
+<p>等价于</p>
+<pre><code class="language-xml">android:text=&quot;@{user.name != null ? user.name : user.password}&quot;
+</code></pre>
+<h4 id="属性控制">属性控制</h4>
+<p>可以通过变量值来控制 View 的属性</p>
+<pre><code class="language-xml">&lt;TextView
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:text=&quot;可见性变化&quot;
+    android:visibility=&quot;@{user.male  ? View.VISIBLE : View.GONE}&quot; /&gt;
+</code></pre>
+<h4 id="避免空指针异常">避免空指针异常</h4>
+<p>DataBinding 也会自动帮助我们避免空指针异常<br>
+例如，如果 <strong>&quot;@{userInfo.password}&quot;</strong> 中 <strong>userInfo</strong> 为 <strong>null</strong> 的话，<strong>userInfo.password</strong> 会被赋值为默认值 <strong>null</strong>，而不会抛出空指针异常</p>
+<h2 id="include-和-viewstub">include 和 viewStub</h2>
+<h4 id="include">include</h4>
+<p>对于 include 的布局文件，一样是支持通过 dataBinding 来进行数据绑定，此时一样需要在待 include 的布局中依然使用 layout 标签，声明需要使用到的变量</p>
+<p><code>view_include.xml</code></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;data&gt;
+        &lt;import type=&quot;com.github.ixiaow.databindingsample.model.User&quot; /&gt;
+        &lt;variable
+            name=&quot;userInfo&quot;
+            type=&quot;User&quot; /&gt;
+    &lt;/data&gt;
+    &lt;android.support.constraint.ConstraintLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:background=&quot;#acc&quot;&gt;
+
+        &lt;TextView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:gravity=&quot;center&quot;
+            android:padding=&quot;20dp&quot;
+            android:text=&quot;@{userInfo.name}&quot; /&gt;
+    &lt;/android.support.constraint.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<p>在主布局文件中将相应的变量传递给 include 布局，从而使两个布局文件之间共享同一个变量</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:bind=&quot;http://schemas.android.com/apk/res-auto&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
+    &lt;data&gt;
+        &lt;import type=&quot;com.github.ixiaow.databindingsample.model.User&quot; /&gt;
+        &lt;variable
+            name=&quot;userInfo&quot;
+            type=&quot;User&quot; /&gt;
+    &lt;/data&gt;
+    &lt;LinearLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;
+        android:orientation=&quot;vertical&quot;
+        tools:context=&quot;.Main6Activity&quot;&gt;
+        &lt;include
+            layout=&quot;@layout/view_include&quot;
+            bind:userInfo=&quot;@{userInfo}&quot; /&gt;
+    &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<h4 id="viewstub">viewStub</h4>
+<p>dataBinding 一样支持 ViewStub 布局</p>
+<p>在布局文件中引用 viewStub 布局</p>
+<pre><code class="language-xml">&lt;ViewStub
+    android:id=&quot;@+id/view_stub&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout=&quot;@layout/view_stub&quot;/&gt;
+</code></pre>
+<p>获取到 ViewStub 对象，由此就可以来控制 ViewStub 的可见性</p>
+<pre><code class="language-java">ActivityMain6Binding activityMain6Binding = DataBindingUtil.setContentView(this, R.layout.activity_main6);
+View view = activityMain6Binding.viewStub.getViewStub().inflate();
+</code></pre>
+<p>如果需要为 ViewStub 绑定变量值，则 ViewStub 文件一样要使用 layout 标签进行布局，主布局文件使用自定义的 bind 命名空间将变量传递给 ViewStub</p>
+<pre><code class="language-xml">&lt;ViewStub
+    android:id=&quot;@+id/view_stub&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout=&quot;@layout/view_stub&quot;
+    bind:userInfo=&quot;@{userInfo}&quot; /&gt;
+</code></pre>
+<p>如果在 xml 中没有使用 <code>bind:userInfo=&quot;@{userInf}&quot;</code>对 ViewStub 进行数据绑定，则可以等到当 ViewStub <strong>Inflate</strong> 时再绑定变量，此时需要为 ViewStub 设置 <code>setOnInflateListener</code>回调函数，在回调函数中进行数据绑定</p>
+<pre><code class="language-java">activityMain6Binding.viewStub.setOnInflateListener(new ViewStub.OnInflateListener() {
+    @Override
+    public void onInflate(ViewStub stub, View inflated) {
+        //如果在 xml 中没有使用 bind:userInfo=&quot;@{userInf}&quot; 对 viewStub 进行数据绑定
+        //那么可以在此处进行手动绑定
+        ViewStubBinding viewStubBinding = DataBindingUtil.bind(inflated);
+        viewStubBinding.setUserInfo(user);
+        Log.e(TAG, &quot;onInflate&quot;);
+    }
+});
+</code></pre>
+<h2 id="bindingadapter">BindingAdapter</h2>
+<p>dataBinding 提供了 <strong>BindingAdapter</strong> 这个注解用于支持自定义属性，或者是修改原有属性。注解值可以是已有的 xml 属性，例如 <code>android:src</code>、<code>android:text</code>等，也可以自定义属性然后在 xml 中使用</p>
+<p>例如，对于一个 ImageView ，我们希望在某个变量值发生变化时，可以动态改变显示的图片，此时就可以通过 BindingAdapter 来实现</p>
+<p>需要先定义一个静态方法，为之添加 BindingAdapter 注解，注解值是为 ImageView 控件自定义的属性名，而该静态方法的两个参数可以这样来理解：当 ImageView 控件的 url 属性值发生变化时，dataBinding 就会将 ImageView 实例以及新的 url 值传递给 loadImage() 方法，从而可以在此动态改变 ImageView 的相关属性</p>
+<pre><code class="language-java">@BindingAdapter({&quot;url&quot;})
+public static void loadImage(ImageView view, String url) {
+    Log.d(TAG, &quot;loadImage url : &quot; + url);
+}
+</code></pre>
+<p>在 xml 文件中关联变量值，当中，bind 这个名称可以自定义</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:bind=&quot;http://schemas.android.com/apk/res-auto&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
+
+    &lt;data&gt;
+        &lt;import type=&quot;com.github.ixiaow.databindingsample.model.Image&quot; /&gt;
+        &lt;variable
+            name=&quot;image&quot;
+            type=&quot;Image&quot; /&gt;
+    &lt;/data&gt;
+
+    &lt;android.support.constraint.ConstraintLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;&gt;
+
+        &lt;ImageView
+            android:id=&quot;@+id/image&quot;
+            android:layout_width=&quot;wrap_content&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:src=&quot;@drawable/ic_launcher_background&quot;
+            bind:url=&quot;@{image.url}&quot; /&gt;
+    &lt;/android.support.constraint.ConstraintLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<p>BindingAdapter 更为强大的一点是可以覆盖 Android 原先的控件属性。例如，可以设定每一个 Button 的文本都要加上后缀：“-Button”</p>
+<pre><code class="language-java">@BindingAdapter(&quot;android:text&quot;)
+public static void setText(Button view, String text) {
+    view.setText(text + &quot;-Button&quot;);
+}
+</code></pre>
+<pre><code class="language-xml">&lt;Button
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:onClick=&quot;@{()-&gt;handler.onClick(image)}&quot;
+    android:text='@{&quot;改变图片Url&quot;}'/&gt;
+</code></pre>
+<p>这样，整个工程中使用到了 <strong>&quot;android:text&quot;</strong> 这个属性的控件，其显示的文本就会多出一个后缀</p>
+<h2 id="bindingconversion">BindingConversion</h2>
+<p>dataBinding 还支持对数据进行转换，或者进行类型转换</p>
+<p>与 BindingAdapter 类似，以下方法会将布局文件中所有以<code>@{String}</code>方式引用到的<code>String</code>类型变量加上后缀<code>-conversionString</code></p>
+<pre><code class="language-java">@BindingConversion
+public static String conversionString(String text) {
+    return text + &quot;-conversionString&quot;;
+}
+</code></pre>
+<p>xml 文件</p>
+<pre><code class="language-xml">&lt;TextView
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:text='@{&quot;xxx&quot;}'
+    android:textAllCaps=&quot;false&quot;/&gt;
+</code></pre>
+<p>可以看到，对于 Button 来说，BindingAdapter 和 BindingConversion 同时生效了，而 BindingConversion 的优先级要高些, 此外，BindingConversion 也可以用于转换属性值的类型</p>
+<p>看以下布局，此处在向 <code>background</code> 和 <code>textColor</code> 两个属性赋值时，直接就使用了字符串，按正常情况来说这自然是会报错的，但有了 BindingConversion 后就可以自动将字符串类型的值转为需要的 <code>Drawable</code> 和 <code>Color</code> 了</p>
+<pre><code class="language-xml">&lt;TextView
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:background='@{&quot;红色&quot;}'
+    android:padding=&quot;20dp&quot;
+    android:text=&quot;红色背景蓝色字&quot;
+    android:textColor='@{&quot;蓝色&quot;}'/&gt;
+
+&lt;TextView
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout_marginTop=&quot;20dp&quot;
+    android:background='@{&quot;蓝色&quot;}'
+    android:padding=&quot;20dp&quot;
+    android:text=&quot;蓝色背景红色字&quot;
+    android:textColor='@{&quot;红色&quot;}'/&gt;
+</code></pre>
+<pre><code class="language-java">@BindingConversion
+public static Drawable convertStringToDrawable(String str) {
+    if (str.equals(&quot;红色&quot;)) {
+        return new ColorDrawable(Color.parseColor(&quot;#FF4081&quot;));
+    }
+
+    if (str.equals(&quot;蓝色&quot;)) {
+        return new ColorDrawable(Color.parseColor(&quot;#3F51B5&quot;));
+    }
+    return new ColorDrawable(Color.parseColor(&quot;#344567&quot;));
+}
+
+@BindingConversion
+public static int convertStringToColor(String str) {
+    if (str.equals(&quot;红色&quot;)) {
+        return Color.parseColor(&quot;#FF4081&quot;);
+    }
+
+    if (str.equals(&quot;蓝色&quot;)) {
+        return Color.parseColor(&quot;#3F51B5&quot;);
+    }
+    return Color.parseColor(&quot;#344567&quot;);
+}
+</code></pre>
+<h2 id="array-list-set-map">Array、List、Set、Map ...</h2>
+<p>dataBinding 也支持在布局文件中使用 <strong>数组、Lsit、Set 和 Map</strong>，且在布局文件中都可以通过 <code>list[index]</code> 的形式来获取元素</p>
+<p>而为了和 <strong>variable</strong> 标签的尖括号区分开，在声明 <strong>Lsit&lt; String &gt;</strong> 之类的数据类型时，需要使用尖括号的转义字符</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
+
+    &lt;data&gt;
+        &lt;import type=&quot;java.util.List&quot; /&gt;
+        &lt;import type=&quot;java.util.Map&quot; /&gt;
+        &lt;import type=&quot;java.util.Set&quot; /&gt;
+        &lt;import type=&quot;android.util.SparseArray&quot; /&gt;
+        &lt;variable
+            name=&quot;array&quot;
+            type=&quot;String[]&quot; /&gt;
+
+        &lt;variable
+            name=&quot;list&quot;
+            type=&quot;List&lt;String&gt;&quot; /&gt;
+
+        &lt;variable
+            name=&quot;map&quot;
+            type=&quot;Map&lt;String, String&gt;&quot; /&gt;
+
+        &lt;variable
+            name=&quot;set&quot;
+            type=&quot;Set&lt;String&gt;&quot; /&gt;
+
+        &lt;variable
+            name=&quot;sparse&quot;
+            type=&quot;SparseArray&lt;String&gt;&quot; /&gt;
+
+        &lt;variable
+            name=&quot;index&quot;
+            type=&quot;int&quot; /&gt;
+
+        &lt;variable
+            name=&quot;key&quot;
+            type=&quot;String&quot; /&gt;
+    &lt;/data&gt;
+
+    &lt;LinearLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;
+        android:orientation=&quot;vertical&quot;&gt;
+
+        &lt;TextView
+            ···
+            android:text=&quot;@{array[1]}&quot; /&gt;
+
+        &lt;TextView
+            ···
+            android:text=&quot;@{sparse[index]}&quot; /&gt;
+
+        &lt;TextView
+            ···
+            android:text=&quot;@{list[index]}&quot; /&gt;
+
+        &lt;TextView
+            ···
+            android:text=&quot;@{map[key]}&quot; /&gt;
+
+        &lt;TextView
+            ···
+            android:text='@{map[&quot;leavesC&quot;]}' /&gt;
+
+        &lt;TextView
+            ···
+            android:text='@{set.contains(&quot;xxx&quot;)?&quot;xxx&quot;:key}' /&gt;
+    &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+<h2 id="资源引用">资源引用</h2>
+<p>dataBinding 支持对尺寸和字符串这类资源的访问</p>
+<p><code>dimens.xml</code></p>
+<pre><code class="language-xml">&lt;dimen name=&quot;paddingBig&quot;&gt;190dp&lt;/dimen&gt;
+&lt;dimen name=&quot;paddingSmall&quot;&gt;150dp&lt;/dimen&gt;
+</code></pre>
+<p><code>string.xml</code></p>
+<pre><code class="language-xml">&lt;string name=&quot;format&quot;&gt;%s is %s&lt;/string&gt;
+</code></pre>
+<p><code>layout.xml</code></p>
+<pre><code class="language-xml">&lt;data&gt;
+    &lt;variable
+       name=&quot;flag&quot;
+       type=&quot;boolean&quot; /&gt;
+&lt;/data&gt; 
+
+&lt;Button
+      android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:paddingLeft=&quot;@{flag ? @dimen/paddingBig:@dimen/paddingSmall}&quot;
+    android:text='@{@string/format(&quot;leavesC&quot;, &quot;Ye&quot;)}'
+    android:textAllCaps=&quot;false&quot; /&gt;
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[360加固Gradle插件实现]]></title>
+        <id>https://xiaowujiang.cn/posts/6c01e784/</id>
+        <link href="https://xiaowujiang.cn/posts/6c01e784/">
+        </link>
+        <updated>2020-12-04T16:14:31.000Z</updated>
+        <content type="html"><![CDATA[<p>最近码了一个基于360加固的流程实现的Gradle插件，在自动编译打包后进行360加固流程操作。只需要配置一些参数后，就可以实现自动打包编译和加固。</p>
+<p>项目地址:https://github.com/ixiaow/android-gradle-plugin</p>
+<h3 id="使用步骤">使用步骤</h3>
+<h4 id="1-添加依赖">1. 添加依赖</h4>
+<ul>
+<li>在根<code>build.gradle</code>中添加：</li>
+</ul>
+<pre><code class="language-groovy">allprojects {
+    repositories {
+        maven { url &quot;https://jitpack.io&quot; }
+    }
+}
+
+dependencies {
+    ...
+    classpath 'com.github.ixiaow:android-gradle-plugin:$version'
+}
+</code></pre>
+<p>(请替换 <code>$version</code>为最新的版本号:<a href="https://jitpack.io/#ixiaow/android-gradle-plugin"><img src="https://jitpack.io/v/jxiaow/android-gradle-plugin.svg" alt="" loading="lazy"></a>)</p>
+<ul>
+<li>在<code>app</code>的模块<code>build.gradle</code>中添加：</li>
+</ul>
+<pre><code class="language-groovy">apply plugin: 'com.github.ixiaow.jiagu'
+</code></pre>
+<h4 id="2-参数配置">2. 参数配置</h4>
+<p>使用这款插件需要在<code>app</code>的<code>build.gradle</code>中添加一些配置信息，如下：</p>
+<pre><code class="language-groovy">jiagu {
+    home '../360jiagu' // 360加固软件的根目录
+    buildTypes 'release', 'debug' // 需要加固的编译类型
+    configs '-crashlog' // 选择360的可选配置服务
+    username 'user' // 360加固用户名
+    password 'password' // 360加固密码
+    charsetName 'GBK' // 360加固控制台输出字符编码
+    // apk签名文件， 如果在Android中配置了签名文件，此项可以不用配置，插件会自动读取名为'release'的签名文件
+    signingConfig { 
+        key_alias         : KEY_ALIAS, 
+        key_password      : KEY_PASSWORD,
+        key_store_password: KEY_STORE_PASSWORD,
+        key_store_file    : KEY_STORE_FILE
+    }
+}
+</code></pre>
+<h4 id="3-开始加固">3. 开始加固</h4>
+<p>确认上述参数无误后，就可以在控制台中切换到当前项目根目录执行</p>
+<pre><code class="language-shell"># 各个系统的控制台gradle命令可能不一样： ./gradlew 或 gradlew 
+./gradlew clean jiaGuApk 
+</code></pre>
+<h3 id="文档">文档</h3>
+<p><a href="https://ixiaow.github.io/android-gradle-plugin/plugin/com.github.ixiaow.jiagu/index.html">android-gradle-plugin</a></p>
+<h3 id="360加固助手">360加固助手</h3>
+<p><a href="https://jiagu.360.cn/#/global/download">360加固助手</a></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Android通过Intent简单实现分享功能]]></title>
         <id>https://xiaowujiang.cn/posts/73a6d0c4/</id>
@@ -64,6 +2327,926 @@ CharSequence label = resolveInfo.loadLabel(packageManager);
     context.startActivity(intent);
 }
 </code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Dart 语言简述]]></title>
+        <id>https://xiaowujiang.cn/posts/b8c700d2/</id>
+        <link href="https://xiaowujiang.cn/posts/b8c700d2/">
+        </link>
+        <updated>2019-12-04T16:24:44.000Z</updated>
+        <summary type="html"><![CDATA[<p>最近开始接触Flutter相关的项目，通过源码、例子和一些资料的阅读，发现如果掌握了Dart的一些语法和一些基础对于Flutter的学习有着事半功倍的效果。下面是我在查阅一些资料和实际的开发中的一些总结。希望对今后的学习有所帮助。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>最近开始接触Flutter相关的项目，通过源码、例子和一些资料的阅读，发现如果掌握了Dart的一些语法和一些基础对于Flutter的学习有着事半功倍的效果。下面是我在查阅一些资料和实际的开发中的一些总结。希望对今后的学习有所帮助。</p>
+<!--more-->
+<blockquote>
+<p>Dart 诞生于 2011.10.10 日， 谷歌 Dart 语言项目的领导人 Lars Bak 在丹麦举行的Goto 会议上 布， Dart 种“结构化的 Web 程”语言， Dart 编程语言在所有现代浏览器和环境中提供高性能。</p>
+</blockquote>
+<p>Dart语言的特性：</p>
+<ul>
+<li>Dart 是AOT（Ahead Of Time）编译的，编译成快速、可预测本地的代码。</li>
+<li>Dart也可以JIT（Just In Time）编译，开发周期异常快，包括Flutter流行的亚秒级有状态热重载。</li>
+<li>Dart可以更轻松地创建以60fps运行的流畅动画和状态，Dart可以在没有锁的情况下进行对象分配和垃圾回收。</li>
+<li>Dart使Flutter不需要单独的声明式布局语言，或单独的可视化界面构建器，因为Dart的声明式编程布局易于阅读和可视化。</li>
+</ul>
+<p>Dart重要概念：</p>
+<ul>
+<li>
+<p>一切皆对象，无论是变量、数字、函数等都是对象，所有的对像都继自Object， 这点类似于 Java 语言。</p>
+</li>
+<li>
+<p>程序中指定数据类型使得程序合理地分配内存空间，并帮助编绎器进行语法检查，由于Dart 言是弱数据类型， 所以类型不是必须的 。</p>
+</li>
+<li>
+<p>Dart 代码在运行前解析 指定数据类型和编译时的常量， 可以提高运行速度。</p>
+</li>
+<li>
+<p>Dart 程序有统 的程序人口： main （） 这一点与 Java C 和 C＋＋ 语言很像。</p>
+</li>
+<li>
+<p>Dart 没有 <code>public</code> <code>protected</code> <code>private</code> 这些修饰符的概念，私有特性通过变量或函数加上下划线来表示。</p>
+</li>
+<li>
+<p>Dart 工具可以检查出警告信息(<code>warning</code>) 和 错误信息(<code>errors</code>)， 警告信息只是表明代码可能不工作，但是不会妨碍程序运行，错误信息可以是编译时的错误，也可能是运行时的错误， 编译时的错误将阻止程序运行，运行时的错误将会以异常（exception ）的方式呈现。</p>
+</li>
+<li>
+<p>Dart 支持 anync/await 异步处理。</p>
+</li>
+<li>
+<p>关键字（ 56 个）如下：</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-43-54-dart%E5%85%B3%E9%94%AE%E5%AD%97.png" alt="dart关键字.png" loading="lazy"></figure>
+<ul>
+<li>带有上标 <strong>1</strong> 的关键字是 <em><strong>内置关键字</strong></em>。避免把内置关键字当做标识符使用。 也不要把内置关键字 用作类名字和类型名字。</li>
+<li>带有上标 <strong>2</strong> 的关键字，是在 Dart 1.0 发布以后又新加的，用于支持异步相关的特性。</li>
+</ul>
+</li>
+</ul>
+<h2 id="变量与基本类型">变量与基本类型</h2>
+<h3 id="变量的声明">变量的声明</h3>
+<p>在Dart里，变量的声明有三种方式：</p>
+<ol>
+<li>
+<p>用<code>var</code>关键字</p>
+<p>用var声明变量时，如果未指定初始值，可以变成任意类型。如果指定了类型，则类型会被锁定。如：</p>
+<pre><code class="language-dart">void main() {
+  var v; // 初始值未指定类型
+  v = '2'; // 可以变为任意类型
+  v = 3;
+  print('v: $v');
+
+  var v1 = '111'; // 初始化时已经指定类型
+  var v1 = 222; // 此时无法赋值成功，编译时报错
+}
+</code></pre>
+</li>
+<li>
+<p>用<code>dynamic</code>关键字</p>
+<p>dynamic声明的变量，表示动态任意类型，编译时不检查类型。如：</p>
+<pre><code class="language-dart">void main() {
+  dynamic d1 = '111';
+  d1 = 222;
+  d1 = 333.0;
+  print(&quot;d1: $d1&quot;);
+  // dynamic修饰的变量，在编译时不做检查
+  d1.test(); // 这行还代码，在编译时是不会检查错误信息的，运行时会报错
+}
+</code></pre>
+</li>
+<li>
+<p>用<code>Object</code></p>
+<p>Object声明的变量，表示任意动态类型，编译时检查类型。如：</p>
+<pre><code class="language-dart">void main() {
+  Object o1 = &quot;sss&quot;;
+  o1 = 222;
+  o1.test(); // 编译时会做检查，报错
+}
+</code></pre>
+</li>
+</ol>
+<h3 id="变量的默认值">变量的默认值</h3>
+<ul>
+<li>没有初始化的变量会自动获取一个默认值null</li>
+<li>一切皆为对象，对象的默认值为null</li>
+</ul>
+<h3 id="final-和-const">final 和 const</h3>
+<p>​    final 或 const 修饰的变量为常量或固定值。</p>
+<ul>
+<li>共同点：
+<ol>
+<li>声明的类型可以省略</li>
+<li>初始化后不能再赋值</li>
+<li>不能和<code>var</code>同时使用</li>
+</ol>
+</li>
+<li>不同点：
+<ol>
+<li>类级别常量，使用 <code>static const</code></li>
+<li>const 可以使用其它const常量的值来初始化其值</li>
+<li>使用const赋值声明，const可省略</li>
+<li>可以更改非final、非const变量的值，即使曾经具有const值</li>
+<li>const 导致的不可变性是可传递的</li>
+<li>相同的const常量不会在内存中重复创建</li>
+<li>const需要编译时常量</li>
+</ol>
+</li>
+</ul>
+<h3 id="基本类型">基本类型</h3>
+<p>Dart语言常用的基本数据类型包括： <code>Number</code>，<code>String</code>，<code>Boolean</code>，<code>List和Map</code></p>
+<ul>
+<li>
+<p>Number类型</p>
+<p>Number 类型包括 int 整形，double浮点类型，他们都是<code>num</code>类型的子类</p>
+</li>
+<li>
+<p>String类型</p>
+<ul>
+<li>Dart 字符串是 utf-16 编码的字符序列，可以使用单引号或者双引号来创建字符</li>
+<li>可以使用三个单引号或者双引号创建多行字符串对象</li>
+<li>可以使用r前缀创建原始字符串，即输出原始字符，字符串里的转义等符号不会生效</li>
+<li>可以在字符串中使用表达式：<code>&quot;${expression}&quot;</code>，如果表达式是一个标识符，可以省略<code>{}</code>，如果表达式的结果为一个对象，则 Dart会调用对象的<code>toString</code>方法</li>
+</ul>
+</li>
+<li>
+<p>Boolean类型</p>
+<p>Dart是强bool类型检查，只有bool类型的值是true才被认为是true， 如果未赋初值，则为null</p>
+</li>
+<li>
+<p>List类型</p>
+<p>在Dart语言中，具有一系列相同类型的数据称为List对象。Dart中List可以直接打印出出各个元素，而java中则是地址。</p>
+</li>
+<li>
+<p>Map类型</p>
+<p>与java类似。</p>
+</li>
+<li>
+<p>Set</p>
+<ul>
+<li>set1.difference(set2): 返回 set1 集合里有但 set2 里没有的元素集合</li>
+<li>set1.intersection(set2)：返回set1和set2的交集</li>
+<li>set1.union(set2)：返回set1和set2的并集</li>
+<li>set1.retainAll()：set1只保留某些元素(要保留的元素要在原set中存在）</li>
+</ul>
+</li>
+<li>
+<p>Runs</p>
+<ul>
+<li>用在符串中表示Unicode字符</li>
+<li>使用String.fromCharCodes显示字符图形</li>
+<li>如果非4个数值，需要把编码值放到大括号中</li>
+</ul>
+</li>
+</ul>
+<h2 id="函数">函数</h2>
+<p>Dart是一个面向对象的语言,所以函数也是对象，函数属于Function对象。函数可以像参数一样传递给其他函数。</p>
+<h3 id="函数定义">函数定义</h3>
+<ol>
+<li>
+<p>定义函数时可以省略类型(不建议)</p>
+<pre><code class="language-dart">void func(a, b){} // 参数a,b都省略了类型
+</code></pre>
+</li>
+<li>
+<p>支持缩写语法<code>=&gt;</code></p>
+<pre><code class="language-dart">void main() =&gt; runApp(MyApp()); // 当函数体只有一条语句时可以使用此种写法
+</code></pre>
+</li>
+<li>
+<p>可在函数内定义函数</p>
+<p>可以在函数里定义函数，如：</p>
+<pre><code class="language-dart">int func(int a, int b) {
+  int sum(int a, int b, int c) {
+    return a + b + c;
+  }
+  return sum(a, b, 1);
+}
+</code></pre>
+<p>dart 函数支持闭包</p>
+<pre><code class="language-dart">Function addFunction(int a) {
+  return (y) =&gt; a + y;
+}
+
+void main() {
+  var addFunc = addFunction(12);
+  print(addFunc(22));
+}
+</code></pre>
+</li>
+</ol>
+<h3 id="函数返回值">函数返回值</h3>
+<ul>
+<li>所有的函数都有返回值</li>
+<li>如果没有指定函数返回值，则默认的返回值是null</li>
+<li>没有返回值的函数,系统会在最后添加隐式的return语句</li>
+</ul>
+<h3 id="可选参数">可选参数</h3>
+<ul>
+<li>
+<p>可选命名参数</p>
+<p>使用<code>{param1, param2,...}</code>的形式来指定命名参数。</p>
+<pre><code class="language-dart">main() {
+  func(a:1);
+  func(b:1);
+  func(a:1, b:1);
+}
+
+int func({int a, int b}) {
+  return a + b;
+}
+</code></pre>
+</li>
+<li>
+<p>可选位置参数</p>
+<p>将参数使用中括号[]括起来,用来表明是可选位置参数，必填参数要放在可选参数前面。</p>
+<pre><code class="language-dart">String getUserInfo(String name, String sex, [String from]) {}
+</code></pre>
+<p>其中name和sex是必须传入的参数,from参数可以不传</p>
+</li>
+<li>
+<p>参数默认值</p>
+<ul>
+<li>如果参数指定了默认值,当不传入值时，函数就会使用这个默认值。通常默认值参数为null。</li>
+</ul>
+<pre><code class="language-dart">String getUserInfo(String name, String sex, [String from = '中国']) {}
+</code></pre>
+<ul>
+<li>可选命名参数默认值(默认值必须是编译时常量)，可以使用等号<code>=</code> 或冒号<code>:</code>，Dart SDK 1.21 之前只能用冒号，冒号的支持以后会移除，所以建议使用<em>等号</em>。</li>
+<li>可选位置参数默认值(默认值必须是编译时常量)，只能使用等号<code>=</code>。</li>
+<li>可使用list或map作为默认值，但必须是const。</li>
+</ul>
+<pre><code class="language-dart">int fun([List list = const [1, 2, 3]]) {}
+</code></pre>
+</li>
+</ul>
+<h3 id="匿名函数">匿名函数</h3>
+<ul>
+<li>
+<p>可赋值给变量，通过变量调用</p>
+<pre><code class="language-dart">main() {
+  var func = (int a, int b) =&gt; a + b;
+  func(1, 2);
+}
+</code></pre>
+</li>
+<li>
+<p>可在其他函数中直接调用或传递给其他函数</p>
+</li>
+</ul>
+<h3 id="函数别名">函数别名</h3>
+<p>函数别名使用<code>typedef</code>表示，如：</p>
+<pre><code class="language-dart">typedef Fun1(int a, int b);
+typedef Fun2&lt;T, K&gt;(T a, K b);
+</code></pre>
+<ul>
+<li>typedef给函数起一个别名，使用比较方便。例如定义一个方法的回调，直接使用别名定义。</li>
+<li>没返回值，则只要参数匹配就行了，如果定义了返回值，则返回值不一样会报错。</li>
+</ul>
+<h3 id="main函数">main函数</h3>
+<p>Flutter应用程序必须要有一个main函数作为程序的入口函数。</p>
+<h2 id="运算符">运算符</h2>
+<p>Dart所有的运算符如下表所示， 与java不同的有8个，如下：</p>
+<p><code>?.</code>，条件成员访问 和 . 类似，但是左边的操作对象不能为 null，例如 foo?.bar 如果 foo 为 null 则返回 null，否则返回 bar 成员。<br>
+<code>~/</code>，除后取整。<br>
+<code>as</code>，类型转换。<br>
+<code>is</code>，如果对象是指定类型返回true。<br>
+<code>is!</code>，如果对象是指定类型返回false。<br>
+<code>??</code>，双问号左边为true返回左边结果，否则返回右边结果。<br>
+<code>..</code>，级联语法。严格来说， 两个点的级联语法不是一个操作符。 只是一个 Dart 特殊语法。<br>
+<code>??:</code>，如果左边是 null，则右边赋值给左边；如果不是 null，则左边的值保持不变。</p>
+<table>
+<thead>
+<tr>
+<th><strong>描述</strong></th>
+<th style="text-align:center"><strong>操作符</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>后缀操作</td>
+<td style="text-align:center">expr++ expr-- () [] . <code>?.</code></td>
+</tr>
+<tr>
+<td>前缀操作</td>
+<td style="text-align:center">-expr !expr ~expr ++expr --expr</td>
+</tr>
+<tr>
+<td>乘除</td>
+<td style="text-align:center">* /  % <code>~/</code></td>
+</tr>
+<tr>
+<td>加减</td>
+<td style="text-align:center">+ -</td>
+</tr>
+<tr>
+<td>位移</td>
+<td style="text-align:center">&lt;&lt; &gt;&gt;</td>
+</tr>
+<tr>
+<td>按位与</td>
+<td style="text-align:center">&amp;</td>
+</tr>
+<tr>
+<td>按位异或</td>
+<td style="text-align:center">^</td>
+</tr>
+<tr>
+<td>按位或</td>
+<td style="text-align:center">|</td>
+</tr>
+<tr>
+<td>类型操作</td>
+<td style="text-align:center">&gt;= &gt; &lt;= &lt; <code>as</code> <code>is</code> <code>is!</code></td>
+</tr>
+<tr>
+<td>相等</td>
+<td style="text-align:center">== !=</td>
+</tr>
+<tr>
+<td>逻辑与</td>
+<td style="text-align:center">&amp;&amp;</td>
+</tr>
+<tr>
+<td>逻辑或</td>
+<td style="text-align:center">||</td>
+</tr>
+<tr>
+<td>是否为空</td>
+<td style="text-align:center"><code>??</code></td>
+</tr>
+<tr>
+<td>三目运算</td>
+<td style="text-align:center">expr1 ? expr2 : expr3</td>
+</tr>
+<tr>
+<td>级联</td>
+<td style="text-align:center"><code>..</code></td>
+</tr>
+<tr>
+<td>赋值</td>
+<td style="text-align:center">= *= /= ~/= %= += -= &lt;&lt;= &gt;&gt;= &amp;= ^= |=  <code>??=</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="流程控制语句">流程控制语句</h2>
+<p>Dart中控制流程语句和Java类似。List和Set等实现了Iterable接口的类支持for-in遍历元素。</p>
+<ul>
+<li>if  else</li>
+<li>for forEach <code>for-in</code></li>
+<li>while  do-while</li>
+<li>break continue</li>
+<li>switch case</li>
+<li>assert</li>
+<li>try-catch throw</li>
+</ul>
+<h2 id="异常处理">异常处理</h2>
+<p>异常是表示发生意外错误，如果没有捕获异常，引发异常的隔离程序将被挂起，并且程序终止。</p>
+<p>Dart代码可抛出并捕获异常，但Dart的所有异常都是<strong>未检查异常</strong>，方法不声明他们可能抛出的异常,也不需要捕获任何异常。<br>
+Dart 代码可以抛出任何非 null 对象为异常，不仅仅是实现了 Exception 或者 Error 的对象。<br>
+可以使用on 或者 catch 来声明捕获语句，也可以 同时使用。使用 on 来指定异常类型，使用 catch 来 捕获异常对象。</p>
+<ol>
+<li>
+<p>抛出异常</p>
+<pre><code class="language-dart">// 抛出Exception对象
+throw FormatException('抛出一个ｆormatException')   
+// 抛出Error对象
+throw OutMemoryError();    
+//或自定义异常
+throw '数据非法'
+</code></pre>
+</li>
+<li>
+<p>捕获异常</p>
+<p><code>catch()</code> 可以指定一个或两个参数来捕获异常，第一个是抛出的异常，第二个是堆栈跟踪，如：</p>
+<pre><code class="language-dart">try {
+    ...
+} on Error catch (e) { // 捕获异常详细信息
+
+} catch　(e, s) { // 堆栈跟踪信息
+
+}
+</code></pre>
+<p><code>rethrow</code> 把捕获的异常重新抛出</p>
+</li>
+<li>
+<p>Finally</p>
+</li>
+</ol>
+<h2 id="面向对象">面向对象</h2>
+<p>Dart作为高级语言支持面向对象的很多特性并且支持基于<code>mixin</code>的继承方式。基于mixin的继承方式是值：一个类可以继承多个父类，相当于其他语言里的多继承，所有的类都有同一个基类<code>Object</code>。</p>
+<h3 id="实例化成员变量">实例化成员变量</h3>
+<p>类定义中所有的变量都会隐式的定义Setter方法，针对非空的变量会额外增加getter方法</p>
+<h3 id="构造函数">构造函数</h3>
+<p>dart的构造函数有多种形式，如下：</p>
+<ul>
+<li>
+<p>常规构造函数</p>
+<pre><code class="language-dart">class User {
+  String name;
+  int age;
+
+  User(String name, int age) {
+    this.name = name;
+    this.age = age;
+  }
+  // 或
+  User(this.name, this.age);  
+}
+</code></pre>
+</li>
+<li>
+<p>命名的构造函数</p>
+<pre><code class="language-dart">class User {
+  String name;
+  int age;
+
+  User.fromJson(Map json) {
+      name = json['name'];
+      age = json['age'];
+  }
+}
+</code></pre>
+<p>使用命名构造函数可以为一个类实现多个构造函数， 或者使用命名构造函数来更清晰的表明你的意图。</p>
+</li>
+<li>
+<p>重定向构造函数</p>
+<pre><code class="language-dart">class User {
+  String name;
+  int age;
+
+  User(this.name, this.age);
+
+  User.create(String name): this(name,12); 
+}
+</code></pre>
+<p>一个重定向构造函数是没有代码的，在构造函数声明后，使用 冒号调用其他构造函数。</p>
+</li>
+<li>
+<p>构造函数初始化列表</p>
+<pre><code class="language-dart">class User {
+  // final 修饰的成员变量，只能通过构造方法进行赋值
+  final String name;
+  final int age;
+
+  // 初始化列表
+  User(name, age)
+      : name = name,
+        age = age;
+}
+</code></pre>
+<p>在构造函数体执行之前可以初始化实例参数。 使用逗号分隔初始化表达式。初始化列表非常适合用来设置 final 变量的值。</p>
+</li>
+<li>
+<p>调用超类构造函数</p>
+<p>在构造方法处使用<code>super</code>关键字，如：</p>
+<pre><code class="language-dart">class User extends Person {
+  // final 修饰的成员变量，只能通过构造方法进行赋值
+  final String name;
+  final int age;
+
+  // 初始化列表
+  User(this.name, this.age):super(name,age);
+}
+</code></pre>
+</li>
+<li>
+<p>常量构造函数</p>
+<pre><code class="language-dart">class User {
+  // 定义const构造函数要确保所有的成员变量都是final修饰
+  final String name;
+  final int age;
+
+  static final User user = const User('111', 12);
+
+  // const 关键字放在构造函数名前，且不能有函数体
+  const User(this.name, this.age);
+}
+</code></pre>
+</li>
+<li>
+<p>工厂构造函数(单例)</p>
+<pre><code class="language-dart">class User {
+  String name;
+//工厂构造函数无法访问this，所以这里要用static
+  static User _user;
+//工厂方法构造函数，关键字factory
+  factory User([String name]) {
+    return User._user ??= User._(name);
+  }
+//定义一个命名构造函数用来生产实例
+  User._(this.name);
+}
+</code></pre>
+</li>
+</ul>
+<h3 id="读取和写入对象getter-setter">读取和写入对象（Getter、Setter）</h3>
+<ul>
+<li>get()和set()方法是专门用于读取和写入对象的属性的方法。</li>
+<li>每一个类的实例，系统都隐式地包含有get()和set()方法。</li>
+<li>final 修饰的变量没有setter方法。</li>
+<li>可以使用get 和 set 关键字定义getter和setter。</li>
+</ul>
+<pre><code class="language-dart">class User {
+  String name;
+
+  User(this.name);
+
+  String get username =&gt; 'getter ${this.name}';
+  set username(String name) =&gt; this.name = name;
+}
+</code></pre>
+<h3 id="重载操作">重载操作</h3>
+<p>采用operator修饰，如：</p>
+<pre><code class="language-dart">class Vector {
+  final int x;
+  final int y;
+
+  const Vector(this.x, this.y);
+
+  Vector operator +(Vector v) {
+    return Vector(x + v.x, y + v.y);
+  }
+}
+</code></pre>
+<h3 id="抽象类">抽象类</h3>
+<ul>
+<li>抽象类采用<code>abstract</code>关键字修饰<code>class</code>。f</li>
+<li>不能被实例化，除非定义一个工厂构造函数。</li>
+<li>抽象类通常用来定义接口， 以及部分实现。</li>
+<li>抽象类通常具有抽象方法，抽象方法不需要关键字，以分号结束即可。</li>
+<li>接口方式使用时，需要重写抽象类的成员变量和方法，包括私有的。</li>
+<li>一个类可以implement一个普通类。Dart任何一个类都是接口。</li>
+<li>一个类可以implement多个接口。</li>
+</ul>
+<h3 id="可调用类">可调用类</h3>
+<p>类实现 <code>call()</code> 方法可以让类像函数一样能够被调用。</p>
+<pre><code class="language-dart">class ClassFunction {
+  call(String a, String b, String c) =&gt; '$a, $b, $c';
+}
+
+main() {
+  var cf = ClassFunction();
+  var out = cf('a1', 'b1', 'c1');
+  print('out: $out');
+  print(cf.runtimeType);
+  print(out.runtimeType);
+  print(cf is Function);
+}
+</code></pre>
+<h3 id="枚举类">枚举类</h3>
+<p>与java一致，采用<code>enum</code>修饰。</p>
+<pre><code class="language-dart">enum Type {
+  A, B, C
+}
+</code></pre>
+<h3 id="mixins">Mixins</h3>
+<p>Mixins(混入功能)相当于多继承，使用with关键字来实现Mixins的功能</p>
+<pre><code class="language-dart">class S {
+  a() =&gt; print('S.a');
+}
+
+class A {
+  a() =&gt; print('A.a');
+  b() =&gt; print('A.b');
+}
+
+class T = A with S;
+</code></pre>
+<ol>
+<li>子类没有重写超类A方法的前提下，如果2个或多个超类拥有相同签名的A方法，那么子类会以继承的最后一个超类中的A方法为准。</li>
+<li>如果子类自己重写了A方法则以本身的A方法为准。</li>
+</ol>
+<h2 id="泛型">泛型</h2>
+<p>Dart1.21开始可以使用泛型函数。泛型函数可以在以下几个地方使用类型参数：</p>
+<ul>
+<li>函数的返回值类型。</li>
+<li>参数的类型。</li>
+<li>局部变量的类型。</li>
+</ul>
+<pre><code class="language-dart">main() {
+  K addCache&lt;K, V&gt;(K key, V value) {
+    K temp = key;
+    print('${key}: ${value}');
+    return temp;
+  }
+  var key = addCache('key', 'value');
+  print(key);
+}
+</code></pre>
+<p>要在使用构造函数时指定一个或多个类型，可将类型放在类名称后面的尖括号&lt;...&gt;中:</p>
+<pre><code class="language-dart">main() {
+  var p = Phone&lt;String&gt;('123456');
+  print(p.mobileNumber);
+}
+
+class Phone&lt;T&gt; {
+  final T mobileNumber;
+  Phone(this.mobileNumber);
+}
+</code></pre>
+<p>实现泛型类型时，您可能希望限制其参数的类型，可以在<code>&lt;&gt;</code>里面使用<code>extends</code>。</p>
+<pre><code class="language-dart">main() {
+  var man = Man();
+  var m = User&lt;Man&gt;(man);
+  m.man.doMassage();
+}
+
+class User&lt;T extends Man&gt; {
+  final T man;
+  User(this.man);
+}
+
+class Man {
+  void doMassage() {}
+}
+</code></pre>
+<p>与java一致， 唯一区别：Java泛型是编译时的，在运行时泛型信息会被擦除，Dart的泛型类型是固化的，在运行时也可以判断具体类型。</p>
+<pre><code class="language-dart">var names = List&lt;String&gt;();
+print(names is List&lt;String&gt;);//true
+print(names.runtimeType); // List&lt;String&gt; 
+</code></pre>
+<h2 id="库的使用">库的使用</h2>
+<h3 id="引用库">引用库</h3>
+<p>通过import语句在一个库中引入另一个库文件：</p>
+<ol>
+<li>在import语句后面需要接上库文件的路径</li>
+<li>对dart语言提供的库文件使用dart:xx格式</li>
+<li>第三方的库文件使用package:xx格式</li>
+</ol>
+<pre><code class="language-dart">import 'dart:io'; 
+import 'package:mylib/mylib.dart'; 
+import 'package :utils/utils.dart' ; 
+</code></pre>
+<h3 id="指定一个库的前缀">指定一个库的前缀</h3>
+<p>当引用的库拥有相互冲突的名字，可以为其中一个或几个指定不一样的前缀。</p>
+<pre><code class="language-dart">import 'package:libl/ libl.dart '; 
+import 'package:lib2 / lib2.dart ' as lib2 ;
+</code></pre>
+<h3 id="引用库的一部分">引用库的一部分</h3>
+<p>如果只需要使用库的一部分内容，可以有选择性地引用，有如下关键字：</p>
+<ul>
+<li>show 关键字：　只引用一点</li>
+<li>hide 关键字：　除此之外都引用</li>
+</ul>
+<pre><code class="language-dart">／／ 导入 foo
+import 'package:libl/libl.dart' show foo; 
+／／ 除了 foo 导入其他所有内容
+import 'package:lib2 / lib2.dart' hide foo; 
+</code></pre>
+<h3 id="库的延迟载入">库的延迟载入</h3>
+<ul>
+<li>使用<code>deferred as</code>导入</li>
+<li>使用标识符调用<code>loadLibrary()</code> 加载库</li>
+</ul>
+<pre><code class="language-dart">import 'dart:io' deferred as io;
+
+lazyLoad() async {
+  //使用 await 关键字暂停代码执行一直到库加载完成。
+  await io.loadLibrary();
+}
+
+main() {
+  lazyLoad();
+}
+</code></pre>
+<ul>
+<li>优点：
+<ul>
+<li>可提高程序启动速度。</li>
+<li>用在不常使用的功能。</li>
+<li>用在载入时间过长的包。</li>
+<li>执行 A/B 测试，例如 尝试各种算法的 不同实现。</li>
+</ul>
+</li>
+</ul>
+<h2 id="异步使用">异步使用</h2>
+<p>Dart支持异步操作，一般使用<code>async</code>函数和<code>await</code>表达式实现异步操作，Dart库提供<code>asynchronous</code>功能,该功能提供接口来消耗时间的操作，比如文件读写,网络请求。该功能返回<code>Future</code>或<code>Stream</code>对象。</p>
+<p>可以通过如下的方式来获取asynchronous功能返回的Future对象值:</p>
+<ul>
+<li>使用async函数和await表达式</li>
+<li>使用Future功能提供的API</li>
+</ul>
+<p>可以通过如下方式来获取asynchronous功能返回的Stream对象的值:</p>
+<ul>
+<li>使用async和一个异步的循环(await for)</li>
+<li>使用Stream的相关API</li>
+</ul>
+<h3 id="async-await">async / await</h3>
+<p>await关键字必须在async函数内部使用，await表达式可以使用多次</p>
+<pre><code class="language-dart">void main(){
+  getName1();
+  getName2();
+  getName3();
+}
+
+Future getName1() async {
+  await getStr1();
+  await getStr2();
+  print('getName1’);
+}
+getStr1() {
+  print('getStr1’);
+}
+getStr2() {
+  print('getStr2’);
+}
+getName2() {
+  print('getName2’);
+}
+getName3() {
+  print('getName3’);
+}
+
+/// 输出结果： getStr1 getName2  getName3  getStr2  getName1
+</code></pre>
+<h3 id="thencatcherrorwhencomplete">then,catchError,whenComplete</h3>
+<p>如果需要监听“完毕”这个状态，那么用<code>whenComplete</code>，需要监听“成功”这个状态，用<code>then</code>，需要监听“失败”这个状态，用<code>catchError</code>。<br>
+如果重写了test方法，test返回true就可以在catchError的onError方法里捕获到异常，如果test返回false，就把该异常继续抛出而不会在catchError方法里被捕获，如果不写test默认实现一个返回true的test方法</p>
+<pre><code class="language-dart">void main() {
+  Future(() =&gt; futureTask()) //异步任务的函数
+      .then((m) =&gt; &quot;result:$m&quot;) //任务执行完后的子任务
+      .then((m) =&gt; m.length) //其中m为上个任务执行完后的返回的结果
+      .then((m) =&gt; printLength(m))
+      .catchError(print) // 拦截错误，如果实现了test方法，只有return true时才会拦截，否则不会
+      .whenComplete(() =&gt; whenTaskCompelete()); //所有任务完成后的回调函数
+}
+
+whenTaskCompelete() {
+  print('task complete');
+}
+
+futureTask() async {
+  return 'future';
+}
+
+printLength(dynamic name) {
+  if (name is! String || name.length &lt; 3 || name.length &gt; 15) {
+    throw '长度错误';
+  }
+}
+</code></pre>
+<h3 id="event-looper">Event-Looper</h3>
+<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-45-02-event-loop.png" alt="event-loop.png" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-45-33-event-loop-process.png" alt="event-loop-process.png" loading="lazy"></figure>
+<ol>
+<li>一个消息循环的职责就是不断从消息队列中取出消息并处理他们直到消息队列为空。</li>
+<li>消息队列中的消息可能来自用户输入，文件I/O消息，定时器等。例如上图的消息队列就包含了定时器消息和用户输入消息。</li>
+<li>Dart中的<code>Main Isolate</code>只有一个<code>Event Looper</code>，但是存在两个Event Queue: <code>Event Queue</code>以及<code>Microtask Queue</code>。</li>
+</ol>
+<h3 id="event-queue和microtask-queue">Event Queue和Microtask Queue</h3>
+<figure data-type="image" tabindex="4"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-46-08-event-microtask.png" alt="event-microtask.png" loading="lazy"></figure>
+<ul>
+<li>优先全部执行完Microtask Queue中的Event。</li>
+<li>直到Microtask Queue为空时，才会执行Event Queue中的Event。</li>
+<li>当Event Looper正在处理Microtask Queue中的Event时候，Event Queue中的Event就停止了处理了，此时App不能绘制任何图形，不能处理任何鼠标点击，不能处理文件IO等等。</li>
+<li>绘制图形，处理鼠标点击，处理文件IO等都是在Event Queue里完成的。</li>
+</ul>
+<h3 id="任务调度">任务调度</h3>
+<ul>
+<li>使用Future类，可以将任务加入到Event Queue的队尾</li>
+<li>使用scheduleMicrotask函数，将任务加入到Microtask Queue队尾</li>
+<li>优先全部执行完Microtask Queue中的Event，直到Microtask Queue为空时，才会执行Event Queue中的Event。</li>
+</ul>
+<h3 id="future">Future</h3>
+<ul>
+<li>使用 Future（）将任务加入event队列。</li>
+<li>Future中的<code>then</code>并没有创建新的Event丢到<code>Event Queue</code>中，而只是一个普通的<code>Function Call</code>，在FutureTask执行完后，立即开始执行。</li>
+<li>如果在then()调用之前Future就已经执行完毕了，那么任务会被加入到<code>microtask</code>队列中，并且该任务会执行then()中注册的回调函数。</li>
+<li>使用Future.value构造函数的时候，就会上一条一样，创建Task丢到microtask Queue中执行then传入的函数。</li>
+<li>Future.sync构造函数执行了它传入的函数之后，也会立即创建Task丢到microtask Queue中执行。</li>
+<li>当任务需要延迟执行时，可以使用new Future.delay()来将任务延迟执行。</li>
+</ul>
+<pre><code class="language-dart">void main(){
+  testFuture();
+}
+void testFuture() {
+  Future f = new Future(() =&gt; print('f1'));
+  Future f1 = new Future(() =&gt; null);
+  //Future f1 = new Future.delayed(Duration(seconds: 1) ,() =&gt; null);
+  Future f2 = new Future(() =&gt; null);
+  Future f3 = new Future(() =&gt; null);
+  f3.then((_) =&gt; print('f2'));
+  f2.then((_) {
+    print('f3');
+    new Future(() =&gt; print('f4'));
+    f1.then((_) {
+      print('f5');
+    });
+  });
+  f1.then((m) {
+    print('f6');
+  });
+  print('f7');
+}
+</code></pre>
+<h3 id="schedulemicrotask">scheduleMicrotask()</h3>
+<ul>
+<li>如果可以，尽量将任务放入event队列中。</li>
+<li>使用Future的then方法或whenComplete方法来指定任务顺序。</li>
+<li>为了保持你app的可响应性，尽量不要将大计算量的任务放入这两个队列。</li>
+<li>大计算量的任务放入额外的isolate中。</li>
+</ul>
+<pre><code class="language-dart">import 'dart:async';
+void main(){
+  testScheduleMicrotask();
+}
+void testScheduleMicrotask(){
+  scheduleMicrotask(() =&gt; print('s1'));
+
+  new Future.delayed(new Duration(seconds: 1), () =&gt; print('s2'));
+
+  new Future(() =&gt; print('s3')).then((_) {
+    print('s4');
+    scheduleMicrotask(() =&gt; print('s5'));
+  }).then((_) =&gt; print('s6'));
+
+  new Future(() =&gt; print('s7'));
+
+  scheduleMicrotask(() =&gt; print('s8'));
+
+  print('s9');
+}
+</code></pre>
+<h2 id="隔离isolate">隔离（isolate）</h2>
+<p>所有Dart代码都在隔离区内运行，而不是线程。每个隔离区都有自己的内存堆，确保不会从任何其他隔离区访问隔离区的状态。</p>
+<p>Dart没有共享内存的并发，没有竞争的可能性所以不需要锁，也就不用担心死锁的问题。</p>
+<p>isolate之间没有共享内存，所以他们之间的通信唯一方式只能是通过Port进行，而且Dart中的消息传递总是异步的。</p>
+<p>isolate神似Thread，但实际上两者有本质的区别。操作系统内的线程之间是可以有共享内存的而isolate没有，这是最为关键的区别。</p>
+<h2 id="元数据">元数据</h2>
+<p>使用元数据给代码添加更多的信息。元数据是以＠开始的修饰符，在＠后面接着编译时的常量或者一个常量构造函数。</p>
+<ul>
+<li>@deprecated 被弃用</li>
+<li>@override　重写</li>
+<li>@proxy 代理</li>
+</ul>
+<p>元数据可以修饰 library、class、typedef、type parameter、constructor、factory、function、field、parameter、variable declaration。</p>
+<h3 id="注释">注释</h3>
+<ul>
+<li>
+<p>单行注释以//开头。Dart编译器会忽略//和行尾之间的所有内容。</p>
+<pre><code class="language-dart">// 这是单行注释
+</code></pre>
+</li>
+<li>
+<p>多行注释以/<em>开头，以</em>/结尾。介于/*和 */两者之间的内容会被编译器忽略（除非该注释是一个文档注释)。</p>
+<pre><code class="language-dart">/*
+ * 这是多行注释
+ * 这是多行注释 
+ */
+</code></pre>
+<p>多行注释可以嵌套</p>
+</li>
+<li>
+<p>文档注释以///或者/**开头。可以通过dartdoc命令导出文档。</p>
+<pre><code class="language-dart">/// 这是文档注释
+
+/**
+  * 这是文档注释
+  */
+</code></pre>
+</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Git切换分支保存修改的代码]]></title>
+        <id>https://xiaowujiang.cn/posts/ec91b04f/</id>
+        <link href="https://xiaowujiang.cn/posts/ec91b04f/">
+        </link>
+        <updated>2018-07-15T14:31:19.000Z</updated>
+        <summary type="html"><![CDATA[<p>在使用git同步代码的过程中，也许会碰到一个项目有好几个分支的情况，就拿我最近的项目来说，我创建了两个分支：<code>master</code>和<code>dev</code>。</p>
+<p>经常是在<code>dev</code>分支上开发好了，然后切换到<code>master</code>分支上进行<code>merge</code>, 但是有时候在<code>dev</code>分支上开发了一半，忽然又需要去<code>master</code>上改个需求或者<code>bug</code>，这时候该当如何呢？</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>在使用git同步代码的过程中，也许会碰到一个项目有好几个分支的情况，就拿我最近的项目来说，我创建了两个分支：<code>master</code>和<code>dev</code>。</p>
+<p>经常是在<code>dev</code>分支上开发好了，然后切换到<code>master</code>分支上进行<code>merge</code>, 但是有时候在<code>dev</code>分支上开发了一半，忽然又需要去<code>master</code>上改个需求或者<code>bug</code>，这时候该当如何呢？</p>
+<!--more-->
+<p>在这个场景下，我查找到了两种方式：</p>
+<h2 id="及时commit代码">及时<code>commit</code>代码</h2>
+<p>在<code>dev</code>分支上把已经完成的部分<code>commit</code>后，不<code>push</code>，然后切换到<code>master</code>分支，改完后再<code>commit</code></p>
+<h2 id="使用-git-stash">使用 <code>git stash</code></h2>
+<p>有时候，在<code>dev</code>分支上写的代码，没有编译通过，就需要切换到<code>master</code>分支， 在这种情况下（代码还没有经过测试通过，还无法<code>commit</code>）可以使用<code>git stash</code>。</p>
+<ul>
+<li>
+<p>保存<code>dev</code>当前的修改</p>
+<p>在命令行输入：</p>
+<pre><code class="language-shell">git stash //会生成一个hash值作为版本标志
+</code></pre>
+<p>或者</p>
+<pre><code class="language-shell">git stash save &quot;修改的信息&quot; //会将`修改的信息`作为版本标志
+</code></pre>
+<p>这样你的代码就回到了上一个<code>commit</code>了。接下来就可以切换到<code>master</code>分支了。</p>
+</li>
+<li>
+<p>返回到<code>dev</code>分支</p>
+<p>当修改完<code>master</code>分支后，可以通过</p>
+<pre><code class="language-shell">git stash pop //将栈中的最后一个取出来
+</code></pre>
+<p>或者</p>
+<pre><code class="language-shell">git stash list //可以看到所有的版本信息
+</code></pre>
+<p>然后选择列表项，执行</p>
+<pre><code class="language-shell">git stash apply stash@{0} //git stash apply stash@{0}的作用是可以指定栈中的一个版本
+</code></pre>
+</li>
+</ul>
 ]]></content>
     </entry>
 </feed>

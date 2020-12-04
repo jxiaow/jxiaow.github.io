@@ -4,7 +4,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Android通过Intent简单实现分享功能 | Xiaowu</title>
+<title>360加固Gradle插件实现 | Xiaowu</title>
 
 <link rel="shortcut icon" href="https://xiaowujiang.cn/favicon.ico?v=1607101500628">
 
@@ -89,7 +89,7 @@
         <div class="post-detail gt-bg-theme-color-second">
             <article class="gt-post-content">
                 <h2 class="post-title">
-                    Android通过Intent简单实现分享功能
+                    360加固Gradle插件实现
                 </h2>
                 <div class="post-info">
                     <time class="post-time gt-c-content-color-first">
@@ -98,52 +98,57 @@
                     
                 </div>
                 <div class="post-content">
-                    <p>现在大多数App的分享功能基本上使用的都是微信、QQ、微博的分享sdk或者是集成友盟分享sdk，如果想简单快速的实现分享功能，可以考虑通过<code>Intent</code>方式打开在系统中安装的具有分享功能的App的分享页面。</p>
-<!-- more -->
-<p>方法如下：</p>
-<pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
-    Intent intent = new Intent();
-    intent.setAction(Intent.ACTION_SEND);
-    intnet.setType(&quot;text/plain&quot;);
-    PackageManager packageManager = context.getPackageManager();
-    List&lt;ResolveInfo&gt; resolveInfos = packageManager.queryIntentActivities(intent, 0);
-    return resloveInfos;
-}
-</code></pre>
-<p>如果只需要QQ和微信分享，可以进行如下操作：</p>
-<pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
-    Intent intent = new Intent();
-    intent.setAction(Intent.ACTION_SEND);
-    intnet.setType(&quot;text/plain&quot;);
-    PackageManager packageManager = context.getPackageManager();
-    List&lt;ResolveInfo&gt; resolveInfos = packageManager.queryIntentActivities(intent, 0);
-    List&lt;ResolveInfo&gt; shareItems = new ArrayList();    
-    for(ResolveInfo info: resolveInfos) {
-        String name = info.activityInfo.packageName;
-        if (TextUtils.equals(packageName, &quot;com.tencent.mm&quot;)
-                    || TextUtils.equals(packageName, &quot;com.tencent.mobileqq&quot;)) {
-                shareItems.add(resolveInfo);
-        }
+                    <p>最近码了一个基于360加固的流程实现的Gradle插件，在自动编译打包后进行360加固流程操作。只需要配置一些参数后，就可以实现自动打包编译和加固。</p>
+<p>项目地址:https://github.com/ixiaow/android-gradle-plugin</p>
+<h3 id="使用步骤">使用步骤</h3>
+<h4 id="1-添加依赖">1. 添加依赖</h4>
+<ul>
+<li>在根<code>build.gradle</code>中添加：</li>
+</ul>
+<pre><code class="language-groovy">allprojects {
+    repositories {
+        maven { url &quot;https://jitpack.io&quot; }
     }
-    return shareItems;
+}
+
+dependencies {
+    ...
+    classpath 'com.github.ixiaow:android-gradle-plugin:$version'
 }
 </code></pre>
-<p>通过<code>ResolveInfo</code>获取图标<code>ICON</code>和<code>Label</code>:</p>
-<pre><code class="language-java">Drawable drawable = resloveInfo.loadIcon(packageManager);
-CharSequence label = resolveInfo.loadLabel(packageManager);
+<p>(请替换 <code>$version</code>为最新的版本号:<a href="https://jitpack.io/#ixiaow/android-gradle-plugin"><img src="https://jitpack.io/v/jxiaow/android-gradle-plugin.svg" alt="" loading="lazy"></a>)</p>
+<ul>
+<li>在<code>app</code>的模块<code>build.gradle</code>中添加：</li>
+</ul>
+<pre><code class="language-groovy">apply plugin: 'com.github.ixiaow.jiagu'
 </code></pre>
-<p>通过<code>Intent</code>发起分享：</p>
-<pre><code class="language-java">public static void share(Context context, 
-            ResolveInfo info, String shareContent){
-    Intent itnent = new Intent();
-    intnet.setAction(Intent.ACTION_SEND);
-    String pkg = resolveInfo.activityInfo.packageName;
-    String cls = resolveInfo.activityInfo.name;
-    intent.setComponent(new Component(pkg, cls));
-    intent.putExtra(Intent.EXTRA_TEXT, shareContent);
-    context.startActivity(intent);
+<h4 id="2-参数配置">2. 参数配置</h4>
+<p>使用这款插件需要在<code>app</code>的<code>build.gradle</code>中添加一些配置信息，如下：</p>
+<pre><code class="language-groovy">jiagu {
+    home '../360jiagu' // 360加固软件的根目录
+    buildTypes 'release', 'debug' // 需要加固的编译类型
+    configs '-crashlog' // 选择360的可选配置服务
+    username 'user' // 360加固用户名
+    password 'password' // 360加固密码
+    charsetName 'GBK' // 360加固控制台输出字符编码
+    // apk签名文件， 如果在Android中配置了签名文件，此项可以不用配置，插件会自动读取名为'release'的签名文件
+    signingConfig { 
+        key_alias         : KEY_ALIAS, 
+        key_password      : KEY_PASSWORD,
+        key_store_password: KEY_STORE_PASSWORD,
+        key_store_file    : KEY_STORE_FILE
+    }
 }
 </code></pre>
+<h4 id="3-开始加固">3. 开始加固</h4>
+<p>确认上述参数无误后，就可以在控制台中切换到当前项目根目录执行</p>
+<pre><code class="language-shell"># 各个系统的控制台gradle命令可能不一样： ./gradlew 或 gradlew 
+./gradlew clean jiaGuApk 
+</code></pre>
+<h3 id="文档">文档</h3>
+<p><a href="https://ixiaow.github.io/android-gradle-plugin/plugin/com.github.ixiaow.jiagu/index.html">android-gradle-plugin</a></p>
+<h3 id="360加固助手">360加固助手</h3>
+<p><a href="https://jiagu.360.cn/#/global/download">360加固助手</a></p>
 
                 </div>
             </article>
@@ -152,14 +157,14 @@ CharSequence label = resolveInfo.loadLabel(packageManager);
         
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://xiaowujiang.cn/posts/b8c700d2/" class="post-title gt-a-link">
-                    Dart 语言简述
+                <a href="https://xiaowujiang.cn/posts/73a6d0c4/" class="post-title gt-a-link">
+                    Android通过Intent简单实现分享功能
                 </a>
             </div>
         
 
         
-            <span id="/posts/73a6d0c4/" class="leancloud_visitors" data-flag-title="Android通过Intent简单实现分享功能">
+            <span id="/posts/6c01e784/" class="leancloud_visitors" data-flag-title="360加固Gradle插件实现">
                 <em class="post-meta-item-text">阅读量 </em>
                 <i class="leancloud-visitors-count">0</i>
             </span>

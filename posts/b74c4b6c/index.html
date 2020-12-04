@@ -1,0 +1,593 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>Dagger 2 进阶使用 | Xiaowu</title>
+
+<link rel="shortcut icon" href="https://xiaowujiang.cn/favicon.ico?v=1607101500628">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://xiaowujiang.cn/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Xiaowu
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/posts/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1607101500628" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    Dagger 2 进阶使用
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-12-05 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
+<!-- more -->
+<blockquote>
+<p>本系列文章是基于 Google Dagger 2.23.2 版本， Kotlin 1.3.21版本</p>
+</blockquote>
+<p>在<a href="/post/cbb172f8.html">Dagger 2 完全解析（一）,基本使用与原理</a>中介绍了 <code>Dagger 2</code> 基本使用，但是在实战中基本使用是远远不够的，我们还需要掌握一些其它的知识，下面由简入繁地讲解这几个概念，同时结合 Dagger 2 的编译时生成代码分析背后的原理（示例代码沿用第一篇的）。</p>
+<p>下面开始对<code>Lazy</code>、<code>Provider</code>、<code>Qualifier</code>和 <code>Scope</code>进行分析。</p>
+<h2 id="lazy-延迟注入">Lazy （延迟注入）</h2>
+<p>有时我们想注入的依赖在使用时再完成初始化，提高加载速度，就可以使用注入<code>Lazy&lt;T&gt;</code>。只有在调用<code>Lazy</code>的 <code>get()</code> 方法时才会初始化依赖实例注入依赖。</p>
+<pre><code class="language-java">public interface Lazy&lt;T&gt; {
+  T get();
+}
+</code></pre>
+<p>在<code>A</code>中使用：</p>
+<pre><code class="language-kotlin">class A {
+    ...
+    @Inject
+    lateinit var lazyD: Lazy&lt;D&gt;
+
+    fun doWork(){
+        lazyD.get() // 返回D的实例
+    }
+}
+</code></pre>
+<p><code>Make app</code>后，在<code>DaggerAComponent</code>中：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private final AModule aModule;
+
+ ...
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+  private A injectA2(A instance) {
+    A_MembersInjector.injectB(instance, AModule_ProvideBFactory.provideB(aModule));
+    A_MembersInjector.injectC(instance, new C());
+    // DoubleCheck 是线程安全的Lazy实例初始化类
+    A_MembersInjector.injectLazyD(instance, DoubleCheck.lazy(D_Factory.create()));
+    return instance;
+  }
+
+...
+</code></pre>
+<p><code>DoubleCheck</code> 是线程安全的<code>Lazy</code>实例初始化工具类</p>
+<pre><code class="language-java">public static &lt;P extends Provider&lt;T&gt;, T&gt; Lazy&lt;T&gt; lazy(P provider) {
+    if (provider instanceof Lazy) {
+      @SuppressWarnings(&quot;unchecked&quot;)
+      final Lazy&lt;T&gt; lazy = (Lazy&lt;T&gt;) provider;
+      return lazy;
+    }
+    return new DoubleCheck&lt;T&gt;(checkNotNull(provider));
+  }
+
+// 在需要使用的时候调用此方法进行返回相应的实例
+  @Override
+  public T get() {
+    Object result = instance;
+    if (result == UNINITIALIZED) {
+      synchronized (this) {
+        result = instance;
+        if (result == UNINITIALIZED) {
+          result = provider.get();
+          instance = reentrantCheck(instance, result);
+          provider = null;
+        }
+      }
+    }
+    return (T) result;
+  }
+</code></pre>
+<h2 id="provider-注入">Provider 注入</h2>
+<p>有时候不仅仅是注入单个实例，我们需要多个实例，这时可以使用注入<code>Provider&lt;T&gt;</code>，每次调用它的 <code>get()</code> 方法都会调用到 <code>@Inject 构造函数</code>创建新实例或者<code>Module 的 provide 方法</code>返回实例。</p>
+<pre><code class="language-kotlin">class A {
+
+    @Inject
+    lateinit var providerD: Provider&lt;D&gt;
+
+    fun createDFactory(): MutableList&lt;D&gt; {
+        val ds = mutableListOf&lt;D&gt;()
+        for (i in 0..10) {
+            ds.add(providerD.get())
+        }
+        return ds
+    }
+}
+</code></pre>
+<p><code>Make app</code>后，在<code>DaggerAComponent</code>中：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private final AModule aModule;
+
+ ...
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+ private A injectA2(A instance) {
+    A_MembersInjector.injectB(instance, AModule_ProvideBFactory.provideB(aModule));
+    A_MembersInjector.injectC(instance, new C());
+    A_MembersInjector.injectLazyD(instance, DoubleCheck.lazy(D_Factory.create()));
+    // 注入provider ,将`Factory`传入
+    A_MembersInjector.injectProviderD(instance, D_Factory.create());
+    return instance;
+  }
+...
+</code></pre>
+<p>再来看看<code>D_Factory</code>：</p>
+<pre><code class="language-java">public final class D_Factory implements Factory&lt;D&gt; {
+  private static final D_Factory INSTANCE = new D_Factory();
+
+  // 每次调用get方法都会重新创建实例
+  @Override
+  public D get() {
+    return new D();
+  }
+
+  public static D_Factory create() {
+    return INSTANCE;
+  }
+
+  public static D newInstance() {
+    return new D();
+  }
+}
+</code></pre>
+<p>通过上面可以看到，每次调用<code>get</code>方法都会重新创建实例, <code>D_Factory</code>实现了<code>Factory&lt;D&gt;</code>而<code>Factory&lt;D&gt;</code>继承自<code>Provider&lt;D&gt;</code>。</p>
+<pre><code class="language-java">public final class D_Factory implements Factory&lt;D&gt; {}
+
+public interface Factory&lt;T&gt; extends Provider&lt;T&gt; {}
+</code></pre>
+<h2 id="qualifier限定符">Qualifier（限定符）</h2>
+<p>试想这样一种情况：在 <code>AModule</code>提供了两个生成<code>B</code> 实例的<code>provide</code> 方法，如果使用 <code>Dagger 2</code> 在 <code>A</code> 中注入<code>B</code>实例时应该选择哪一个方法呢？</p>
+<pre><code class="language-kotlin">@Module
+class AModule {
+
+    @Provides
+    fun provideB(): B = B()
+
+    @Provides
+    fun provideOther(): B = B()
+}
+</code></pre>
+<p>这时 Dagger 2 不知道使用<code>provideB</code>还是<code>provideOther</code>提供的实例，在编译时就会出现：</p>
+<pre><code class="language-java">[Dagger/DuplicateBindings] *.data.B is bound multiple times:
+</code></pre>
+<p>而<code>@Qualifier</code>注解就是用来解决这个问题，使用注解来确定使用哪种 provide 方法。</p>
+<pre><code class="language-java">@Target(ANNOTATION_TYPE)
+@Retention(RUNTIME)
+@Documented
+public @interface Qualifier {}
+</code></pre>
+<p>我们可以发现<code>@Qualifier</code>是用来修饰注解的，所以它是不能直接作用到<code>provide</code>方法上。</p>
+<p>下面是自定义的<code>@Named</code>注解，你也可以用自定义的其他 Qualifier 注解：</p>
+<pre><code class="language-java">@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface Named {
+  String value() default &quot;&quot;;
+}
+</code></pre>
+<p>在 provide 方法上加上<code>@Named</code>注解，用来区分</p>
+<pre><code class="language-kotlin">@Module
+class AModule {
+
+    @Named(&quot;b&quot;)
+    @Provides
+    fun provideB(): B = B()
+
+    @Named(&quot;other&quot;)
+    @Provides
+    fun provideOther(): B = B()
+}
+</code></pre>
+<p>还需要在<code>Inject</code> 注入的地方加上<code>@field:Named</code>注解:</p>
+<pre><code class="language-kotlin">class A {
+    @Inject
+    @field:Named(&quot;other&quot;)
+    lateinit var b: B
+     ...
+}
+</code></pre>
+<p>**tips: ** 在<code>kotlin</code>中使用<code>@Name</code>给属性注入时需要添加<code>@field</code>，不然注解不生效。</p>
+<p>这样在依赖注入时，Dagger 2 就会使用<code>provideB</code>方法提供的实例，所以<strong>Qualifier（限定符）的作用相当于起了个区分的别名。</strong></p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private final AModule aModule;
+  ...
+
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+  private A injectA2(A instance) {
+    // 使用的是 provide方法
+    A_MembersInjector.injectB(instance, AModule_ProvideBFactory.provideB(aModule));
+    ...
+    return instance;
+  }
+  ...
+}
+</code></pre>
+<p>当然啦，我们也可以自定义注解进行区分，比如：</p>
+<pre><code class="language-kotlin">@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.FIELD)
+annotation class Other
+</code></pre>
+<p>然后在<code>provideOther</code>和<code>lateinit var b: B</code>上加上<code>@Other</code>即可。</p>
+<h2 id="scope作用域">Scope（作用域）</h2>
+<p>Scope 是用来确定注入的实例的生命周期的，如果没有使用 Scope 注解，Component 每次调用 Module 中的 provide 方法或 <code>Inject 构造函数</code>生成的工厂时都会创建一个新的实例，而使用 Scope 后可以复用之前的依赖实例。下面先介绍 Scope 的基本概念与原理，再分析 Singleton、Reusable 等作用域。</p>
+<h3 id="scope-基本概念">Scope 基本概念</h3>
+<p>先介绍 Scope 的用法，<code>@Scope</code>是元注解，是用来标注自定义注解的，如下：</p>
+<pre><code class="language-java">@Target(ANNOTATION_TYPE)
+@Retention(RUNTIME)
+@Documented
+public @interface Scope {}
+</code></pre>
+<p>**Scope 注解只能标注目标类、@provide 方法和 Component。**Scope 注解要生效的话，需要同时标注在 <code>Component</code> 和提供依赖实例的<code>Module 或目标类</code>上。<strong>Module 中 provide 方法中的 Scope 注解必须和 与之绑定的 Component 的 Scope 注解一样，否则作用域不同会导致编译时会报错。</strong></p>
+<p>那么 Scope 注解又是如何产生作用的呢，怎么保证生成的依赖实例的生命周期呢？</p>
+<p>在 Dagger 2 官方文档中我找到一句话，非常清楚地描述了<code>@Scope</code>的原理：</p>
+<blockquote>
+<p>When a binding uses a scope annotation, that means that the component object holds a reference to the bound object until the component object itself is garbage-collected.</p>
+</blockquote>
+<p>当 Component 与 Module、目标类（需要被注入依赖）使用 Scope 注解绑定时，意味着 Component 对象持有绑定的依赖实例的一个引用直到 Component 对象本身被回收。<strong>也就是作用域的原理，其实是让生成的依赖实例的生命周期与 Component 绑定，Scope 注解并不能保证生命周期，要想保证赖实例的生命周期，需要确保 Component 的生命周期。</strong></p>
+<p>下面以<code>@AScope</code>为例，看 Scope 注解背后的代码：</p>
+<p>先定义<code>AScope</code></p>
+<pre><code class="language-kotlin">@Scope
+@Retention(RUNTIME)
+@Target(FIELD, FUNCTION, CLASS)
+annotation class AScope
+</code></pre>
+<h4 id="使用module方式">使用Module方式</h4>
+<p>在<code>AModule</code>中：</p>
+<pre><code class="language-kotlin">@Module
+class AModule {
+    @AScope
+    @Provides
+    fun provideB(): B = B()
+}
+</code></pre>
+<p>在<code>AComponent</code>中</p>
+<pre><code class="language-kotlin">@Component(modules = [AModule::class])
+@AScope
+interface AComponent {
+    fun injectA(a: A)
+}
+</code></pre>
+<p>这样生成的 <code>B</code>实例就与 <code>AComponent</code> 绑定了。下面看编译时生成的代码：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private Provider&lt;B&gt; provideBProvider;
+
+  private DaggerAComponent(AModule aModuleParam) {
+    initialize(aModuleParam);
+  }
+
+  ...
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private void initialize(final AModule aModuleParam) {
+    this.provideOtherProvider = DoubleCheck.provider(AModule_ProvideBFactory.create(aModuleParam));
+  }
+
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+  private A injectA2(A instance) {
+    // provideOtherProvider 不再由Factory创建，而是DobuleCheck
+    A_MembersInjector.injectB(instance, provideBProvider.get());
+    return instance;
+  }
+ ...
+}
+</code></pre>
+<p>从上面 <code>DaggerAComponent</code>的代码可以看出使用了 <code>AScope</code> 作用域后，<code>provideBProvider</code>由<code>AModule_ProvideCarFactory.create()</code>变为了<code>DoubleCheck.provider(AModule_ProvideBFactory.create())</code>。而 DoubleCheck 包装的意义在于持有了 <code>B</code>的实例，而且只会生成一次实例，也就是说：没有用 MyScope 作用域之前，<code>DaggerAComponent</code> 每次注入依赖都会新建一个 <code>B</code>实例，而用 <code>AScope</code> 作用之后，每次注入依赖都只会返回第一次生成的实例。通过生成的代码可以发现这和<code>Lazy</code>的方式很相似。</p>
+<h4 id="注解到目标类方式">注解到目标类方式</h4>
+<pre><code class="language-kotlin">class A {
+    @AScope
+    @Inject
+    lateinit var b: B
+}
+
+
+@AScope
+class B  @Inject constructor()
+
+
+@AScope
+@Component(modules = [AModule::class])
+interface AComponent {
+    fun injectA(a: A)
+}
+
+@Module
+class AModule {
+}
+</code></pre>
+<p>使用这种方式生成的代码：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private Provider&lt;B&gt; bProvider;
+
+  private DaggerAComponent() {
+
+    initialize();
+  }
+ ...
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private void initialize() {
+     // 此处使用的是Factory,不是AModule_ProvideBFactory
+    this.bProvider = DoubleCheck.provider(B_Factory.create());
+  }
+
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+  private A injectA2(A instance) {
+    A_MembersInjector.injectB(instance, bProvider.get());
+    return instance;
+  }
+  ...
+}
+</code></pre>
+<p><strong>Scope 作用域的本质：Component 间接持有依赖实例的引用，把实例的作用域与 Component 绑定</strong></p>
+<h3 id="singleton">Singleton</h3>
+<p>在了解作用域的原理后，再来理解 Dagger 2 提供的自带作用域就容易了。<code>@Singleton</code>顾名思义保证单例，那么它又是如何实现的呢，实现了单例模式那样只返回一个实例吗？</p>
+<p>把上面例子中<code>@AScope</code>换成<code>@Singleton</code>，发现生成的 DaggerAComponent 和其他类没有变化。也只是用<code>DoubleCheck</code>包装了工厂而已，并没有什么特殊实现。所以 Singleton 作用域可以保证一个 Component 中的单例，但是如果产生多个 Component 实例，那么实例的单例就无法保证了。</p>
+<p>所以在网上一些例子中，有看到<code>AppComponent</code>使用 Singleton 作用域，保证绑定的依赖实例的单例。它生效的原因是<code>AppComponent</code>只会在 Application 中创建一次，由<code>AppComponent</code>的单例来保证绑定的依赖实例的单例。</p>
+<p>**注意：Component 可以同时被多个 Scope 标记。**即 Component 可以和多个 Scope 的 Moudle 或目标类绑定。</p>
+<h3 id="reusable">Reusable</h3>
+<p>上文中的自定义的<code>@AScope</code>和<code>@Singleton</code>都可以使得绑定的 Component 缓存依赖的实例，但是与之绑定 Component 必须有相同的 Scope 标记。假如我只想单纯缓存依赖的实例，可以复用之前的实例，不想关心与之绑定是什么 Component，应该怎么办呢？。</p>
+<p>这时就可以使用<code>@Reusable</code>作用域，**Reusable 作用域不关心绑定的 Component，Reusable 作用域只需要标记目标类或 provide 方法，不用标记 Component。**下面先看看使用 Reusable 作用域后，生成的 <code>DaggerAComponent</code> 的变化：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private Provider&lt;B&gt; provideBProvider;
+
+  private DaggerAComponent(AModule aModuleParam) {
+    initialize(aModuleParam);
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private void initialize(final AModule aModuleParam) {
+    this.provideBProvider = SingleCheck.provider(AModule_ProvideBFactory.create(aModuleParam));
+  }
+
+  @Override
+  public void injectA(A a) {
+    injectA2(a);
+  }
+
+  private A injectA2(A instance) {
+    A_MembersInjector.injectB(instance, provideBProvider.get());
+    return instance;
+  }
+ ...
+}
+</code></pre>
+<p>从上面代码可以看出使用<code>@Reusable</code>作用域后，利用到 Reusable 实例的 Component 会间接持有实例的引用。但是这里是用<code>SingleCheck</code>而不是<code>DoubleCheck</code>，在多线程情况下可能会生成多个实例。因为<code>@Reusable</code>作用域目的只是可以复用之前的实例，并不需要严格地保证实例的唯一，所以使用 <code>SingleCheck</code> 就足够了。</p>
+<h3 id="releasable-references可释放引用"><s>Releasable references（可释放引用）</s></h3>
+<p>相关内容在新版<code>Dagger2</code>已经废除。</p>
+<h2 id="binding-instances">Binding Instances</h2>
+<p>通过前面作用域的讲解，可以清楚 Component 可以间接持有 Module 或 Inject 目标类构造函数提供的依赖实例，除了这两种方式，Component 还可以在创建 Component 的时候绑定依赖实例，用以注入。这就是<code>@BindsInstance</code>注解的作用，只能在 Component.Builder 中使用。</p>
+<p>在 Android 中使用 Dagger 2 时，activity 实例经常也需要作为依赖实例用以注入，在之前只能使用 Module：</p>
+<pre><code class="language-kotlin">@Module
+class MainActivityModule {
+    private val mainActivity: MainActivity
+
+    constructor(mainActivity: MainActivity) {
+        this.mainActivity = mainActivity
+    }
+
+    @Provides
+    fun provideMainActivity(): MainActivity {
+        return this.mainActivity
+    }
+}
+</code></pre>
+<p>而使用<code>@BindsInstance</code>的话会更加简单：</p>
+<pre><code class="language-kotlin">@Component
+interface MainActivityComponent {
+
+    fun injectMainActivity(activity: MainActivity)
+
+    @Component.Builder
+    interface Builder {
+
+        @BindsInstance
+        fun activity(activity: Activity): Builder
+
+        fun build(): MainActivityComponent
+    }
+}
+</code></pre>
+<p>注意在调用<code>build()</code>创建 Component 之前，所有<code>@BindsInstance</code>方法必须先调用。上面例子中 <code>MainActivityComponent</code>还可以注入 Activity 类型的依赖，但是不能注入 <code>MainActivity</code>，因为 Dagger 2 是使用具体类型作为依据的（也就是只能使用<code>@Inject Activity activity</code>而不是<code>@Inject MainActivity activity</code>）。</p>
+<p>如果<code>@BindsInstance</code>方法的参数可能为 null，需要再用<code>@Nullable</code>标记，同时标注 Inject 的地方也需要用<code>@Nullable</code>标记。这时 Builder 也可以不调用<code>@BindsInstance</code>方法，这样 Component 会默认设置 instance 为 null。</p>
+<h2 id="总结">总结</h2>
+<ul>
+<li>Lazy 可以延时注入，Provider 可以创建多个实例</li>
+<li>Qualifier 限定符用来解决同一个实例不同方法提供冲突的问题，可以依赖实例起个别名用来区分，或者自定义注解</li>
+<li>Scope 作用域的本质是 Component 会持有与之绑定的依赖实例的引用，要想确保实例的生命周期，关键在于控制 Component 的生命周期。</li>
+<li>推荐优先使用<code>@BindsInstance</code>方法，相对于写一个带有构造函数带有参数的 Module。</li>
+</ul>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://xiaowujiang.cn/posts/cbb172f8/" class="post-title gt-a-link">
+                    Dagger 2 的基本使用与原理
+                </a>
+            </div>
+        
+
+        
+            <span id="/posts/b74c4b6c/" class="leancloud_visitors" data-flag-title="Dagger 2 进阶使用">
+                <em class="post-meta-item-text">阅读量 </em>
+                <i class="leancloud-visitors-count">0</i>
+            </span>
+        
+
+        
+
+        
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'monsterid',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/jxiaow" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+    <div class="footer-info">
+        
+    </div>
+    <div>
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://xiaowujiang.cn/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

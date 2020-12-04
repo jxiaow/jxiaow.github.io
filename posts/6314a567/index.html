@@ -4,7 +4,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Android通过Intent简单实现分享功能 | Xiaowu</title>
+<title>Git修改历史提交信息（包含作者信息） | Xiaowu</title>
 
 <link rel="shortcut icon" href="https://xiaowujiang.cn/favicon.ico?v=1607101500628">
 
@@ -89,77 +89,62 @@
         <div class="post-detail gt-bg-theme-color-second">
             <article class="gt-post-content">
                 <h2 class="post-title">
-                    Android通过Intent简单实现分享功能
+                    Git修改历史提交信息（包含作者信息）
                 </h2>
                 <div class="post-info">
                     <time class="post-time gt-c-content-color-first">
-                        · 2020-12-05 ·
+                        · 2018-07-15 ·
                     </time>
                     
                 </div>
                 <div class="post-content">
-                    <p>现在大多数App的分享功能基本上使用的都是微信、QQ、微博的分享sdk或者是集成友盟分享sdk，如果想简单快速的实现分享功能，可以考虑通过<code>Intent</code>方式打开在系统中安装的具有分享功能的App的分享页面。</p>
+                    <p>最近学到了 git 的一招对我来说的新技巧：<strong>修改历史提交的 author</strong>。</p>
+<p>在某天打开码云，查看项目时，发现贡献者好几个，我就纳闷了我一个人写的代码怎么会有好几个贡献者，最后通过<code>git log</code>查看提交信息发现，确实是在提交的过程中用了好几个用户名，于是就百度了一下git命令，最后让我找到了<code>git rebase</code>。</p>
 <!-- more -->
-<p>方法如下：</p>
-<pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
-    Intent intent = new Intent();
-    intent.setAction(Intent.ACTION_SEND);
-    intnet.setType(&quot;text/plain&quot;);
-    PackageManager packageManager = context.getPackageManager();
-    List&lt;ResolveInfo&gt; resolveInfos = packageManager.queryIntentActivities(intent, 0);
-    return resloveInfos;
-}
+<h3 id="使用方式">使用方式</h3>
+<p>使用 <code>git rebase -i HEAD~n</code> 命令，<code>n</code>表示要修改前 n 次所有的提交， 说白了就是你要查看多少条提交记录。比如，我要查看从现在到<code>30</code>条范围内的提交记录，所以可以使用 <code>git rebase -i HEAD~30</code>。<code>-i</code>中的 i 是 interactive，交互的意思。</p>
+<p>输入此命令后，显示以下结果：</p>
+<pre><code class="language-shell">pick ac0fcc6 add file2
+pick a0cbfbe add file3
+pick 16ee6eb add file4
+
+# Rebase d57f11f..16ee6eb onto d57f11f (3 command(s))
+#
+# Commands:
+# p, pick = use commit
+# r, reword = use commit, but edit the commit message
+# e, edit = use commit, but stop for amending
+# s, squash = use commit, but meld into previous commit
+# f, fixup = like &quot;squash&quot;, but discard this commit's log message
+# x, exec = run command (the rest of the line) using shell
 </code></pre>
-<p>如果只需要QQ和微信分享，可以进行如下操作：</p>
-<pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
-    Intent intent = new Intent();
-    intent.setAction(Intent.ACTION_SEND);
-    intnet.setType(&quot;text/plain&quot;);
-    PackageManager packageManager = context.getPackageManager();
-    List&lt;ResolveInfo&gt; resolveInfos = packageManager.queryIntentActivities(intent, 0);
-    List&lt;ResolveInfo&gt; shareItems = new ArrayList();    
-    for(ResolveInfo info: resolveInfos) {
-        String name = info.activityInfo.packageName;
-        if (TextUtils.equals(packageName, &quot;com.tencent.mm&quot;)
-                    || TextUtils.equals(packageName, &quot;com.tencent.mobileqq&quot;)) {
-                shareItems.add(resolveInfo);
-        }
-    }
-    return shareItems;
-}
+<p>通过列表找到，需要要修改的提交信息，根据提示，如，上面的例子中，我需要修改第二行和第三行的提交信息，那我们就可以将第二行和第三行的 pick 改成 edit 或 e，保存退出。</p>
+<p>保存上面的修改并退出后，git 会依次执行上面的操作，当操作为 pick 时，直接 commit。当操作为 edit 时，会中断，并提示以下信息：</p>
+<pre><code class="language-shell">You can amend the commit now, with
+
+    git commit --amend 
+
+Once you are satisfied with your changes, run
+
+    git rebase --continue
 </code></pre>
-<p>通过<code>ResolveInfo</code>获取图标<code>ICON</code>和<code>Label</code>:</p>
-<pre><code class="language-java">Drawable drawable = resloveInfo.loadIcon(packageManager);
-CharSequence label = resolveInfo.loadLabel(packageManager);
+<p>这里的意思是说，你可以使用 <code>git commit --amend</code> 来修改此次提交，修改以后，觉得满意了，执行 <code>git rebase --continue</code> 继续剩下的流程。</p>
+<p>由于我们的主要目的是修改提交者的信息，因此光用 <code>git commit --amend</code> 是不够的，我们要使用 <code>git commit --amend --author &quot;xw &lt;aa.hbl@gmail.com&gt;&quot;</code> 这样的操作，这一点是修改提交者信息的关键所在。</p>
+<p>使用上面的命令成功修改此次提交的提交者信息后，一定要记得执行 <code>git rebase --continue</code> 继续。</p>
+<p>最终完成以后提示如下：</p>
+<pre><code class="language-shell">$ git rebase --continue
+Successfully rebased and updated refs/heads/master.
 </code></pre>
-<p>通过<code>Intent</code>发起分享：</p>
-<pre><code class="language-java">public static void share(Context context, 
-            ResolveInfo info, String shareContent){
-    Intent itnent = new Intent();
-    intnet.setAction(Intent.ACTION_SEND);
-    String pkg = resolveInfo.activityInfo.packageName;
-    String cls = resolveInfo.activityInfo.name;
-    intent.setComponent(new Component(pkg, cls));
-    intent.putExtra(Intent.EXTRA_TEXT, shareContent);
-    context.startActivity(intent);
-}
-</code></pre>
+<p><strong>注意</strong>: 在本次操作中用到了<code>git</code>命令行和<code>vim</code>编辑模式，不明白的话就自行百度吧。</p>
 
                 </div>
             </article>
         </div>
 
         
-            <div class="next-post">
-                <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://xiaowujiang.cn/posts/b8c700d2/" class="post-title gt-a-link">
-                    Dart 语言简述
-                </a>
-            </div>
-        
 
         
-            <span id="/posts/73a6d0c4/" class="leancloud_visitors" data-flag-title="Android通过Intent简单实现分享功能">
+            <span id="/posts/6314a567/" class="leancloud_visitors" data-flag-title="Git修改历史提交信息（包含作者信息）">
                 <em class="post-meta-item-text">阅读量 </em>
                 <i class="leancloud-visitors-count">0</i>
             </span>

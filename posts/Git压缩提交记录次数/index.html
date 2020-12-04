@@ -4,7 +4,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Android通过Intent简单实现分享功能 | Xiaowu</title>
+<title>Git压缩提交记录次数 | Xiaowu</title>
 
 <link rel="shortcut icon" href="https://xiaowujiang.cn/favicon.ico?v=1607101500628">
 
@@ -89,77 +89,99 @@
         <div class="post-detail gt-bg-theme-color-second">
             <article class="gt-post-content">
                 <h2 class="post-title">
-                    Android通过Intent简单实现分享功能
+                    Git压缩提交记录次数
                 </h2>
                 <div class="post-info">
                     <time class="post-time gt-c-content-color-first">
-                        · 2020-12-05 ·
+                        · 2018-07-15 ·
                     </time>
                     
                 </div>
                 <div class="post-content">
-                    <p>现在大多数App的分享功能基本上使用的都是微信、QQ、微博的分享sdk或者是集成友盟分享sdk，如果想简单快速的实现分享功能，可以考虑通过<code>Intent</code>方式打开在系统中安装的具有分享功能的App的分享页面。</p>
-<!-- more -->
-<p>方法如下：</p>
-<pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
-    Intent intent = new Intent();
-    intent.setAction(Intent.ACTION_SEND);
-    intnet.setType(&quot;text/plain&quot;);
-    PackageManager packageManager = context.getPackageManager();
-    List&lt;ResolveInfo&gt; resolveInfos = packageManager.queryIntentActivities(intent, 0);
-    return resloveInfos;
-}
+                    <p>最近在提交<code>git</code>项目中，又get到一项技能，发现自己提交次数有点多，想来合并以前的一些提交记录，减少提交次数。</p>
+<!--more-->
+<p>命令如下:</p>
+<pre><code class="language-shell">git rebase -i HEAD~n  //n代表你要查看的提交记录条数
 </code></pre>
-<p>如果只需要QQ和微信分享，可以进行如下操作：</p>
-<pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
-    Intent intent = new Intent();
-    intent.setAction(Intent.ACTION_SEND);
-    intnet.setType(&quot;text/plain&quot;);
-    PackageManager packageManager = context.getPackageManager();
-    List&lt;ResolveInfo&gt; resolveInfos = packageManager.queryIntentActivities(intent, 0);
-    List&lt;ResolveInfo&gt; shareItems = new ArrayList();    
-    for(ResolveInfo info: resolveInfos) {
-        String name = info.activityInfo.packageName;
-        if (TextUtils.equals(packageName, &quot;com.tencent.mm&quot;)
-                    || TextUtils.equals(packageName, &quot;com.tencent.mobileqq&quot;)) {
-                shareItems.add(resolveInfo);
-        }
-    }
-    return shareItems;
-}
+<p>例如执行</p>
+<pre><code class="language-shell">git rebase -i HEAD~4
 </code></pre>
-<p>通过<code>ResolveInfo</code>获取图标<code>ICON</code>和<code>Label</code>:</p>
-<pre><code class="language-java">Drawable drawable = resloveInfo.loadIcon(packageManager);
-CharSequence label = resolveInfo.loadLabel(packageManager);
+<p>后会出现：</p>
+<pre><code class="language-shell">pick d167a86 提交记录1
+pick c56d2e4 提交记录2
+pick c56d2e4 提交记录3
+pick c56d2e4 提交记录4
+# Rebase 7a28439..c56d2e4 onto 7a28439 (2 commands)
+#
+# Commands:
+# p, pick = use commit
+# r, reword = use commit, but edit the commit message
+# e, edit = use commit, but stop for amending
+# s, squash = use commit, but meld into previous commit
+# f, fixup = like &quot;squash&quot;, but discard this commit's log message
+# x, exec = run command (the rest of the line) using shell
+# d, drop = remove commit
+#
+# These lines can be re-ordered; they are executed from top to bottom.
+#
+# If you remove a line here THAT COMMIT WILL BE LOST.
+#
+# However, if you remove everything, the rebase will be aborted.
+#
+# Note that empty commits are commented out
 </code></pre>
-<p>通过<code>Intent</code>发起分享：</p>
-<pre><code class="language-java">public static void share(Context context, 
-            ResolveInfo info, String shareContent){
-    Intent itnent = new Intent();
-    intnet.setAction(Intent.ACTION_SEND);
-    String pkg = resolveInfo.activityInfo.packageName;
-    String cls = resolveInfo.activityInfo.name;
-    intent.setComponent(new Component(pkg, cls));
-    intent.putExtra(Intent.EXTRA_TEXT, shareContent);
-    context.startActivity(intent);
-}
+<p>可以看到我们提交的4条记录，假如，我需要将记录2、记录3、记录4合并到记录2（只能将最新的合并，即就是 记录1可以合并记录2，但是记录2不能合并记录1），我们将记录3、记录4中的<code>pick</code>改为<code>squash</code>然后保存更改退出后，然后会进入：</p>
+<pre><code class="language-shell"># This is a combination of 3 commits.
+# This is the 1st commit message:
+
+提交记录2
+
+# This is the commit message #2:
+
+提交记录3
+
+# This is the commit message #3:
+提交记录4
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# Date:      Fri Oct 12 14:58:12 2018 +0800
+#
+# interactive rebase in progress; onto 7a28439
+# Last commands done (2 commands done):
+#    pick d167a86 解决测试中提出的bug,修改etag缓存策略
+#    squash c56d2e4 解决测试中的bug和修改UI布局,开发新漫画2.6.0版本
+# No commands remaining.
+# You are currently rebasing branch 'develope' on '7a28439'.
+#
+# Changes to be committed:
+#       modified:   .gitignore
+#       deleted:    .gradle/.DS_Store
+#       deleted:    .gradle/2.14.1/.DS_Store
+#       deleted:    .gradle/2.14.1/taskArtifacts/cache.properties
+#       deleted:    .gradle/2.14.1/taskArtifacts/cache.properties.lock
+#       deleted:    .gradle/2.14.1/taskArtifacts/fileHashes.bin
+#       deleted:    .gradle/2.14.1/taskArtifacts/fileSnapshots.bin
+#       deleted:    .gradle/2.14.1/taskArtifacts/fileSnapshotsToTreeSnapshotsIndex.bin
+#       deleted:    .gradle/2.14.1/taskArtifacts/taskArtifacts.bin
+#       deleted:    .gradle/2.14.1/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.bin
+#       deleted:    .gradle/2.14.1/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.lock
+#       deleted:    .gradle/2.14.1/tasks/_app_compileDebugJavaWithJavac/localJarClasspathSnapshot/localJarClasspathSnapshot.bin#       deleted:    .gradle/2.14.1/tasks/_app_compileDebugJavaWithJavac/localJarClasspathSnapshot/localJarClasspathSnapshot.lock
 </code></pre>
+<p>我们删除上面的&quot;提交记录3、提交记录4&quot;后，保存退出，然后执行：</p>
+<pre><code class="language-shell">git rebase --continue
+</code></pre>
+<p>执行完毕后会显示<code>successful</code>信息。</p>
 
                 </div>
             </article>
         </div>
 
         
-            <div class="next-post">
-                <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://xiaowujiang.cn/posts/b8c700d2/" class="post-title gt-a-link">
-                    Dart 语言简述
-                </a>
-            </div>
-        
 
         
-            <span id="/posts/73a6d0c4/" class="leancloud_visitors" data-flag-title="Android通过Intent简单实现分享功能">
+            <span id="/posts/Git压缩提交记录次数/" class="leancloud_visitors" data-flag-title="Git压缩提交记录次数">
                 <em class="post-meta-item-text">阅读量 </em>
                 <i class="leancloud-visitors-count">0</i>
             </span>

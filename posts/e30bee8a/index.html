@@ -1,0 +1,485 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>Dagger 2 Component 与 SubComponent | Xiaowu</title>
+
+<link rel="shortcut icon" href="https://xiaowujiang.cn/favicon.ico?v=1607101500628">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://xiaowujiang.cn/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Xiaowu
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/posts/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1607101500628" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    Dagger 2 Component 与 SubComponent
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-12-05 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
+<!-- more -->
+<blockquote>
+<p>本系列文章是基于 Google Dagger 2.23.2 版本， Kotlin 1.3.21版本</p>
+</blockquote>
+<p>理解前面两篇文章后，可以使用 <code>Dagger 2</code>框架完成一个对象的依赖注入。但是在实战中会存在多个需要注入依赖的对象，也就是说会有多个 <code>Component</code>，它们之间会有相同的依赖，那么该如何处理它们之间的关系呢？</p>
+<p>我们先来看一个简单的例子：</p>
+<p>假如有三个类：<code>A</code>、<code>B</code>和<code>C</code>, <code>A</code>和<code>B</code>都各自持有<code>C</code>的实例，并且通过<code>Dagger2</code>进行注入</p>
+<pre><code class="language-kotlin">class A {
+    @Inject
+    lateinit var c: C
+}
+
+class B {
+    @Inject
+    lateinit var c: C
+}
+
+class C @Inject constructor()
+</code></pre>
+<p>Component:</p>
+<pre><code class="language-kotlin">@Component
+interface AComponent {
+    fun injectA(a: A)
+}
+
+@Component
+interface BComponent {
+    fun injectA(b: B)
+}
+</code></pre>
+<p>如果要让<code>A</code>、<code>B</code>持有的实例<code>C</code>相同的话，我们该如何处理？</p>
+<p>很多人第一时间会想到下面这种设计：</p>
+<pre><code class="language-kotlin">@Singleton
+@Component(modules = [CModule::class])
+interface AComponent {
+    fun injectA(a: A)
+}
+
+@Singleton
+@Component(modules = [CModule::class])
+interface BComponent {
+    fun injectA(b: B)
+}
+
+@Module
+class CModule {
+
+    companion object {
+        private var c: C? = null
+    }
+
+    @Singleton
+    @Provides
+    fun provideC(): C {
+        if (c == null) {
+            c = C()
+        }
+        return c!!
+    }
+}
+</code></pre>
+<p>把 Component 需要的依赖都在<code>modules</code>属性中声明，但是这样有两个问题：</p>
+<p>（1）有时依赖实例需要共享，例如上面场景中，<code>A</code>和<code>C</code>都持有<code>C</code>的实例，并且根据<code>Module</code>里的实现，会存在谁先创建<code>C</code>实例的问题。</p>
+<p>（2）Scope 作用域容易失效，例如 <code>CModule</code> 的<code>provideCar()</code>使用 <code>@Singleton</code> 作用域，<code>AComponent</code>和<code>BComponent</code>也要用 <code>Singleton</code> 标注，但它们都会持有一个<code>C</code>实例。</p>
+<p>假如<code>A</code>先创建了<code>C</code>那么，<code>BComponent</code>需要依赖 <code>AComponent</code>提供的 <code>C</code>实例，这就是 <code>Component</code> 组织关系中的一种。</p>
+<h2 id="component-的组织关系">Component 的组织关系</h2>
+<p>Component 管理着依赖实例，根据依赖实例之间的关系就能确定 Component 的关系。这些关系可以用<code>object graph</code>描述，我称之为依赖关系图。在 Dagger 2 中 Component 的组织关系分为两种：</p>
+<ul>
+<li>依赖关系，一个 Component 依赖其他 Compoent<code>公开</code>的依赖实例，用 Component 中的<code>dependencies</code>声明。</li>
+<li>继承关系，一个 Component 继承（也可以叫扩展）某 Component 提供更多的依赖，SubComponent 就是继承关系的体现。</li>
+</ul>
+<p>所以前文中<code>AComponent</code>和<code>BComponent</code>是依赖关系。</p>
+<h3 id="依赖关系">依赖关系</h3>
+<p>具体的实现代码：</p>
+<pre><code class="language-kotlin">@Component(modules = [CModule::class])
+interface AComponent {
+    fun injectA(a: A)
+
+    fun c(): C
+}
+
+@Component(dependencies = [AComponent::class])
+interface BComponent {
+    fun injectA(b: B)
+}
+
+@Module
+class CModule {
+    @Provides
+    fun provideC(): C = C()
+}
+</code></pre>
+<p><strong>注</strong>：<strong>因为 BComponent和 AComponent是依赖关系，如果<code>AComponent</code>声明了作用域的话，那么<code>BComponent</code>也必须声明（反之可以），而且它们的 Scope 不能相同，并且两个都有作用域的情况下 @Singleton 修饰的 Component （BComponent）不能依赖其他的 Component。</strong></p>
+<pre><code class="language-java">public final class DaggerBComponent implements BComponent {
+  private final AComponent aComponent;
+
+  private DaggerBComponent(AComponent aComponentParam) {
+    this.aComponent = aComponentParam;
+  }
+ ....
+
+  @Override
+  public void injectA(B b) {
+    injectB(b);}
+
+  private B injectB(B instance) {
+      // 注入时，使用了aComponent.c()
+    B_MembersInjector.injectC(instance, Preconditions.checkNotNull(aComponent.c(), &quot;Cannot return null from a non-@Nullable component method&quot;));
+    return instance;
+  }
+...
+}
+</code></pre>
+<p>编译时生成的代码 DaggerBComponent 中会调用<code>aComponent.c()</code>，如果 AComponent 没有向外提供C 实例的接口的话，DaggerBComponent 就会注入失败。</p>
+<p>依赖注入：</p>
+<pre><code>val aComponent = DaggerAComponent.builder().build()
+DaggerBComponent.builder().aComponent(aComponent).build().inject(b)
+</code></pre>
+<p>依赖关系就跟生活中的朋友关系相当，注意事项如下：</p>
+<ol>
+<li>被依赖的 Component 需要把暴露的依赖实例用显式的接口声明。</li>
+<li>依赖关系中的 Component 的 Scope 不能相同，因为它们的生命周期不同。</li>
+</ol>
+<h3 id="继承关系">继承关系</h3>
+<p>继承关系跟面向对象中的继承的概念有点像，<code>SubComponent</code>称为<code>子 Component</code>，类似于平常说的子类。下面先看看下面这个场景：</p>
+<pre><code class="language-kotlin">class Parent {
+    @Inject
+    lateinit var car: Car
+}
+
+class Child {
+    @Inject
+    lateinit var car: Car
+    @Inject
+    lateinit var bike: Bike
+}
+
+class Car @Inject constructor()
+class Bike @Inject constructor()
+</code></pre>
+<p>Child 可以开Parent的车 car，也可以骑自己的自行车 bike。依赖关系图：</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-48-48-1561371949435.png" alt="1561371949435.png" loading="lazy"></figure>
+<p>上图中 ChildComponent 在 ParentComponent之中，ChildComponent子承父业，可以访问 ParentComponent 的依赖，而 ParentComponent只知道 ChildComponent 是它的子类，可以访问 SubComponent.Builder，却无法访问 SubComponent 中的依赖。</p>
+<pre><code class="language-kotlin">@Component(modules = [CarModule::class])
+interface ParentComponent {
+    fun inject(parent: Parent)
+}
+
+@Subcomponent(modules = [BikeModule::class])
+interface ChildComponent {
+    fun inject(child: Child)
+
+    // SubComponent 必须显式地声明 Subcomponent.Builder，parentComponent 需要用 Builder 来创建 ChildComponent
+    @Subcomponent.Builder
+    interface Builder {
+        fun build(): ChildComponent
+    }
+}
+</code></pre>
+<p><code>@SubComponent</code>的写法与<code>@Component</code>一样，只能标注接口或抽象类，与依赖关系一样，SubComponent 与 parent Component 的 Scope 不能相同，只是 SubComponent 表明它是继承扩展某 Component 的。怎么表明一个 SubComponent 是属于哪个 parent Component 的呢？只需要在 parent Component 依赖的 Module 中的<code>subcomponents</code>加上 SubComponent 的 class，然后就可以在 parent Component 中请求 SubComponent.Builder。</p>
+<pre><code class="language-kotlin">@Component(modules = [CarModule::class])
+interface ParentComponent {
+    ...
+    // 用来创建childComponent
+    fun childComponent(): ChildComponent.Builder
+}
+
+@Subcomponent(modules = [BikeModule::class])
+interface ChildComponent {
+    ...
+    // SubComponent 必须显式地声明 Subcomponent.Builder，parentComponent 需要用 Builder 来创建 ChildComponent
+    @Subcomponent.Builder
+    interface Builder {
+        fun build(): ChildComponent
+    }
+}
+// 在CarModule上添加subComponents
+@Module(subcomponents = [ChildComponent::class])
+class CarModule {
+    @Provides
+    fun provideCar() = Car()
+}
+
+@Module
+class BikeModule {
+    @Provides
+    fun provideBike() = Bike()
+}
+</code></pre>
+<p>上面的代码经过<code>make project</code>后，dagger2生成的代码：</p>
+<pre><code class="language-java">public final class DaggerParentComponent implements ParentComponent {
+  ...
+  @Override
+  public ChildComponent.Builder childComponent() {
+    return new ChildComponentBuilder();}
+  ...
+  private final class ChildComponentBuilder implements ChildComponent.Builder {
+    @Override
+    public ChildComponent build() {
+      return new ChildComponentImpl(new BikeModule());
+    }
+  }
+
+  private final class ChildComponentImpl implements ChildComponent {
+    private final BikeModule bikeModule;
+
+    private ChildComponentImpl(BikeModule bikeModuleParam) {
+      this.bikeModule = bikeModuleParam;
+    }
+   ...
+    private Child injectChild(Child instance) {
+      // 注入car时，调用的parentComponent的carModule提供
+      Child_MembersInjector.injectCar(instance, CarModule_ProvideCarFactory.provideCar(DaggerParentComponent.this.carModule));
+      Child_MembersInjector.injectBike(instance, BikeModule_ProvideBikeFactory.provideBike(bikeModule));
+      return instance;
+    }
+  }
+}
+</code></pre>
+<p>SubComponent 编译时不会生成 DaggerChildComponent，需要通过 parentComponent 的获取 SubComponent.Builder 方法获取 ChildComponent 实例。</p>
+<pre><code class="language-kotlin">val parentComponent = DaggerParentComponent.builder().build()
+parentComponent.childComponent().build().inject(child)
+</code></pre>
+<p><strong>继承关系和依赖关系最大的区别就是：继承关系中不用显式地提供依赖实例的接口，SubComponent 继承 parent Component 的所有依赖。</strong></p>
+<h3 id="依赖关系-vs-继承关系">依赖关系 vs 继承关系</h3>
+<p>相同点：</p>
+<ul>
+<li>两者都能复用其他 Component 的依赖</li>
+<li>有依赖关系和继承关系的 Component 不能有相同的 Scope</li>
+</ul>
+<p>区别：</p>
+<ul>
+<li>依赖关系中被依赖的 Component 必须显式地提供公开依赖实例的接口，而 SubComponent 默认继承 parent Component 的依赖。</li>
+<li>依赖关系会生成两个独立的 DaggerXXComponent 类，而 SubComponent 不会生成 独立的 DaggerXXComponent 类。</li>
+</ul>
+<p>在 Android 开发中，Activity 是 App 运行中组件，Fragment 又是 Activity 一部分，这种组件化思想适合继承关系，所以在 Android 中一般使用 SubComponent。</p>
+<h2 id="subcomponent-的其他问题">SubComponent 的其他问题</h2>
+<h3 id="抽象工厂方法定义继承关系">抽象工厂方法定义继承关系</h3>
+<p>除了使用 Module 的<code>subcomponents</code>属性定义继承关系，还可以在 parent Component 中声明返回 SubComponent 的抽象工厂方法来定义：</p>
+<pre><code class="language-kotlin">@Component(modules = [CarModule::class])
+interface ParentComponent {
+    ...
+    // 用来创建childComponent
+    //// 这个抽象工厂方法表明 ChildComponent 继承 ParentComponent
+    fun childComponent(): ChildComponent
+}
+
+@Subcomponent(modules = [BikeModule::class])
+interface ChildComponent {
+    ...
+}
+
+@Module
+class CarModule {
+    @Provides
+    fun provideCar() = Car()
+}
+
+@Module
+class BikeModule {
+    @Provides
+    fun provideBike() = Bike()
+}
+</code></pre>
+<p>这种定义方式不能很明显地表明继承关系，一般推荐使用 Module 的<code>subcomponents</code>属性定义。</p>
+<h3 id="重复的-module">重复的 Module</h3>
+<p>当相同的 Module 注入到 parent Component 和它的 SubComponent 中时，则每个 Component 都将自动使用这个 Module 的同一实例。也就是如果在 SubComponent.Builder 中调用相同的 Module 或者在返回 SubComponent 的抽象工厂方法中以重复 Module 作为参数时，会出现错误。（前者在编译时不能检测出，是运行时错误）</p>
+<pre><code class="language-java">@Component(modules = {RepeatedModule.class, ...})
+interface ComponentOne {
+  ComponentTwo componentTwo(RepeatedModule repeatedModule); // 编译时报错
+  ComponentThree.Builder componentThreeBuilder();
+}
+
+@Subcomponent(modules = {RepeatedModule.class, ...})
+interface ComponentTwo { ... }
+
+@Subcomponent(modules = {RepeatedModule.class, ...})
+interface ComponentThree {
+  @Subcomponent.Builder
+  interface Builder {
+    Builder repeatedModule(RepeatedModule repeatedModule);
+    ComponentThree build();
+  }
+}
+
+DaggerComponentOne.create().componentThreeBuilder()
+    .repeatedModule(new RepeatedModule()) // 运行时报错 UnsupportedOperationException!
+    .build();
+</code></pre>
+<h2 id="总结">总结</h2>
+<p>Component 之间共用相同依赖，可以有两种组织关系：依赖关系与继承关系。至于如何选择试具体情况而定，但在 Android 开发中，一般使用继承关系，以 AppComponent 作为 root Component，AppComponent 一般还会使用 @Singleton 作用域，而 ActivityComponent 为 SubComponent。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://xiaowujiang.cn/posts/b74c4b6c/" class="post-title gt-a-link">
+                    Dagger 2 进阶使用
+                </a>
+            </div>
+        
+
+        
+            <span id="/posts/e30bee8a/" class="leancloud_visitors" data-flag-title="Dagger 2 Component 与 SubComponent">
+                <em class="post-meta-item-text">阅读量 </em>
+                <i class="leancloud-visitors-count">0</i>
+            </span>
+        
+
+        
+
+        
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'monsterid',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/jxiaow" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+    <div class="footer-info">
+        
+    </div>
+    <div>
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://xiaowujiang.cn/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

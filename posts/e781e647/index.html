@@ -1,0 +1,453 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>Dagger2在Android中的使用 | Xiaowu</title>
+
+<link rel="shortcut icon" href="https://xiaowujiang.cn/favicon.ico?v=1607101500628">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://xiaowujiang.cn/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Xiaowu
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/posts/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1607101500628" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    Dagger2在Android中的使用
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-12-05 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
+<!-- more -->
+<blockquote>
+<p>本系列文章是基于 Google Dagger 2.23.2 版本， Kotlin 1.3.21版本</p>
+</blockquote>
+<p>在Android项目中使用Dagger2时，像 <code>Activity</code>和<code>Fragment</code>这种类型的初始化操作都是有Android系统提供的，如果要往其注入对象，不免会有这样的写法：</p>
+<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var activity: MainActivity
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        DaggerMainActivityComponent.builder()
+            .mainActivityModule(MainActivityModule(this))
+            .appComponent(
+                (application as MyApplication)
+                    .daggerAppComponent
+            ).build()
+            .inject(this)
+    }
+}
+</code></pre>
+<p>上述写法，会有以下几个我们几乎无法避免的问题：</p>
+<ol>
+<li>
+<p>上述Dagger部分的代码存在<strong>模板代码</strong>，在每个Activity中都会这么写到，即便抽取到BaseActivity中，也有一些特殊部分需要在每个Activity中单独处理，随着业务的增加后期维护不易；</p>
+</li>
+<li>
+<p>从上面的代码可以看出，<code>MainActivityModule</code>中持有了<code>MainActivity</code>实例，并且需要在<code>MainActivity</code>传入参数，它打破了依赖注入的核心原则：<strong>类不应该知道它是如何注入的。</strong></p>
+</li>
+</ol>
+<p>因此为了解决上面的问题，谷歌官方推出了<code>dagger.android</code>。</p>
+<p>下面是基本的使用方式，包括如何注入<code>Activity</code>和<code>Fragment</code>,本篇只讲如何使用，后续再分析其原理。</p>
+<h2 id="引入daggerandroid依赖">引入<code>Dagger.android</code>依赖</h2>
+<p>在<code>build.gradle</code>中添加：</p>
+<pre><code class="language-groovy">implementation 'com.google.dagger:dagger-android:2.23.2'
+implementation 'com.google.dagger:dagger-android-support:2.23.2'
+kapt 'com.google.dagger:dagger-android-processor:2.23.2'
+</code></pre>
+<h2 id="注入activity">注入Activity</h2>
+<p>以<code>MainActivity</code>为例</p>
+<h3 id="dagger2中的写法">Dagger2中的写法</h3>
+<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
+    // 这里只是做了一个例子
+    @Inject
+    lateinit var activity: MainActivity
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        DaggerMainActivityComponent.builder()
+            .mainActivityModule(MainActivityModule(this))
+            .appComponent(
+                (application as MyApplication)
+                    .daggerAppComponent
+            ).build()
+            .inject(this)
+    }
+}
+
+@ActivityScope
+@Component(modules = [MainActivityModule::class], dependencies = [AppComponent::class])
+interface MainActivityComponent {
+    fun inject(activity: MainActivity)
+}
+
+@Module
+class MainActivityModule(private val activity: MainActivity) {
+    @Provides
+    fun provideMainActivity(): MainActivity = activity
+}
+
+@Scope
+annotation class ActivityScope
+</code></pre>
+<h3 id="dagger2-android中的写法">Dagger2-Android中的写法</h3>
+<h4 id="修改mainactivitycomponent">修改<code>MainActivityComponent</code></h4>
+<pre><code class="language-kotlin">@ActivityScope
+@Subcomponent
+interface MainActivityComponent : AndroidInjector&lt;MainActivity&gt; {
+    // 声明MainActivity创建的工厂接口
+    @dagger.Subcomponent.Factory
+    interface Factory : AndroidInjector.Factory&lt;MainActivity&gt;
+}
+</code></pre>
+<h4 id="修改mainactivitymodule">修改<code>MainActivityModule</code></h4>
+<pre><code class="language-kotlin">@Module(subcomponents = [MainActivityComponent::class])
+abstract class MainActivityModule {
+    // module中提供绑定工厂方法
+    @Binds
+    @IntoMap
+    @ClassKey(MainActivity::class)
+    abstract fun bind(
+        factory: MainActivityComponent.Factory
+    ): AndroidInjector.Factory&lt;*&gt;
+}
+</code></pre>
+<h4 id="修改oncreate中的dagger注入">修改<code>onCreate()</code>中的Dagger注入</h4>
+<pre><code class="language-kotlin">override fun onCreate(savedInstanceState: Bundle?) {
+   // 在super.onCreate前添加
+   AndroidInjection.inject(this)
+   super.onCreate(savedInstanceState)
+   setContentView(R.layout.activity_main)
+}
+</code></pre>
+<h4 id="修改myapplication">修改<code>MyApplication</code></h4>
+<p>通过<code>dagger.android</code>注入时，Application中也发生了相应的变化</p>
+<pre><code class="language-kotlin">class MyApplication : Application(), HasAndroidInjector {
+
+    @Inject
+    lateinit var dispatchingAndroidInjector: DqispatchingAndroidInjector&lt;Any&gt;
+
+    override fun onCreate() {
+        super.onCreate()
+        DaggerAppComponent.factory().create(this).inject(this)
+    }
+
+    override fun androidInjector(): AndroidInjector&lt;Any&gt; {
+        return dispatchingAndroidInjector
+    }
+}
+
+@dagger.Component(
+    modules = [AndroidInjectionModule::class,// 引入框架提供的InjectionModule
+        AndroidSupportInjectionModule::class,// 如果使用了support相关的类，也需要引入
+        MainActivityModule::class // 这是我们自定义的Module
+    ]
+)
+interface AppComponent : AndroidInjector&lt;MyApplication&gt; {
+    @dagger.Component.Factory
+    interface Factory : AndroidInjector.Factory&lt;MyApplication&gt;
+}
+</code></pre>
+<p>我们需要将我们在<code>MainActivity</code>中的<code>MainActivityModule</code>加入到<code>Application</code>中的<code>AppComponent</code>的<code>module</code>,然后<code>Make Project</code>或<code>Make App</code>或<code>build project</code>，如果未报错即成功。</p>
+<h3 id="简洁写法">简洁写法</h3>
+<p>如果相应的<code>ActivityComponent</code>中只有以下操作时：</p>
+<pre><code class="language-kotlin">@ActivityScope
+@Subcomponent
+interface MainActivityComponent : AndroidInjector&lt;MainActivity&gt; {
+    // 声明MainActivity创建的工厂接口
+    @dagger.Subcomponent.Factory
+    interface Factory : AndroidInjector.Factory&lt;MainActivity&gt;
+}
+</code></pre>
+<p>我们可以新建一个module类， 将满足以上条件的Component 集中到一起，并删除对应的Component，如：</p>
+<pre><code class="language-kotlin">@Module
+abstract class ActivityBindingModule {
+    @ActivityScoped
+    @ContributesAndroidInjector(modules = [MainActivityModule.class])
+    abstract fun mainActivity() : MainActivity
+
+    @ActivityScoped
+    @ContributesAndroidInjector(modules = [AddEditTaskModule.class])
+    abstract fun addEditTaskActivity(): AddEditTaskActivity 
+}
+</code></pre>
+<p>删除 原有module中的<code>bind*</code>方法</p>
+<pre><code class="language-java">@Module
+public class MainActivityModule{
+
+}
+</code></pre>
+<h2 id="注入fragment">注入Fragment</h2>
+<p>注入<code>Fragment</code>与注入<code>Activity</code>类似，唯一不同的地方在于我们需要在<code>onAttach</code>方法中执行<code>AndroidSupportInject.inject(this)</code></p>
+<pre><code class="language-kotlin">class BlankFragment : Fragment() {
+
+    override fun onAttach(context: Context?) {
+        AndroidSupportInjection.inject(this)
+        super.onAttach(context)
+    }
+}
+
+@dagger.Module
+abstract class FragmentBindModule {
+    @ContributesAndroidInjector
+    abstract fun blankFragment(): BlankFragment
+}
+
+
+@dagger.Component(
+    modules = [AndroidInjectionModule::class,
+        AndroidSupportInjectionModule::class,
+        ActivityBinder::class,
+        FragmentBindModule::class
+    ]
+)
+interface AppComponent : AndroidInjector&lt;MyApplication&gt; {
+
+    @dagger.Component.Factory
+    interface Factory : AndroidInjector.Factory&lt;MyApplication&gt;
+}
+</code></pre>
+<p>对于<code>FragmentBindModule</code>不仅可以放入到<code>AppComponent</code>中，也可以放入到<code>MainActivityComponent</code>,或者<code>FragmentComponent</code>如：</p>
+<pre><code class="language-kotlin">@dagger.Subcomponent(modules = [FragmentBindModule::class])
+interface MainActivityComponent : AndroidInjector&lt;MainActivity&gt;{
+
+    @dagger.Subcomponent.Factory
+    interface Factory: AndroidInjector.Factory&lt;MainActivity&gt;
+}
+
+
+@dagger.Module(subcomponents = [
+    MainActivityComponent::class // 将fragment放入到了activity对应的Component
+])
+abstract class MainActivityModule{
+
+    @Binds
+    @IntoMap
+    @ClassKey(MainActivity::class)
+    abstract fun bind(factory:MainActivityComponent.Factory):AndroidInjector.Factory&lt;*&gt;
+}
+</code></pre>
+<h2 id="一些问题">一些问题</h2>
+<h3 id="model-注解的是抽象类时-provides-标注的必须是静态方法">@Model  注解的是抽象类时  @provides 标注的必须是静态方法</h3>
+<blockquote>
+<p>A @Module may not contain both non-static @Provides methods and abstract @Binds or @Multibinds declarations</p>
+</blockquote>
+<p>这个错误提示是将<code>Module</code>定义成了抽象类，这在<code>java</code>中只需要将<code>@Provide</code>标注的方法设置为静态方法即可，但是在<code>Kotlin</code>中是行不通的，因为在<code>kotlin</code>中静态方法是写在<code>companion object</code>代码块内，所以解决方法有两种：</p>
+<ul>
+<li>
+<p>用<code>Module</code>标注<code>companion object</code></p>
+<pre><code class="language-kotlin">@dagger.Module
+abstract class MainActivityModule() {
+    @dagger.Module
+    companion object {
+        @JvmStatic
+        @Provides
+        fun provideFragment() = BlankFragment()
+    }
+
+    @Binds
+    abstract fun context(activity: MainActivity): Context
+}
+</code></pre>
+</li>
+<li>
+<p>使用多个<code>Module</code>将抽象方法和<code>@provide</code>标注的方法分开，如：</p>
+<pre><code class="language-kotlin">@Module
+abstract class MainActivityBindsModule {
+    @Binds
+    abstract fun context(activity: MainActivity): Context
+}
+
+@Module(includes = arrayOf(MainActivityBindsModule ::class))
+class MainActivityProvidesModule {
+      @Provides
+      fun provideFragment() = BlankFragment()
+}
+</code></pre>
+</li>
+</ul>
+<h2 id="总结">总结</h2>
+<p>通过前面的例子我们亦可以看出：</p>
+<ol>
+<li>Dagger2-android 使用的是Dagger2中的<strong>继承关系</strong>；</li>
+<li>使用它，我们就可以不用写那么多的模版代码，相对于<code>Dagger2</code>方便了许多；</li>
+<li>Dagger2-Android 比Dagger2更强大，我们使用<code>@Binds</code>绑定抽象方法来注入一些提供初始化的类等。</li>
+</ol>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://xiaowujiang.cn/posts/e30bee8a/" class="post-title gt-a-link">
+                    Dagger 2 Component 与 SubComponent
+                </a>
+            </div>
+        
+
+        
+            <span id="/posts/e781e647/" class="leancloud_visitors" data-flag-title="Dagger2在Android中的使用">
+                <em class="post-meta-item-text">阅读量 </em>
+                <i class="leancloud-visitors-count">0</i>
+            </span>
+        
+
+        
+
+        
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'monsterid',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/jxiaow" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+    <div class="footer-info">
+        
+    </div>
+    <div>
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://xiaowujiang.cn/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
