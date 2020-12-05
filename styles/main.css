@@ -661,7 +661,7 @@ ul li {
 .post-container .post-detail .post-title {
   font-size: 26px;
   text-align: center;
-  padding: 24px;
+  padding: 12px;
   font-weight: normal;
 }
 .post-container .post-detail .post-info {
@@ -722,7 +722,6 @@ ul li {
 }
 .archives-container .post {
   float: left;
-  padding: 16px 0;
 }
 .archives-container .post .post-title {
   float: left;
