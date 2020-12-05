@@ -477,6 +477,19 @@ ul li {
   border-radius: 2px;
   margin: 18px auto;
 }
+/* 滚动条 */
+::-webkit-scrollbar-thumb {
+  background-color: #c6cbd1;
+  background-image: -webkit-linear-gradient(45deg, rgba(0, 0, 0, 0.3) 25%, #28a745 25%, transparent 50%, rgba(255, 255, 255, 0.4) 50%, #dc3545 75%, #007bff 75%, transparent);
+  border-radius: 1em;
+}
+::-webkit-scrollbar-track {
+  border-radius: 1em;
+}
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
 .navbar {
   padding: 38px 96px !important;
 }
