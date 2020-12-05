@@ -471,6 +471,12 @@ ul li {
   display: flex;
   flex-direction: column;
 }
+.gt-post-content a img {
+  display: inherit;
+  max-width: 100%;
+  border-radius: 2px;
+  margin: 18px auto;
+}
 .navbar {
   padding: 38px 96px !important;
 }

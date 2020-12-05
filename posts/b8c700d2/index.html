@@ -6,11 +6,12 @@
 
 <title>Dart 语言简述 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://www.xiaowujiang.cn/favicon.ico?v=1607137164901">
+<link rel="shortcut icon" href="https://www.xiaowujiang.cn/favicon.ico?v=1607149571981">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://www.xiaowujiang.cn/styles/main.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
 
 <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
 <script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
@@ -20,6 +21,7 @@
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+
 <!-- DEMO JS -->
 <!--<script src="media/scripts/index.js"></script>-->
 
@@ -30,12 +32,14 @@
 <body>
 <div class="main gt-bg-theme-color-first">
     <nav class="navbar navbar-expand-lg">
-    <div class="navbar-brand">
-        <img class="user-avatar" src="/images/avatar.png" alt="头像">
-        <div class="site-name gt-c-content-color-first">
-            Xiaowu
+    <a href="/">
+        <div class="navbar-brand">
+            <img class="user-avatar" src="/images/avatar.png" alt="头像">
+            <div class="site-name gt-c-content-color-first">
+                Xiaowu
+            </div>
         </div>
-    </div>
+    </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
@@ -69,7 +73,7 @@
             
                 <div class="nav-item">
                     
-                        <a href="/posts/about" class="menu gt-a-link">
+                        <a href="/about" class="menu gt-a-link">
                             关于
                         </a>
                     
@@ -77,7 +81,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607137164901" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607149571981" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -1021,27 +1025,25 @@ void testScheduleMicrotask(){
     
     <div class="social-container">
         
-            
-                <a href="https://github.com/jxiaow" target="_blank">
-                    <i class="fab fa-github gt-c-content-color-first"></i>
-                </a>
-            
-        
-            
-        
-            
-        
-            
-        
-            
-        
-            
-        
+        <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
+            <i class="fab fa-github gt-c-content-color-first"></i>
+        </a>
+      
+        <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
+            <i class="fas fa-blog gt-c-content-color-first"></i>
+        </a>
+      
+        <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
+            <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
+        </a>
+      
+        <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
+            <i class="fas fa-envelope gt-c-content-color-first"></i>
+        </a>
+      
     </div>
     <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
-    <div class="footer-info">
-        
-    </div>
+    
     <div>
         Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://www.xiaowujiang.cn/atom.xml" target="_blank">RSS</a></a>
     </div>
@@ -1051,6 +1053,28 @@ void testScheduleMicrotask(){
   hljs.initHighlightingOnLoad()
 </script>
 
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+
+<script>
+  let images = document.querySelectorAll("figure > img"); 
+//   debugger
+//   console.log("dddd: "+ images);
+  images.forEach(image => {
+    var parent = image.parentElement;
+    parent.removeChild(image);
+    var aelem = document.createElement('a');
+    aelem.href = image.src;
+    aelem.dataset['fancybox'] = 'gallery';
+    aelem.classList.add('fancybox');
+    aelem.appendChild(image);
+    parent.appendChild(aelem);
+  })
+
+//   <a data-fancybox="gallery" href="big_1.jpg"><img src="small_1.jpg"></a>
+// <a data-fancybox="gallery" href="big_2.jpg"><img src="small_2.jpg"></a>
+</script>
     </div>
 </div>
 </body>
