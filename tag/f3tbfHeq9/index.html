@@ -4,7 +4,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Android通过Intent简单实现分享功能 | Xiaowu</title>
+<title>Android | Xiaowu</title>
 
 <link rel="shortcut icon" href="https://www.xiaowujiang.cn/favicon.ico?v=1607150067214">
 
@@ -27,11 +27,11 @@
 
 
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
 </head>
 <body>
 <div class="main gt-bg-theme-color-first">
-    <nav class="navbar navbar-expand-lg">
+    <div class="main-content">
+        <nav class="navbar navbar-expand-lg">
     <a href="/">
         <div class="navbar-brand">
             <img class="user-avatar" src="/images/avatar.png" alt="头像">
@@ -89,116 +89,86 @@
     </div>
 </nav>
 
-    <div class="post-container">
-        <div class="post-detail gt-bg-theme-color-second">
-            <article class="gt-post-content">
-                <h2 class="post-title">
-                    Android通过Intent简单实现分享功能
-                </h2>
-                <div class="post-info">
-                    <time class="post-time gt-c-content-color-first">
-                        · 2020-12-05 ·
-                    </time>
-                    
-                </div>
-                <div class="post-content">
-                    <p>现在大多数App的分享功能基本上使用的都是微信、QQ、微博的分享sdk或者是集成友盟分享sdk，如果想简单快速的实现分享功能，可以考虑通过<code>Intent</code>方式打开在系统中安装的具有分享功能的App的分享页面。</p>
-<!-- more -->
-<p>方法如下：</p>
-<pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
-    Intent intent = new Intent();
-    intent.setAction(Intent.ACTION_SEND);
-    intnet.setType(&quot;text/plain&quot;);
-    PackageManager packageManager = context.getPackageManager();
-    List&lt;ResolveInfo&gt; resolveInfos = packageManager.queryIntentActivities(intent, 0);
-    return resloveInfos;
-}
-</code></pre>
-<p>如果只需要QQ和微信分享，可以进行如下操作：</p>
-<pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
-    Intent intent = new Intent();
-    intent.setAction(Intent.ACTION_SEND);
-    intnet.setType(&quot;text/plain&quot;);
-    PackageManager packageManager = context.getPackageManager();
-    List&lt;ResolveInfo&gt; resolveInfos = packageManager.queryIntentActivities(intent, 0);
-    List&lt;ResolveInfo&gt; shareItems = new ArrayList();    
-    for(ResolveInfo info: resolveInfos) {
-        String name = info.activityInfo.packageName;
-        if (TextUtils.equals(packageName, &quot;com.tencent.mm&quot;)
-                    || TextUtils.equals(packageName, &quot;com.tencent.mobileqq&quot;)) {
-                shareItems.add(resolveInfo);
-        }
-    }
-    return shareItems;
-}
-</code></pre>
-<p>通过<code>ResolveInfo</code>获取图标<code>ICON</code>和<code>Label</code>:</p>
-<pre><code class="language-java">Drawable drawable = resloveInfo.loadIcon(packageManager);
-CharSequence label = resolveInfo.loadLabel(packageManager);
-</code></pre>
-<p>通过<code>Intent</code>发起分享：</p>
-<pre><code class="language-java">public static void share(Context context, 
-            ResolveInfo info, String shareContent){
-    Intent itnent = new Intent();
-    intnet.setAction(Intent.ACTION_SEND);
-    String pkg = resolveInfo.activityInfo.packageName;
-    String cls = resolveInfo.activityInfo.name;
-    intent.setComponent(new Component(pkg, cls));
-    intent.putExtra(Intent.EXTRA_TEXT, shareContent);
-    context.startActivity(intent);
-}
-</code></pre>
-
-                </div>
-            </article>
+        <div class="current-tag-container">
+            <h2 class="title gt-c-content-color-first">
+                #Android
+            </h2>
         </div>
-
+        <div class="post-list-container">
+    <div class="post-inner">
         
-            <div class="next-post">
-                <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://www.xiaowujiang.cn/posts/84a009ed/" class="post-title gt-a-link">
-                    Http框架封装
-                </a>
+            <div class="post gt-bg-theme-color-second">
+                <div class="post-left">
+                    <div>
+                        
+                        <a href="https://www.xiaowujiang.cn/posts/e781e647/">
+                            <span class="post-title gt-c-content-color-first">Dagger2在Android中的使用</span>
+                        </a>
+                    </div>
+                    <div class="gt-post-content post-abstract gt-c-content-color-second">
+                        <p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
+
+                    </div>
+                    <div class="post-info">
+                        <time class="post-time gt-c-content-color-first">
+                            发布于 · 2020-12-05 ·
+                        </time>
+                        
+                            <a href="https://www.xiaowujiang.cn/tag/f3tbfHeq9/" class="post-tag">
+                                # Android
+                            </a>
+                        
+                            <a href="https://www.xiaowujiang.cn/tag/M2AgbDvmt8/" class="post-tag">
+                                # Dagger2
+                            </a>
+                        
+                    </div>
+                </div>
+                
             </div>
         
+            <div class="post gt-bg-theme-color-second">
+                <div class="post-left">
+                    <div>
+                        
+                        <a href="https://www.xiaowujiang.cn/posts/e30bee8a/">
+                            <span class="post-title gt-c-content-color-first">Dagger 2 Component 与 SubComponent</span>
+                        </a>
+                    </div>
+                    <div class="gt-post-content post-abstract gt-c-content-color-second">
+                        <p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
 
+                    </div>
+                    <div class="post-info">
+                        <time class="post-time gt-c-content-color-first">
+                            发布于 · 2020-12-05 ·
+                        </time>
+                        
+                            <a href="https://www.xiaowujiang.cn/tag/f3tbfHeq9/" class="post-tag">
+                                # Android
+                            </a>
+                        
+                            <a href="https://www.xiaowujiang.cn/tag/M2AgbDvmt8/" class="post-tag">
+                                # Dagger2
+                            </a>
+                        
+                    </div>
+                </div>
+                
+            </div>
         
-            <span id="/posts/73a6d0c4/" class="leancloud_visitors" data-flag-title="Android通过Intent简单实现分享功能">
-                <em class="post-meta-item-text">阅读量 </em>
-                <i class="leancloud-visitors-count">0</i>
-            </span>
-        
-
-        
-
-        
-            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
-
-<style>
-	div#vcomments{
-		width:100%;
-		max-width: 1000px;
-		padding: 2.5%
-	}
-</style>
-
-
-	<div id="vcomments"></div>
-
-<script>
-	new Valine({
-		el: '#vcomments',
-		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
-		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
-		avatar: 'monsterid',
-		pageSize: 5,
-		recordIp: true,
-		placeholder: '快来吐槽吧~',
-		visitor: true,
-	});
-</script>
-
-        
+    </div>
+</div>
+        <div class="pagination-container">
+    
+    
+</div>
 
         <div class="site-footer gt-c-content-color-first">
     
