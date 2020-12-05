@@ -6,7 +6,7 @@
 
 <title>deepin日常使用 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://www.xiaowujiang.cn/favicon.ico?v=1607181079179">
+<link rel="shortcut icon" href="https://www.xiaowujiang.cn/favicon.ico?v=1607190063871">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://www.xiaowujiang.cn/styles/main.css">
@@ -81,7 +81,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607181079179" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607190063871" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -340,6 +340,26 @@ $ ls
 <p>点击某个markdown文件，使用MarkText打开后，不显示该文件，解决方式，更改marktext.desktop中的启动方式</p>
 <pre><code class="language-textile"># 将U改为F
 Exec=&quot;/opt/Mark Text/marktext&quot; --no-sandbox %F 
+</code></pre>
+<h2 id="android-studio-和-idea-输入法光标无法跟随">Android Studio 和 IDEA 输入法光标无法跟随</h2>
+<p>在deepin下使用Android Studio或 Idea 时出现了输入法候选词固定在了左下角，解决方式如下：</p>
+<ul>
+<li>
+<p>下载补丁包 <a href="https://github.com/RikudouPatrickstar/JetBrainsRuntime-for-Linux-x64">https://github.com/RikudouPatrickstar/JetBrainsRuntime-for-Linux-x64</a> , 可能文件太大，网速跟不上，附上<a href="https://pan.baidu.com/s/1hkX9Gi2xtBIqV6zgNSIugA">百度网盘链接</a> 密码: <code>am14</code></p>
+<p>注意：百度网盘分享的可能不是最新的包，如果按照下面的步骤还不能解决的话，请使用第一个链接去github下载release包。</p>
+</li>
+<li>
+<p>文件下载解压到自定义目录后，复制当前路径；</p>
+</li>
+<li>
+<p>打开Andorid Studio或 Idea的脚本文件, <code>studio.sh</code>,（Android Stuido） 或 <code>idea.sh</code>(idea) , 在第一行添加 如下:</p>
+<p>Android Studio:</p>
+</li>
+</ul>
+<pre><code class="language-shell">export STUDIO_JDK= 文件解压的路径
+</code></pre>
+<p>Idea:</p>
+<pre><code class="language-shell">export IDEA_JDK= 文件解压的路径
 </code></pre>
 
                 </div>
