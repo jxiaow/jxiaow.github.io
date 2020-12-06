@@ -21,7 +21,5 @@ jobs:
         run: |
           git config --global user.name "jxiaow"
           git config --global user.email "jxiaow@126.com"
-          git add .
-          git commit -m "CI built at `date +"%Y-%m-%d %H:%M:%S"`"
           # Gitee Pages
           git push --force --quiet "https://${GT_TOKEN}@${GT_REF}" master:master
