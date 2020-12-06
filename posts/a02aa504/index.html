@@ -7,7 +7,7 @@
 
 <title>deepin日常使用 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://www.xiaowujiang.cn/favicon.ico?v=1607238760179">
+<link rel="shortcut icon" href="https://www.xiaowujiang.cn/favicon.ico?v=1607240250808">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://www.xiaowujiang.cn/styles/main.css">
@@ -83,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607238760179" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607240250808" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -271,13 +271,13 @@ PS1=&quot;\u@\h:\w\[\033[0;32m\]\$git_branch\[\033[0m\] \$ &quot;
 </code></pre>
 <p><code>&lt;username&gt;</code>可以通过 <code>whoami</code> 进行查看</p>
 <h2 id="github-添加ssh">Github 添加ssh</h2>
-<h4 id="1-首先需要检查你电脑是否已经有-ssh-key">1、首先需要检查你电脑是否已经有 SSH key</h4>
+<h3 id="1-首先需要检查你电脑是否已经有-ssh-key">1、首先需要检查你电脑是否已经有 SSH key</h3>
 <p>运行 终端（Alt + Ctrl+ T），输入如下代码：</p>
 <pre><code class="language-shell">$ cd ~/.ssh
 $ ls
 </code></pre>
 <p>这两个命令就是检查是否已经存在 id_rsa.pub 或 id_dsa.pub 文件，如果文件已经存在，那么你可以跳过步骤2，直接进入步骤3。</p>
-<h4 id="2-创建一个-ssh-key">2、创建一个 SSH key</h4>
+<h3 id="2-创建一个-ssh-key">2、创建一个 SSH key</h3>
 <pre><code>$ ssh-keygen -t rsa -C &quot;your_email@example.com&quot;
 </code></pre>
 <p>代码参数含义：</p>
@@ -285,7 +285,7 @@ $ ls
 -C 设置注释文字，比如邮箱。<br>
 -f 指定密钥文件存储文件名。</p>
 <p>输入完上述命令后一直回车即可，然后就会生成 id_rsa 和 id_rsa.pub 两个秘钥文件。</p>
-<h4 id="3-添加你的-ssh-key-到-github上面去">3、添加你的 SSH key 到 github上面去</h4>
+<h3 id="3-添加你的-ssh-key-到-github上面去">3、添加你的 SSH key 到 github上面去</h3>
 <p>a、首先你需要拷贝 id_rsa.pub 文件的内容，你可以用编辑器打开文件复制，也可以用git命令复制该文件的内容，如：</p>
 <pre><code>$ cat ~/.ssh/id_rsa.pub
 </code></pre>
@@ -385,8 +385,7 @@ Exec=&quot;/opt/Mark Text/marktext&quot; --no-sandbox %F
 <li><a href="#%E7%BB%88%E7%AB%AF-git%E9%A1%B9%E7%9B%AE%E8%B7%AF%E5%BE%84%E4%B8%8B%E6%98%BE%E7%A4%BAgit-%E5%88%86%E6%94%AF">终端 git项目路径下显示git 分支</a></li>
 <li><a href="#git-%E9%81%BF%E5%85%8D%E5%A4%9A%E6%AC%A1%E8%BE%93%E5%85%A5%E5%AF%86%E7%A0%81">git 避免多次输入密码</a></li>
 <li><a href="#git-fetch">git fetch</a></li>
-<li><a href="#github-%E6%B7%BB%E5%8A%A0ssh">Github 添加ssh</a><br>
-*
+<li><a href="#github-%E6%B7%BB%E5%8A%A0ssh">Github 添加ssh</a>
 <ul>
 <li><a href="#1-%E9%A6%96%E5%85%88%E9%9C%80%E8%A6%81%E6%A3%80%E6%9F%A5%E4%BD%A0%E7%94%B5%E8%84%91%E6%98%AF%E5%90%A6%E5%B7%B2%E7%BB%8F%E6%9C%89-ssh-key">1、首先需要检查你电脑是否已经有 SSH key</a></li>
 <li><a href="#2-%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA-ssh-key">2、创建一个 SSH key</a></li>
