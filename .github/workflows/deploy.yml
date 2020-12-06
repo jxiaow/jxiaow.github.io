@@ -19,8 +19,6 @@ jobs:
           GT_REF: gitee.com/jxiaow/jxiaow.gitee.io # Gitee 仓库 SSH 地址
           GT_TOKEN: ${{ secrets.GITEE_TOKEN }} # 预先生成 GitHub Token
         run: |
-          cd .
-          git init
           git config --global user.name "jxiaow"
           git config --global user.email "jxiaow@126.com"
           git add .
