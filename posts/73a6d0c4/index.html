@@ -1,4 +1,5 @@
 <html>
+
 <head>
     <meta charset="utf-8"/>
 <meta name="description" content=""/>
@@ -6,7 +7,7 @@
 
 <title>Android通过Intent简单实现分享功能 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://www.xiaowujiang.cn/favicon.ico?v=1607190063871">
+<link rel="shortcut icon" href="https://www.xiaowujiang.cn/favicon.ico?v=1607238760179">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://www.xiaowujiang.cn/styles/main.css">
@@ -29,9 +30,10 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
 </head>
+
 <body>
-<div class="main gt-bg-theme-color-first">
-    <nav class="navbar navbar-expand-lg">
+    <div class="main gt-bg-theme-color-first">
+        <nav class="navbar navbar-expand-lg">
     <a href="/">
         <div class="navbar-brand">
             <img class="user-avatar" src="/images/avatar.png" alt="头像">
@@ -81,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607190063871" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607238760179" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -89,20 +91,22 @@
     </div>
 </nav>
 
-    <div class="post-container">
-        <div class="post-detail gt-bg-theme-color-second">
-            <article class="gt-post-content">
-                <h2 class="post-title">
-                    Android通过Intent简单实现分享功能
-                </h2>
-                <div class="post-info">
-                    <time class="post-time gt-c-content-color-first">
-                        · 2020-12-05 ·
-                    </time>
-                    
-                </div>
-                <div class="post-content">
-                    <p>现在大多数App的分享功能基本上使用的都是微信、QQ、微博的分享sdk或者是集成友盟分享sdk，如果想简单快速的实现分享功能，可以考虑通过<code>Intent</code>方式打开在系统中安装的具有分享功能的App的分享页面。</p>
+        <div class="post-container">
+
+            <div class="post-detail gt-bg-theme-color-second">
+                <article class="gt-post-content">
+                    <h2 class="post-title">
+                        Android通过Intent简单实现分享功能
+                    </h2>
+                    <div class="post-info">
+                        <time class="post-time gt-c-content-color-first">
+                            · 2020-12-05 ·
+                        </time>
+                        
+                    </div>
+                    <div class="post-content-wrapper">
+                        <div class="post-content">
+                            <p>现在大多数App的分享功能基本上使用的都是微信、QQ、微博的分享sdk或者是集成友盟分享sdk，如果想简单快速的实现分享功能，可以考虑通过<code>Intent</code>方式打开在系统中安装的具有分享功能的App的分享页面。</p>
 <!-- more -->
 <p>方法如下：</p>
 <pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
@@ -149,29 +153,34 @@ CharSequence label = resolveInfo.loadLabel(packageManager);
 }
 </code></pre>
 
-                </div>
-            </article>
-        </div>
+                        </div>
+                        <div class="toc-container">
+                            
+                        </div>
+                    </div>
+                </article>
+            </div>
 
-        
+            
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>
                 <a href="https://www.xiaowujiang.cn/posts/84a009ed/" class="post-title gt-a-link">
                     Http框架封装
                 </a>
             </div>
-        
+            
 
-        
-            <span id="/posts/73a6d0c4/" class="leancloud_visitors" data-flag-title="Android通过Intent简单实现分享功能">
+            
+            <span id="/posts/73a6d0c4/" class="leancloud_visitors"
+                data-flag-title="Android通过Intent简单实现分享功能">
                 <em class="post-meta-item-text">阅读量 </em>
                 <i class="leancloud-visitors-count">0</i>
             </span>
-        
+            
 
-        
+            
 
-        
+            
             <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
 
 <style>
@@ -198,48 +207,86 @@ CharSequence label = resolveInfo.loadLabel(packageManager);
 	});
 </script>
 
-        
+            
 
-        <div class="site-footer gt-c-content-color-first">
-    
-    <div class="social-container">
-        
-        <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
-            <i class="fab fa-github gt-c-content-color-first"></i>
-        </a>
-      
-        <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
-            <i class="fas fa-blog gt-c-content-color-first"></i>
-        </a>
-      
-        <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
-            <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
-        </a>
-      
-        <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
-            <i class="fas fa-envelope gt-c-content-color-first"></i>
-        </a>
-      
-    </div>
-    <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
-    
-    <div>
-        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://www.xiaowujiang.cn/atom.xml" target="_blank">RSS</a></a>
-    </div>
+            <div class="site-footer gt-c-content-color-first">
+
+  <div class="social-container">
+
+    <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
+      <i class="fab fa-github gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
+      <i class="fas fa-blog gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
+      <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
+    </a>
+
+    <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
+      <i class="fas fa-envelope gt-c-content-color-first"></i>
+    </a>
+
+  </div>
+  <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+  
+  <div>
+    Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a
+        href="https://www.xiaowujiang.cn/atom.xml" target="_blank">RSS</a></a>
+  </div>
 </div>
 
 <script>
   hljs.initHighlightingOnLoad()
 </script>
 
+            <script>
+    let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+  
+    // This should probably be throttled.
+    // Especially because it triggers during smooth scrolling.
+    // https://lodash.com/docs/4.17.10#throttle
+    // You could do like...
+    // window.addEventListener("scroll", () => {
+    //    _.throttle(doThatStuff, 100);
+    // });
+    // Only not doing it here to keep this Pen dependency-free.
+  
+    window.addEventListener("scroll", event => {
+      let fromTop = window.scrollY;
+  
+      mainNavLinks.forEach((link, index) => {
+        let section = document.getElementById(decodeURI(link.hash).substring(1));
+        let nextSection = null
+        if (mainNavLinks[index + 1]) {
+          nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+        }
+        if (section.offsetTop <= fromTop) {
+          if (nextSection) {
+            if (nextSection.offsetTop > fromTop) {
+              link.classList.add("current");
+            } else {
+              link.classList.remove("current");
+            }
+          } else {
+            link.classList.add("current");
+          }
+        } else {
+          link.classList.remove("current");
+        }
+      });
+    });
+</script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
 <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
 
 <script>
-  let images = document.querySelectorAll("figure > img"); 
-//   debugger
-//   console.log("dddd: "+ images);
+  let images = document.querySelectorAll("figure > img");
+  //   debugger
+  //   console.log("dddd: "+ images);
   images.forEach(image => {
     var parent = image.parentElement;
     parent.removeChild(image);
@@ -254,7 +301,10 @@ CharSequence label = resolveInfo.loadLabel(packageManager);
 //   <a data-fancybox="gallery" href="big_1.jpg"><img src="small_1.jpg"></a>
 // <a data-fancybox="gallery" href="big_2.jpg"><img src="small_2.jpg"></a>
 </script>
+
+        </div>
     </div>
-</div>
+
 </body>
+
 </html>

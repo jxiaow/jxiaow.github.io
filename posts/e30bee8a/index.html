@@ -1,4 +1,5 @@
 <html>
+
 <head>
     <meta charset="utf-8"/>
 <meta name="description" content=""/>
@@ -6,7 +7,7 @@
 
 <title>Dagger 2 Component 与 SubComponent | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://www.xiaowujiang.cn/favicon.ico?v=1607190063871">
+<link rel="shortcut icon" href="https://www.xiaowujiang.cn/favicon.ico?v=1607238760179">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://www.xiaowujiang.cn/styles/main.css">
@@ -29,9 +30,10 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
 </head>
+
 <body>
-<div class="main gt-bg-theme-color-first">
-    <nav class="navbar navbar-expand-lg">
+    <div class="main gt-bg-theme-color-first">
+        <nav class="navbar navbar-expand-lg">
     <a href="/">
         <div class="navbar-brand">
             <img class="user-avatar" src="/images/avatar.png" alt="头像">
@@ -81,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607190063871" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607238760179" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -89,28 +91,30 @@
     </div>
 </nav>
 
-    <div class="post-container">
-        <div class="post-detail gt-bg-theme-color-second">
-            <article class="gt-post-content">
-                <h2 class="post-title">
-                    Dagger 2 Component 与 SubComponent
-                </h2>
-                <div class="post-info">
-                    <time class="post-time gt-c-content-color-first">
-                        · 2020-12-05 ·
-                    </time>
-                    
+        <div class="post-container">
+
+            <div class="post-detail gt-bg-theme-color-second">
+                <article class="gt-post-content">
+                    <h2 class="post-title">
+                        Dagger 2 Component 与 SubComponent
+                    </h2>
+                    <div class="post-info">
+                        <time class="post-time gt-c-content-color-first">
+                            · 2020-12-05 ·
+                        </time>
+                        
                         <a href="https://www.xiaowujiang.cn/tag/f3tbfHeq9/" class="post-tags">
                             # Android
                         </a>
-                    
+                        
                         <a href="https://www.xiaowujiang.cn/tag/M2AgbDvmt8/" class="post-tags">
                             # Dagger2
                         </a>
-                    
-                </div>
-                <div class="post-content">
-                    <p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+                        
+                    </div>
+                    <div class="post-content-wrapper">
+                        <div class="post-content">
+                            <p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
 <a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
 <a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
 <a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
@@ -406,29 +410,54 @@ DaggerComponentOne.create().componentThreeBuilder()
 <h2 id="总结">总结</h2>
 <p>Component 之间共用相同依赖，可以有两种组织关系：依赖关系与继承关系。至于如何选择试具体情况而定，但在 Android 开发中，一般使用继承关系，以 AppComponent 作为 root Component，AppComponent 一般还会使用 @Singleton 作用域，而 ActivityComponent 为 SubComponent。</p>
 
-                </div>
-            </article>
-        </div>
+                        </div>
+                        <div class="toc-container">
+                            <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#component-%E7%9A%84%E7%BB%84%E7%BB%87%E5%85%B3%E7%B3%BB">Component 的组织关系</a>
+<ul>
+<li><a href="#%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB">依赖关系</a></li>
+<li><a href="#%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB">继承关系</a></li>
+<li><a href="#%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB-vs-%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB">依赖关系 vs 继承关系</a></li>
+</ul>
+</li>
+<li><a href="#subcomponent-%E7%9A%84%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98">SubComponent 的其他问题</a>
+<ul>
+<li><a href="#%E6%8A%BD%E8%B1%A1%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E5%AE%9A%E4%B9%89%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB">抽象工厂方法定义继承关系</a></li>
+<li><a href="#%E9%87%8D%E5%A4%8D%E7%9A%84-module">重复的 Module</a></li>
+</ul>
+</li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+</li>
+</ul>
 
-        
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>
                 <a href="https://www.xiaowujiang.cn/posts/b74c4b6c/" class="post-title gt-a-link">
                     Dagger 2 进阶使用
                 </a>
             </div>
-        
+            
 
-        
-            <span id="/posts/e30bee8a/" class="leancloud_visitors" data-flag-title="Dagger 2 Component 与 SubComponent">
+            
+            <span id="/posts/e30bee8a/" class="leancloud_visitors"
+                data-flag-title="Dagger 2 Component 与 SubComponent">
                 <em class="post-meta-item-text">阅读量 </em>
                 <i class="leancloud-visitors-count">0</i>
             </span>
-        
+            
 
-        
+            
 
-        
+            
             <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
 
 <style>
@@ -455,48 +484,86 @@ DaggerComponentOne.create().componentThreeBuilder()
 	});
 </script>
 
-        
+            
 
-        <div class="site-footer gt-c-content-color-first">
-    
-    <div class="social-container">
-        
-        <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
-            <i class="fab fa-github gt-c-content-color-first"></i>
-        </a>
-      
-        <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
-            <i class="fas fa-blog gt-c-content-color-first"></i>
-        </a>
-      
-        <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
-            <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
-        </a>
-      
-        <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
-            <i class="fas fa-envelope gt-c-content-color-first"></i>
-        </a>
-      
-    </div>
-    <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
-    
-    <div>
-        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://www.xiaowujiang.cn/atom.xml" target="_blank">RSS</a></a>
-    </div>
+            <div class="site-footer gt-c-content-color-first">
+
+  <div class="social-container">
+
+    <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
+      <i class="fab fa-github gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
+      <i class="fas fa-blog gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
+      <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
+    </a>
+
+    <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
+      <i class="fas fa-envelope gt-c-content-color-first"></i>
+    </a>
+
+  </div>
+  <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+  
+  <div>
+    Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a
+        href="https://www.xiaowujiang.cn/atom.xml" target="_blank">RSS</a></a>
+  </div>
 </div>
 
 <script>
   hljs.initHighlightingOnLoad()
 </script>
 
+            <script>
+    let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+  
+    // This should probably be throttled.
+    // Especially because it triggers during smooth scrolling.
+    // https://lodash.com/docs/4.17.10#throttle
+    // You could do like...
+    // window.addEventListener("scroll", () => {
+    //    _.throttle(doThatStuff, 100);
+    // });
+    // Only not doing it here to keep this Pen dependency-free.
+  
+    window.addEventListener("scroll", event => {
+      let fromTop = window.scrollY;
+  
+      mainNavLinks.forEach((link, index) => {
+        let section = document.getElementById(decodeURI(link.hash).substring(1));
+        let nextSection = null
+        if (mainNavLinks[index + 1]) {
+          nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+        }
+        if (section.offsetTop <= fromTop) {
+          if (nextSection) {
+            if (nextSection.offsetTop > fromTop) {
+              link.classList.add("current");
+            } else {
+              link.classList.remove("current");
+            }
+          } else {
+            link.classList.add("current");
+          }
+        } else {
+          link.classList.remove("current");
+        }
+      });
+    });
+</script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
 <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
 
 <script>
-  let images = document.querySelectorAll("figure > img"); 
-//   debugger
-//   console.log("dddd: "+ images);
+  let images = document.querySelectorAll("figure > img");
+  //   debugger
+  //   console.log("dddd: "+ images);
   images.forEach(image => {
     var parent = image.parentElement;
     parent.removeChild(image);
@@ -511,7 +578,10 @@ DaggerComponentOne.create().componentThreeBuilder()
 //   <a data-fancybox="gallery" href="big_1.jpg"><img src="small_1.jpg"></a>
 // <a data-fancybox="gallery" href="big_2.jpg"><img src="small_2.jpg"></a>
 </script>
+
+        </div>
     </div>
-</div>
+
 </body>
+
 </html>

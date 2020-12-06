@@ -447,7 +447,6 @@ ul li {
   margin: 0 3px;
   font-size: 13px;
   border-radius: 4px;
-  display: inline-block;
 }
 .gt-post-content pre {
   margin-bottom: 18px;
@@ -669,13 +668,14 @@ ul li {
   flex-direction: column;
   align-items: center;
   min-height: 100%;
+  min-width: 100%;
   flex: 1;
 }
 .post-container .post-detail {
   flex: 1;
   padding: 24px 32px;
-  width: 1000px;
   border-radius: 4px;
+  max-width: 80%;
 }
 .post-container .post-detail .post-title {
   font-size: 26px;
@@ -691,8 +691,62 @@ ul li {
 .post-container .post-detail .post-info .post-tag {
   padding: 8px 16px;
 }
-.post-container .post-detail .post-content {
+.post-container .post-detail .post-content-wrapper {
+  display: flex;
+  margin: auto;
+}
+.post-container .post-detail .post-content-wrapper .post-content {
   margin-top: 30px;
+  width: 80%;
+  flex-shrink: 0;
+}
+.post-container .post-detail .post-content-wrapper .toc-container {
+  margin-left: 10px;
+  width: 20%;
+  padding: 10px;
+  background: white;
+  margin-left: 20px;
+}
+.post-container .post-detail .post-content-wrapper .toc-container .markdownIt-TOC {
+  position: sticky;
+  top: 32px;
+  font-size: 12px;
+  list-style: none;
+  padding-left: 0;
+  padding: 16px 8px;
+}
+.post-container .post-detail .post-content-wrapper .toc-container .markdownIt-TOC:before {
+  position: absolute;
+  top: 0;
+  left: 8px;
+  bottom: 0;
+  width: 1px;
+  background-color: #ebedef;
+  opacity: 0.5;
+}
+.post-container .post-detail .post-content-wrapper .toc-container ul li {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: break-all;
+  list-style: none;
+  display: inline;
+  font-size: 12px;
+}
+.post-container .post-detail .post-content-wrapper .toc-container ul li a {
+  color: #495057 !important;
+  padding: 2px;
+  display: block;
+  transition: all 0.3s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.post-container .post-detail .post-content-wrapper .toc-container ul li a:hover {
+  background: #fafafa;
+}
+.post-container .post-detail .post-content-wrapper .toc-container ul li a.current {
+  color: #006CFF !important;
+  background: #fafafa;
 }
 .next-post {
   text-align: center;
@@ -716,6 +770,7 @@ ul li {
   .post-container .post-detail {
     width: 100%;
     margin-top: 20px;
+    max-width: 100%;
   }
   .post-container .post-detail .post-title {
     font-size: 20px;
@@ -725,6 +780,15 @@ ul li {
   #disqus_thread {
     padding: 24px 32px;
     width: 100%;
+  }
+}
+@media (max-width: 1150px) {
+  .toc-container {
+    display: none;
+  }
+  .post-content {
+    margin-top: 30px;
+    width: 100% !important;
   }
 }
 .archives-container {

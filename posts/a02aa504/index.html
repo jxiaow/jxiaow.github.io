@@ -1,4 +1,5 @@
 <html>
+
 <head>
     <meta charset="utf-8"/>
 <meta name="description" content=""/>
@@ -6,7 +7,7 @@
 
 <title>deepin日常使用 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://www.xiaowujiang.cn/favicon.ico?v=1607190063871">
+<link rel="shortcut icon" href="https://www.xiaowujiang.cn/favicon.ico?v=1607238760179">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://www.xiaowujiang.cn/styles/main.css">
@@ -29,9 +30,10 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
 </head>
+
 <body>
-<div class="main gt-bg-theme-color-first">
-    <nav class="navbar navbar-expand-lg">
+    <div class="main gt-bg-theme-color-first">
+        <nav class="navbar navbar-expand-lg">
     <a href="/">
         <div class="navbar-brand">
             <img class="user-avatar" src="/images/avatar.png" alt="头像">
@@ -81,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607190063871" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607238760179" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -89,20 +91,22 @@
     </div>
 </nav>
 
-    <div class="post-container">
-        <div class="post-detail gt-bg-theme-color-second">
-            <article class="gt-post-content">
-                <h2 class="post-title">
-                    deepin日常使用
-                </h2>
-                <div class="post-info">
-                    <time class="post-time gt-c-content-color-first">
-                        · 2019-06-26 ·
-                    </time>
-                    
-                </div>
-                <div class="post-content">
-                    <p><strong>持续更新中..................</strong></p>
+        <div class="post-container">
+
+            <div class="post-detail gt-bg-theme-color-second">
+                <article class="gt-post-content">
+                    <h2 class="post-title">
+                        deepin日常使用
+                    </h2>
+                    <div class="post-info">
+                        <time class="post-time gt-c-content-color-first">
+                            · 2019-06-26 ·
+                        </time>
+                        
+                    </div>
+                    <div class="post-content-wrapper">
+                        <div class="post-content">
+                            <p><strong>持续更新中..................</strong></p>
 <p>使用深度的<code>deepin</code>的<code>linux</code>发行版系统已经半年有余，对于一个开发者来说，日常使用基本满足并且开发的效率和编译的程序的效率相对于<code>win10</code>高很多，但是呢也会有一些小问题，下面是我刚接触到这个系统时遇到的一些，然后通过查找资料和实践做的一些笔记吧，这篇很不定时更新。</p>
 <!--more-->
 <h1 id="添加自定义程序到程序列表">添加自定义程序到程序列表</h1>
@@ -362,29 +366,73 @@ Exec=&quot;/opt/Mark Text/marktext&quot; --no-sandbox %F
 <pre><code class="language-shell">export IDEA_JDK= 文件解压的路径
 </code></pre>
 
-                </div>
-            </article>
-        </div>
+                        </div>
+                        <div class="toc-container">
+                            <ul class="markdownIt-TOC">
+<li><a href="#%E6%B7%BB%E5%8A%A0%E8%87%AA%E5%AE%9A%E4%B9%89%E7%A8%8B%E5%BA%8F%E5%88%B0%E7%A8%8B%E5%BA%8F%E5%88%97%E8%A1%A8">添加自定义程序到程序列表</a></li>
+<li><a href="#%E4%BF%AE%E6%94%B9%E6%A0%87%E9%A2%98%E6%A0%8F">修改标题栏</a></li>
+<li><a href="#java-jdk%E5%AE%89%E8%A3%85">JAVA JDK安装</a></li>
+<li><a href="#%E6%B7%BB%E5%8A%A0java%E5%92%8Candroid-sdk%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F">添加Java和Android SDK环境变量</a></li>
+<li><a href="#linux-%E4%BB%A3%E7%90%86">Linux 代理</a>
+<ul>
+<li><a href="#%E7%BB%88%E7%AB%AF%E4%BB%A3%E7%90%86">终端代理</a></li>
+<li><a href="#%E7%B3%BB%E7%BB%9F%E4%BB%A3%E7%90%86%E7%94%9F%E6%88%90pac%E6%96%87%E4%BB%B6">系统代理生成<code>pac</code>文件</a></li>
+<li><a href="#chrome%E8%AE%BE%E7%BD%AE%E4%BB%A3%E7%90%86">Chrome设置代理</a></li>
+</ul>
+</li>
+<li><a href="#git%E7%9B%B8%E5%85%B3">Git相关</a>
+<ul>
+<li><a href="#%E7%BB%88%E7%AB%AF-git%E9%A1%B9%E7%9B%AE%E8%B7%AF%E5%BE%84%E4%B8%8B%E6%98%BE%E7%A4%BAgit-%E5%88%86%E6%94%AF">终端 git项目路径下显示git 分支</a></li>
+<li><a href="#git-%E9%81%BF%E5%85%8D%E5%A4%9A%E6%AC%A1%E8%BE%93%E5%85%A5%E5%AF%86%E7%A0%81">git 避免多次输入密码</a></li>
+<li><a href="#git-fetch">git fetch</a></li>
+<li><a href="#github-%E6%B7%BB%E5%8A%A0ssh">Github 添加ssh</a><br>
+*
+<ul>
+<li><a href="#1-%E9%A6%96%E5%85%88%E9%9C%80%E8%A6%81%E6%A3%80%E6%9F%A5%E4%BD%A0%E7%94%B5%E8%84%91%E6%98%AF%E5%90%A6%E5%B7%B2%E7%BB%8F%E6%9C%89-ssh-key">1、首先需要检查你电脑是否已经有 SSH key</a></li>
+<li><a href="#2-%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA-ssh-key">2、创建一个 SSH key</a></li>
+<li><a href="#3-%E6%B7%BB%E5%8A%A0%E4%BD%A0%E7%9A%84-ssh-key-%E5%88%B0-github%E4%B8%8A%E9%9D%A2%E5%8E%BB">3、添加你的 SSH key 到 github上面去</a></li>
+<li><a href="#4-%E6%B5%8B%E8%AF%95%E4%B8%80%E4%B8%8B%E8%AF%A5ssh-key">4、测试一下该SSH key</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#playonlinux-%E4%B8%AD%E6%96%87%E6%94%AF%E6%8C%81">PlayOnLinux 中文支持</a></li>
+<li><a href="#xmind-zen-%E6%BF%80%E6%B4%BB">XMIND-ZEN 激活</a></li>
+<li><a href="#%E8%BF%9B%E5%85%A5tty">进入tty</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85%E8%BD%AF%E4%BB%B6%E7%BC%BA%E5%B0%91%E4%BE%9D%E8%B5%96%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3">安装软件缺少依赖问题解决</a></li>
+<li><a href="#deepin20-%E5%A4%A7%E5%9C%86%E8%A7%92%E4%BF%AE%E5%A4%8D%E8%A1%A5%E4%B8%81">deepin20 大圆角修复补丁</a></li>
+<li><a href="#marktext%E6%97%A0%E6%B3%95%E5%90%AF%E5%8A%A8">markText无法启动</a>
+<ul>
+<li><a href="#android-studio-%E5%92%8C-idea-%E8%BE%93%E5%85%A5%E6%B3%95%E5%85%89%E6%A0%87%E6%97%A0%E6%B3%95%E8%B7%9F%E9%9A%8F">Android Studio 和 IDEA 输入法光标无法跟随</a></li>
+</ul>
+</li>
+</ul>
 
-        
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>
                 <a href="https://www.xiaowujiang.cn/posts/ec91b04f/" class="post-title gt-a-link">
                     Git切换分支保存修改的代码
                 </a>
             </div>
-        
+            
 
-        
-            <span id="/posts/a02aa504/" class="leancloud_visitors" data-flag-title="deepin日常使用">
+            
+            <span id="/posts/a02aa504/" class="leancloud_visitors"
+                data-flag-title="deepin日常使用">
                 <em class="post-meta-item-text">阅读量 </em>
                 <i class="leancloud-visitors-count">0</i>
             </span>
-        
+            
 
-        
+            
 
-        
+            
             <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
 
 <style>
@@ -411,48 +459,86 @@ Exec=&quot;/opt/Mark Text/marktext&quot; --no-sandbox %F
 	});
 </script>
 
-        
+            
 
-        <div class="site-footer gt-c-content-color-first">
-    
-    <div class="social-container">
-        
-        <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
-            <i class="fab fa-github gt-c-content-color-first"></i>
-        </a>
-      
-        <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
-            <i class="fas fa-blog gt-c-content-color-first"></i>
-        </a>
-      
-        <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
-            <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
-        </a>
-      
-        <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
-            <i class="fas fa-envelope gt-c-content-color-first"></i>
-        </a>
-      
-    </div>
-    <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
-    
-    <div>
-        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://www.xiaowujiang.cn/atom.xml" target="_blank">RSS</a></a>
-    </div>
+            <div class="site-footer gt-c-content-color-first">
+
+  <div class="social-container">
+
+    <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
+      <i class="fab fa-github gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
+      <i class="fas fa-blog gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
+      <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
+    </a>
+
+    <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
+      <i class="fas fa-envelope gt-c-content-color-first"></i>
+    </a>
+
+  </div>
+  <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+  
+  <div>
+    Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a
+        href="https://www.xiaowujiang.cn/atom.xml" target="_blank">RSS</a></a>
+  </div>
 </div>
 
 <script>
   hljs.initHighlightingOnLoad()
 </script>
 
+            <script>
+    let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+  
+    // This should probably be throttled.
+    // Especially because it triggers during smooth scrolling.
+    // https://lodash.com/docs/4.17.10#throttle
+    // You could do like...
+    // window.addEventListener("scroll", () => {
+    //    _.throttle(doThatStuff, 100);
+    // });
+    // Only not doing it here to keep this Pen dependency-free.
+  
+    window.addEventListener("scroll", event => {
+      let fromTop = window.scrollY;
+  
+      mainNavLinks.forEach((link, index) => {
+        let section = document.getElementById(decodeURI(link.hash).substring(1));
+        let nextSection = null
+        if (mainNavLinks[index + 1]) {
+          nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+        }
+        if (section.offsetTop <= fromTop) {
+          if (nextSection) {
+            if (nextSection.offsetTop > fromTop) {
+              link.classList.add("current");
+            } else {
+              link.classList.remove("current");
+            }
+          } else {
+            link.classList.add("current");
+          }
+        } else {
+          link.classList.remove("current");
+        }
+      });
+    });
+</script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
 <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
 
 <script>
-  let images = document.querySelectorAll("figure > img"); 
-//   debugger
-//   console.log("dddd: "+ images);
+  let images = document.querySelectorAll("figure > img");
+  //   debugger
+  //   console.log("dddd: "+ images);
   images.forEach(image => {
     var parent = image.parentElement;
     parent.removeChild(image);
@@ -467,7 +553,10 @@ Exec=&quot;/opt/Mark Text/marktext&quot; --no-sandbox %F
 //   <a data-fancybox="gallery" href="big_1.jpg"><img src="small_1.jpg"></a>
 // <a data-fancybox="gallery" href="big_2.jpg"><img src="small_2.jpg"></a>
 </script>
+
+        </div>
     </div>
-</div>
+
 </body>
+
 </html>
