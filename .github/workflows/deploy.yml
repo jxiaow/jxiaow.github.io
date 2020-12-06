@@ -1,20 +1,3 @@
-
-name: Sync To Gitee
-on: # 触发条件
-  push:
-    branches: master # 仅向分支 push 时触发，该分支存放博客源文件
-jobs:
-  sync:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: wearerequired/git-mirror-action@master
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.GITEE_PRIVATE_KEY }}
-        with:
-          source-repo: "git@github.com:jxiaow/jxiaow.gitee.io.git"
-          destination-repo: "git@gitee.com:jxiaow/jxiaow.gitee.io.git"
-
-
 name: Sync
 on: # 触发条件
   push:
