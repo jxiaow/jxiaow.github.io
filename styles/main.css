@@ -1007,7 +1007,7 @@ Orginal Style from ethanschoonover.com/solarized (c) Jeremy Hull <sourdrums@gmai
 /* 代码滑块 */
 pre::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
+  height: 4px;
 }
 pre::-webkit-scrollbar-thumb {
   border-radius: 4px;
