@@ -520,8 +520,14 @@ DaggerComponentOne.create().componentThreeBuilder()
 </script>
 
             <script>
-    let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
-  
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+  if (mainNavLinks == null || mainNavLinks.length == 0) {
+    let tocContainer = document.querySelector(".toc-container");
+    tocContainer.classList.remove("toc-container")
+    tocContainer.parentElement.firstElementChild.style.width="100%"
+  } else {
+
     // This should probably be throttled.
     // Especially because it triggers during smooth scrolling.
     // https://lodash.com/docs/4.17.10#throttle
@@ -530,10 +536,11 @@ DaggerComponentOne.create().componentThreeBuilder()
     //    _.throttle(doThatStuff, 100);
     // });
     // Only not doing it here to keep this Pen dependency-free.
-  
+
+
     window.addEventListener("scroll", event => {
       let fromTop = window.scrollY;
-  
+
       mainNavLinks.forEach((link, index) => {
         let section = document.getElementById(decodeURI(link.hash).substring(1));
         let nextSection = null
@@ -555,6 +562,10 @@ DaggerComponentOne.create().componentThreeBuilder()
         }
       });
     });
+  }
+
+
+
 </script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
@@ -578,7 +589,6 @@ DaggerComponentOne.create().componentThreeBuilder()
 //   <a data-fancybox="gallery" href="big_1.jpg"><img src="small_1.jpg"></a>
 // <a data-fancybox="gallery" href="big_2.jpg"><img src="small_2.jpg"></a>
 </script>
-
         </div>
     </div>
 
