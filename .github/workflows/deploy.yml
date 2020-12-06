@@ -1,25 +1,48 @@
-name: Upate Gitee # Actions 名字
 
+name: Sync To Gitee
 on: # 触发条件
   push:
-    branches: master # 仅向 hexo-config 分支 push 时触发，该分支存放博客源文件
-  # Api的方式
-  # repository_dispatch:
-   # types: yuque
-      
+    branches: master # 仅向分支 push 时触发，该分支存放博客源文件
 jobs:
-  build: # job id
-    name: Build and publish # job 名，不写默认使用 job id
-    runs-on: ubuntu-latest # 运行环境，可选 ubuntu-latest, ubuntu-18.04, ubuntu-16.04, windows-latest, windows-2019, windows-2016, macOS-latest, macOS-10.14
-
+  sync:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1 # 拉取博客最新源文件
-      - name: publish gitee # 发布
+      - uses: wearerequired/git-mirror-action@master
         env:
-          GT_REF: gitee.com/jxiaow/jxiaow.gitee.io # Gitee 仓库 SSH 地址
-          GT_TOKEN: ${{ secrets.GITEE_TOKEN }} # 预先生成 GitHub Token
-        run: |
-          git config --global user.name "jxiaow"
-          git config --global user.email "jxiaow@126.com"
-          # Gitee Pages
-          git push --force --quiet "https://${GT_TOKEN}@${GT_REF}" master:master
+          SSH_PRIVATE_KEY: ${{ secrets.GITEE_PRIVATE_KEY }}
+        with:
+          source-repo: "git@github.com:jxiaow/jxiaow.gitee.io.git"
+          destination-repo: "git@gitee.com:jxiaow/jxiaow.gitee.io.git"
+
+
+name: Sync
+on: # 触发条件
+  push:
+    branches: master # 仅向分支 push 时触发，该分支存放博客源文件
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync to Gitee
+        uses: wearerequired/git-mirror-action@master
+        env:
+          # 注意在 Settings->Secrets 配置 GITEE_RSA_PRIVATE_KEY
+          SSH_PRIVATE_KEY: ${{ secrets.GITEE_PRIVATE_KEY }}
+        with:
+          # 注意替换为你的 GitHub 源仓库地址
+          source-repo: git@github.com:jxiaow/jxiaow.github.io.git
+          # 注意替换为你的 Gitee 目标仓库地址
+          destination-repo: git@gitee.com:jxiaow/jxiaow.github.io.git
+
+      - name: Build Gitee Pages
+        uses: yanglbme/gitee-pages-action@main
+        with:
+          # 注意替换为你的 Gitee 用户名
+          gitee-username: jxiaow
+          # 注意在 Settings->Secrets 配置 GITEE_PASSWORD
+          gitee-password: ${{ secrets.GITEE_PASSWORD }}
+          # 注意替换为你的 Gitee 仓库，仓库名严格区分大小写，请准确填写，否则会出错
+          gitee-repo: jxiaow/jxiaow.gitee.io
+          # 要部署的分支，默认是 master，若是其他分支，则需要指定（指定的分支必须存在）
+          branch: main
