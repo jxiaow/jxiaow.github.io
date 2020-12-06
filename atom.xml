@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://www.xiaowujiang.cn</id>
+    <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2020-12-06T10:51:17.178Z</updated>
+    <updated>2020-12-06T10:56:17.815Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://www.xiaowujiang.cn"/>
-    <link rel="self" href="https://www.xiaowujiang.cn/atom.xml"/>
+    <link rel="alternate" href="https://jxiaow.gitee.io"/>
+    <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
     <subtitle>心若没有栖息的地方，到哪里都是在流浪</subtitle>
-    <logo>https://www.xiaowujiang.cn/images/avatar.png</logo>
-    <icon>https://www.xiaowujiang.cn/favicon.ico</icon>
+    <logo>https://jxiaow.gitee.io/images/avatar.png</logo>
+    <icon>https://jxiaow.gitee.io/favicon.ico</icon>
     <rights>All rights reserved 2020, Xiaowu</rights>
     <entry>
         <title type="html"><![CDATA[Dagger2在Android中的使用]]></title>
-        <id>https://www.xiaowujiang.cn/posts/e781e647/</id>
-        <link href="https://www.xiaowujiang.cn/posts/e781e647/">
+        <id>https://jxiaow.gitee.io/posts/e781e647/</id>
+        <link href="https://jxiaow.gitee.io/posts/e781e647/">
         </link>
         <updated>2020-12-04T16:24:44.000Z</updated>
         <summary type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
@@ -288,8 +288,8 @@ class MainActivityProvidesModule {
     </entry>
     <entry>
         <title type="html"><![CDATA[Dagger 2 Component 与 SubComponent]]></title>
-        <id>https://www.xiaowujiang.cn/posts/e30bee8a/</id>
-        <link href="https://www.xiaowujiang.cn/posts/e30bee8a/">
+        <id>https://jxiaow.gitee.io/posts/e30bee8a/</id>
+        <link href="https://jxiaow.gitee.io/posts/e30bee8a/">
         </link>
         <updated>2020-12-04T16:23:48.000Z</updated>
         <summary type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
@@ -596,8 +596,8 @@ DaggerComponentOne.create().componentThreeBuilder()
     </entry>
     <entry>
         <title type="html"><![CDATA[Dagger 2 进阶使用]]></title>
-        <id>https://www.xiaowujiang.cn/posts/b74c4b6c/</id>
-        <link href="https://www.xiaowujiang.cn/posts/b74c4b6c/">
+        <id>https://jxiaow.gitee.io/posts/b74c4b6c/</id>
+        <link href="https://jxiaow.gitee.io/posts/b74c4b6c/">
         </link>
         <updated>2020-12-04T16:22:57.000Z</updated>
         <summary type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
@@ -1012,8 +1012,8 @@ interface MainActivityComponent {
     </entry>
     <entry>
         <title type="html"><![CDATA[Dagger 2 的基本使用与原理]]></title>
-        <id>https://www.xiaowujiang.cn/posts/cbb172f8/</id>
-        <link href="https://www.xiaowujiang.cn/posts/cbb172f8/">
+        <id>https://jxiaow.gitee.io/posts/cbb172f8/</id>
+        <link href="https://jxiaow.gitee.io/posts/cbb172f8/">
         </link>
         <updated>2020-12-04T16:21:41.000Z</updated>
         <summary type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
@@ -1355,8 +1355,8 @@ private A injectA2(A instance) {
     </entry>
     <entry>
         <title type="html"><![CDATA[Android DataBinding 从入门到进阶]]></title>
-        <id>https://www.xiaowujiang.cn/posts/3c6ea6b6/</id>
-        <link href="https://www.xiaowujiang.cn/posts/3c6ea6b6/">
+        <id>https://jxiaow.gitee.io/posts/3c6ea6b6/</id>
+        <link href="https://jxiaow.gitee.io/posts/3c6ea6b6/">
         </link>
         <updated>2020-12-04T16:19:45.000Z</updated>
         <summary type="html"><![CDATA[<p>DataBinding 是<code>google</code>发布的一个数据绑定框架，用于降低布局和逻辑的耦合性，使代码逻辑更加清晰。大量减少 Activity 内的代码，数据能够单向或双向绑定到 layout 文件中，有助于防止内存泄漏，而且能自动进行空检测以避免空指针异常。</p>
@@ -2216,8 +2216,8 @@ public static int convertStringToColor(String str) {
     </entry>
     <entry>
         <title type="html"><![CDATA[360加固Gradle插件实现]]></title>
-        <id>https://www.xiaowujiang.cn/posts/6c01e784/</id>
-        <link href="https://www.xiaowujiang.cn/posts/6c01e784/">
+        <id>https://jxiaow.gitee.io/posts/6c01e784/</id>
+        <link href="https://jxiaow.gitee.io/posts/6c01e784/">
         </link>
         <updated>2020-12-04T16:14:31.000Z</updated>
         <content type="html"><![CDATA[<p>最近码了一个基于360加固的流程实现的Gradle插件，在自动编译打包后进行360加固流程操作。只需要配置一些参数后，就可以实现自动打包编译和加固。</p>
@@ -2275,8 +2275,8 @@ dependencies {
     </entry>
     <entry>
         <title type="html"><![CDATA[Android通过Intent简单实现分享功能]]></title>
-        <id>https://www.xiaowujiang.cn/posts/73a6d0c4/</id>
-        <link href="https://www.xiaowujiang.cn/posts/73a6d0c4/">
+        <id>https://jxiaow.gitee.io/posts/73a6d0c4/</id>
+        <link href="https://jxiaow.gitee.io/posts/73a6d0c4/">
         </link>
         <updated>2020-12-04T16:03:24.000Z</updated>
         <summary type="html"><![CDATA[<p>现在大多数App的分享功能基本上使用的都是微信、QQ、微博的分享sdk或者是集成友盟分享sdk，如果想简单快速的实现分享功能，可以考虑通过<code>Intent</code>方式打开在系统中安装的具有分享功能的App的分享页面。</p>
@@ -2331,8 +2331,8 @@ CharSequence label = resolveInfo.loadLabel(packageManager);
     </entry>
     <entry>
         <title type="html"><![CDATA[Http框架封装]]></title>
-        <id>https://www.xiaowujiang.cn/posts/84a009ed/</id>
-        <link href="https://www.xiaowujiang.cn/posts/84a009ed/">
+        <id>https://jxiaow.gitee.io/posts/84a009ed/</id>
+        <link href="https://jxiaow.gitee.io/posts/84a009ed/">
         </link>
         <updated>2020-04-26T02:03:07.000Z</updated>
         <summary type="html"><![CDATA[<p>用过了现有的一些<code>http</code>请求框架，决定自己也来简单的封装一个。本文只是基于一些http请求框架二次封装的，高手勿喷。<a href="https://github.com/ixiaow/ppjoke/tree/master/network/src/main/java/com/mooc/network">源码</a></p>
@@ -2960,8 +2960,8 @@ public &lt;T&gt; void observe(LifecycleOwner owner,
     </entry>
     <entry>
         <title type="html"><![CDATA[PicGo搭建github图床]]></title>
-        <id>https://www.xiaowujiang.cn/posts/2513fba4/</id>
-        <link href="https://www.xiaowujiang.cn/posts/2513fba4/">
+        <id>https://jxiaow.gitee.io/posts/2513fba4/</id>
+        <link href="https://jxiaow.gitee.io/posts/2513fba4/">
         </link>
         <updated>2020-04-13T09:35:45.000Z</updated>
         <summary type="html"><![CDATA[<p>使用图床可以节省本地服务器空间，加快图片打开速度，对于写博客或者一些网站使用很有必要，本次介绍的是PicGo的使用。</p>
@@ -3036,8 +3036,8 @@ public &lt;T&gt; void observe(LifecycleOwner owner,
     </entry>
     <entry>
         <title type="html"><![CDATA[Dart 语言简述]]></title>
-        <id>https://www.xiaowujiang.cn/posts/b8c700d2/</id>
-        <link href="https://www.xiaowujiang.cn/posts/b8c700d2/">
+        <id>https://jxiaow.gitee.io/posts/b8c700d2/</id>
+        <link href="https://jxiaow.gitee.io/posts/b8c700d2/">
         </link>
         <updated>2019-12-04T16:24:44.000Z</updated>
         <summary type="html"><![CDATA[<p>最近开始接触Flutter相关的项目，通过源码、例子和一些资料的阅读，发现如果掌握了Dart的一些语法和一些基础对于Flutter的学习有着事半功倍的效果。下面是我在查阅一些资料和实际的开发中的一些总结。希望对今后的学习有所帮助。</p>
