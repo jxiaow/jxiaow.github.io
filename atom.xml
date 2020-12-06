@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2020-12-06T11:45:09.357Z</updated>
+    <updated>2020-12-06T13:23:44.825Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -3019,7 +3019,7 @@ public &lt;T&gt; void observe(LifecycleOwner owner,
 <p>⑦ 将其设置为默认图床</p>
 </li>
 </ul>
-<h1 id="注意事项">注意事项</h1>
+<p>** 注意事项**</p>
 <ul>
 <li>
 <p>如果仓库需要设置自定义域名，需要将我们的资源提交到一个<code>gh-pages</code>分区</p>
