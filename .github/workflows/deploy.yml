@@ -1,0 +1,29 @@
+name: Upate Gitee # Actions 名字
+
+on: # 触发条件
+  push:
+    branches: master # 仅向 hexo-config 分支 push 时触发，该分支存放博客源文件
+  # Api的方式
+  # repository_dispatch:
+   # types: yuque
+      
+jobs:
+  build: # job id
+    name: Build and publish # job 名，不写默认使用 job id
+    runs-on: ubuntu-latest # 运行环境，可选 ubuntu-latest, ubuntu-18.04, ubuntu-16.04, windows-latest, windows-2019, windows-2016, macOS-latest, macOS-10.14
+
+    steps:
+      - uses: actions/checkout@v1 # 拉取博客最新源文件
+      - name: publish gitee # 发布
+        env:
+          GT_REF: gitee.com/jxiaow/jxiaow.gitee.io # Gitee 仓库 SSH 地址
+          GT_TOKEN: ${{ secrets.GITEE_TOKEN }} # 预先生成 GitHub Token
+        run: |
+          cd .
+          git init
+          git config --global user.name "jxiaow"
+          git config --global user.email "jxiaow@126.com"
+          git add .
+          git commit -m "CI built at `date +"%Y-%m-%d %H:%M:%S"`"
+          # Gitee Pages
+          git push --force --quiet "https://${GT_TOKEN}@${GT_REF}" master:master
