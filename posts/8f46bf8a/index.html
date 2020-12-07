@@ -7,7 +7,7 @@
 
 <title>Java中的静态代码块在kotlin中的表现形式 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607336280860">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607340326696">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -47,7 +47,7 @@
         <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-nav mr-auto" style="text-align: center">
+        <div class="navbar-nav " style="text-align: center">
             
                 <div class="nav-item">
                     
@@ -83,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607336280860" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607340326696" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -93,24 +93,37 @@
 
         <div class="post-container">
 
-            <div class="post-detail gt-bg-theme-color-second">
-                <article class="gt-post-content">
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
                     <h2 class="post-title">
                         Java中的静态代码块在kotlin中的表现形式
                     </h2>
                     <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            · 2019-07-17 ·
-                        </time>
-                        
-                        <a href="https://jxiaow.gitee.io/tag/MdNTWVzNi/" class="post-tags">
-                            # kotlin
-                        </a>
-                        
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2019-07-17 ·
+                            </time>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/MdNTWVzNi/" class="post-tags">
+                                # kotlin
+                            </a>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/8f46bf8a/"
+                                class="leancloud_visitors" data-flag-title="Java中的静态代码块在kotlin中的表现形式">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
                     </div>
-                    <div class="post-content-wrapper">
-                        <div class="post-content">
-                            <p>在<code>java</code>中我们有时候会用到类的静态代码块来初始化一些变量，那么在<code>kotlin</code>中如何表示呢？</p>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <p>在<code>java</code>中我们有时候会用到类的静态代码块来初始化一些变量，那么在<code>kotlin</code>中如何表示呢？</p>
 <!--more-->
 <p>看以下代码：</p>
 <p><code>TestStatic.java</code></p>
@@ -163,13 +176,14 @@ public final class StaticTest {
 </code></pre>
 <p>可以看到，<code>init</code>方法最终被编译成了<code>static</code>代码块。</p>
 
-                        </div>
-                        <div class="toc-container">
-                            
-                        </div>
                     </div>
-                </article>
-            </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    
+                </div>
+            </article>
+            <!-- </div> -->
 
             
             <div class="next-post">
@@ -178,14 +192,6 @@ public final class StaticTest {
                     deepin日常使用
                 </a>
             </div>
-            
-
-            
-            <span id="/posts/8f46bf8a/" class="leancloud_visitors"
-                data-flag-title="Java中的静态代码块在kotlin中的表现形式">
-                <em class="post-meta-item-text">阅读量 </em>
-                <i class="leancloud-visitors-count">0</i>
-            </span>
             
 
             
@@ -254,11 +260,12 @@ public final class StaticTest {
 
             <script>
   let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
-
+  
   if (mainNavLinks == null || mainNavLinks.length == 0) {
     let tocContainer = document.querySelector(".toc-container");
     tocContainer.classList.remove("toc-container")
-    tocContainer.parentElement.firstElementChild.style.width="100%"
+    tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
   } else {
 
     // This should probably be throttled.

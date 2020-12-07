@@ -7,7 +7,7 @@
 
 <title>Dagger2在Android中的使用 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607336280860">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607340326696">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -47,7 +47,7 @@
         <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-nav mr-auto" style="text-align: center">
+        <div class="navbar-nav " style="text-align: center">
             
                 <div class="nav-item">
                     
@@ -83,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607336280860" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607340326696" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -93,28 +93,41 @@
 
         <div class="post-container">
 
-            <div class="post-detail gt-bg-theme-color-second">
-                <article class="gt-post-content">
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
                     <h2 class="post-title">
                         Dagger2在Android中的使用
                     </h2>
                     <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            · 2020-12-05 ·
-                        </time>
-                        
-                        <a href="https://jxiaow.gitee.io/tag/f3tbfHeq9/" class="post-tags">
-                            # Android
-                        </a>
-                        
-                        <a href="https://jxiaow.gitee.io/tag/M2AgbDvmt8/" class="post-tags">
-                            # Dagger2
-                        </a>
-                        
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2020-12-05 ·
+                            </time>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/f3tbfHeq9/" class="post-tags">
+                                # Android
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/M2AgbDvmt8/" class="post-tags">
+                                # Dagger2
+                            </a>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/e781e647/"
+                                class="leancloud_visitors" data-flag-title="Dagger2在Android中的使用">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
                     </div>
-                    <div class="post-content-wrapper">
-                        <div class="post-content">
-                            <p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
 <a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
 <a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
 <a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
@@ -378,9 +391,11 @@ class MainActivityProvidesModule {
 <li>Dagger2-Android 比Dagger2更强大，我们使用<code>@Binds</code>绑定抽象方法来注入一些提供初始化的类等。</li>
 </ol>
 
-                        </div>
-                        <div class="toc-container">
-                            <ul class="markdownIt-TOC">
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
 <li>
 <ul>
 <li><a href="#%E5%BC%95%E5%85%A5daggerandroid%E4%BE%9D%E8%B5%96">引入<code>Dagger.android</code>依赖</a></li>
@@ -409,10 +424,9 @@ class MainActivityProvidesModule {
 </li>
 </ul>
 
-                        </div>
-                    </div>
-                </article>
-            </div>
+                </div>
+            </article>
+            <!-- </div> -->
 
             
             <div class="next-post">
@@ -421,14 +435,6 @@ class MainActivityProvidesModule {
                     Dagger 2 Component 与 SubComponent
                 </a>
             </div>
-            
-
-            
-            <span id="/posts/e781e647/" class="leancloud_visitors"
-                data-flag-title="Dagger2在Android中的使用">
-                <em class="post-meta-item-text">阅读量 </em>
-                <i class="leancloud-visitors-count">0</i>
-            </span>
             
 
             
@@ -497,11 +503,12 @@ class MainActivityProvidesModule {
 
             <script>
   let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
-
+  
   if (mainNavLinks == null || mainNavLinks.length == 0) {
     let tocContainer = document.querySelector(".toc-container");
     tocContainer.classList.remove("toc-container")
-    tocContainer.parentElement.firstElementChild.style.width="100%"
+    tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
   } else {
 
     // This should probably be throttled.

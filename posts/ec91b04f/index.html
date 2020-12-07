@@ -7,7 +7,7 @@
 
 <title>Git切换分支保存修改的代码 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607336280860">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607340326696">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -47,7 +47,7 @@
         <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-nav mr-auto" style="text-align: center">
+        <div class="navbar-nav " style="text-align: center">
             
                 <div class="nav-item">
                     
@@ -83,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607336280860" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607340326696" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -93,20 +93,33 @@
 
         <div class="post-container">
 
-            <div class="post-detail gt-bg-theme-color-second">
-                <article class="gt-post-content">
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
                     <h2 class="post-title">
                         Git切换分支保存修改的代码
                     </h2>
                     <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            · 2018-07-15 ·
-                        </time>
-                        
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2018-07-15 ·
+                            </time>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/ec91b04f/"
+                                class="leancloud_visitors" data-flag-title="Git切换分支保存修改的代码">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
                     </div>
-                    <div class="post-content-wrapper">
-                        <div class="post-content">
-                            <p>在使用git同步代码的过程中，也许会碰到一个项目有好几个分支的情况，就拿我最近的项目来说，我创建了两个分支：<code>master</code>和<code>dev</code>。</p>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <p>在使用git同步代码的过程中，也许会碰到一个项目有好几个分支的情况，就拿我最近的项目来说，我创建了两个分支：<code>master</code>和<code>dev</code>。</p>
 <p>经常是在<code>dev</code>分支上开发好了，然后切换到<code>master</code>分支上进行<code>merge</code>, 但是有时候在<code>dev</code>分支上开发了一半，忽然又需要去<code>master</code>上改个需求或者<code>bug</code>，这时候该当如何呢？</p>
 <!--more-->
 <p>在这个场景下，我查找到了两种方式：</p>
@@ -139,9 +152,11 @@
 </li>
 </ul>
 
-                        </div>
-                        <div class="toc-container">
-                            <ul class="markdownIt-TOC">
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
 <li>
 <ul>
 <li><a href="#%E5%8F%8A%E6%97%B6commit%E4%BB%A3%E7%A0%81">及时<code>commit</code>代码</a></li>
@@ -150,10 +165,9 @@
 </li>
 </ul>
 
-                        </div>
-                    </div>
-                </article>
-            </div>
+                </div>
+            </article>
+            <!-- </div> -->
 
             
             <div class="next-post">
@@ -162,14 +176,6 @@
                     Git压缩提交记录次数
                 </a>
             </div>
-            
-
-            
-            <span id="/posts/ec91b04f/" class="leancloud_visitors"
-                data-flag-title="Git切换分支保存修改的代码">
-                <em class="post-meta-item-text">阅读量 </em>
-                <i class="leancloud-visitors-count">0</i>
-            </span>
             
 
             
@@ -238,11 +244,12 @@
 
             <script>
   let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
-
+  
   if (mainNavLinks == null || mainNavLinks.length == 0) {
     let tocContainer = document.querySelector(".toc-container");
     tocContainer.classList.remove("toc-container")
-    tocContainer.parentElement.firstElementChild.style.width="100%"
+    tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
   } else {
 
     // This should probably be throttled.

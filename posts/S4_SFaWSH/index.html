@@ -7,7 +7,7 @@
 
 <title>网站收藏 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607336280860">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607340326696">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -47,7 +47,7 @@
         <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-nav mr-auto" style="text-align: center">
+        <div class="navbar-nav " style="text-align: center">
             
                 <div class="nav-item">
                     
@@ -83,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607336280860" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607340326696" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -93,24 +93,37 @@
 
         <div class="post-container">
 
-            <div class="post-detail gt-bg-theme-color-second">
-                <article class="gt-post-content">
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
                     <h2 class="post-title">
                         网站收藏
                     </h2>
                     <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            · 2020-12-07 ·
-                        </time>
-                        
-                        <a href="https://jxiaow.gitee.io/tag/EVJUeHK3V/" class="post-tags">
-                            # favourite
-                        </a>
-                        
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2020-12-07 ·
+                            </time>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/EVJUeHK3V/" class="post-tags">
+                                # favourite
+                            </a>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/S4_SFaWSH/"
+                                class="leancloud_visitors" data-flag-title="网站收藏">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
                     </div>
-                    <div class="post-content-wrapper">
-                        <div class="post-content">
-                            <h1 id="android">Android</h1>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <h1 id="android">Android</h1>
 <ul>
 <li>9Path网站  <a href="http://inloop.github.io/shadow4android/">Android Shadow Generator</a></li>
 <li>Android 源码查看网站 <a href="https://cs.android.com/">https://cs.android.com</a></li>
@@ -155,9 +168,11 @@
 <li>学习 Web 开发 | MDN (mozilla.org) <a href="https://onlineconvertfree.com/zh/convert-format/png-to-svg/">https://onlineconvertfree.com/zh/convert-format/png-to-svg/</a></li>
 </ul>
 
-                        </div>
-                        <div class="toc-container">
-                            <ul class="markdownIt-TOC">
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
 <li><a href="#android">Android</a></li>
 <li><a href="#%E4%BB%93%E5%BA%93%E5%9C%B0%E5%9D%80">仓库地址</a></li>
 <li><a href="#%E5%B7%A5%E5%85%B7%E7%A0%B4%E8%A7%A3">工具破解</a></li>
@@ -169,10 +184,9 @@
 <li><a href="#%E5%AD%A6%E4%B9%A0%E6%95%99%E7%A8%8B">学习教程</a></li>
 </ul>
 
-                        </div>
-                    </div>
-                </article>
-            </div>
+                </div>
+            </article>
+            <!-- </div> -->
 
             
             <div class="next-post">
@@ -181,14 +195,6 @@
                     Dagger2在Android中的使用
                 </a>
             </div>
-            
-
-            
-            <span id="/posts/S4_SFaWSH/" class="leancloud_visitors"
-                data-flag-title="网站收藏">
-                <em class="post-meta-item-text">阅读量 </em>
-                <i class="leancloud-visitors-count">0</i>
-            </span>
             
 
             
@@ -257,11 +263,12 @@
 
             <script>
   let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
-
+  
   if (mainNavLinks == null || mainNavLinks.length == 0) {
     let tocContainer = document.querySelector(".toc-container");
     tocContainer.classList.remove("toc-container")
-    tocContainer.parentElement.firstElementChild.style.width="100%"
+    tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
   } else {
 
     // This should probably be throttled.

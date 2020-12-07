@@ -7,7 +7,7 @@
 
 <title>Git修改历史提交信息（包含作者信息） | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607336280860">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607340326696">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -47,7 +47,7 @@
         <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-nav mr-auto" style="text-align: center">
+        <div class="navbar-nav " style="text-align: center">
             
                 <div class="nav-item">
                     
@@ -83,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607336280860" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607340326696" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -93,20 +93,33 @@
 
         <div class="post-container">
 
-            <div class="post-detail gt-bg-theme-color-second">
-                <article class="gt-post-content">
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
                     <h2 class="post-title">
                         Git修改历史提交信息（包含作者信息）
                     </h2>
                     <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            · 2018-07-15 ·
-                        </time>
-                        
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2018-07-15 ·
+                            </time>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/6314a567/"
+                                class="leancloud_visitors" data-flag-title="Git修改历史提交信息（包含作者信息）">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
                     </div>
-                    <div class="post-content-wrapper">
-                        <div class="post-content">
-                            <p>最近学到了 git 的一招对我来说的新技巧：<strong>修改历史提交的 author</strong>。</p>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <p>最近学到了 git 的一招对我来说的新技巧：<strong>修改历史提交的 author</strong>。</p>
 <p>在某天打开码云，查看项目时，发现贡献者好几个，我就纳闷了我一个人写的代码怎么会有好几个贡献者，最后通过<code>git log</code>查看提交信息发现，确实是在提交的过程中用了好几个用户名，于是就百度了一下git命令，最后让我找到了<code>git rebase</code>。</p>
 <!-- more -->
 <h3 id="使用方式">使用方式</h3>
@@ -145,9 +158,11 @@ Successfully rebased and updated refs/heads/master.
 </code></pre>
 <p><strong>注意</strong>: 在本次操作中用到了<code>git</code>命令行和<code>vim</code>编辑模式，不明白的话就自行百度吧。</p>
 
-                        </div>
-                        <div class="toc-container">
-                            <ul class="markdownIt-TOC">
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
 <li>
 <ul>
 <li>
@@ -159,19 +174,10 @@ Successfully rebased and updated refs/heads/master.
 </li>
 </ul>
 
-                        </div>
-                    </div>
-                </article>
-            </div>
+                </div>
+            </article>
+            <!-- </div> -->
 
-            
-
-            
-            <span id="/posts/6314a567/" class="leancloud_visitors"
-                data-flag-title="Git修改历史提交信息（包含作者信息）">
-                <em class="post-meta-item-text">阅读量 </em>
-                <i class="leancloud-visitors-count">0</i>
-            </span>
             
 
             
@@ -240,11 +246,12 @@ Successfully rebased and updated refs/heads/master.
 
             <script>
   let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
-
+  
   if (mainNavLinks == null || mainNavLinks.length == 0) {
     let tocContainer = document.querySelector(".toc-container");
     tocContainer.classList.remove("toc-container")
-    tocContainer.parentElement.firstElementChild.style.width="100%"
+    tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
   } else {
 
     // This should probably be throttled.

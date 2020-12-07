@@ -7,7 +7,7 @@
 
 <title>App启动优化 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607336280860">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607340326696">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -47,7 +47,7 @@
         <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-nav mr-auto" style="text-align: center">
+        <div class="navbar-nav " style="text-align: center">
             
                 <div class="nav-item">
                     
@@ -83,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607336280860" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607340326696" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -93,20 +93,33 @@
 
         <div class="post-container">
 
-            <div class="post-detail gt-bg-theme-color-second">
-                <article class="gt-post-content">
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
                     <h2 class="post-title">
                         App启动优化
                     </h2>
                     <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            · 2019-07-17 ·
-                        </time>
-                        
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2019-07-17 ·
+                            </time>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/6241fe4b/"
+                                class="leancloud_visitors" data-flag-title="App启动优化">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
                     </div>
-                    <div class="post-content-wrapper">
-                        <div class="post-content">
-                            <p>随着手机的运行内存（RAM）越来越大，CPU处理能力越来越强的情况，App的启动速度给用户的印象越来越重要，所以App启动优化也势在必行，下面是我在App优化过程中做的一些笔记。</p>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <p>随着手机的运行内存（RAM）越来越大，CPU处理能力越来越强的情况，App的启动速度给用户的印象越来越重要，所以App启动优化也势在必行，下面是我在App优化过程中做的一些笔记。</p>
 <!-- more -->
 <h2 id="android-系统的启动">Android 系统的启动</h2>
 <p>Android开机执行过程如下图所示：</p>
@@ -246,9 +259,11 @@ Debug.stopMethodTracing();
 <li>懒加载， 用到的时候才去初始化，一些常量的初始化可以使用类的静态代码块去处理。</li>
 </ol>
 
-                        </div>
-                        <div class="toc-container">
-                            <ul class="markdownIt-TOC">
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
 <li>
 <ul>
 <li><a href="#android-%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%90%AF%E5%8A%A8">Android 系统的启动</a></li>
@@ -275,10 +290,9 @@ Debug.stopMethodTracing();
 </li>
 </ul>
 
-                        </div>
-                    </div>
-                </article>
-            </div>
+                </div>
+            </article>
+            <!-- </div> -->
 
             
             <div class="next-post">
@@ -287,14 +301,6 @@ Debug.stopMethodTracing();
                     Java中的静态代码块在kotlin中的表现形式
                 </a>
             </div>
-            
-
-            
-            <span id="/posts/6241fe4b/" class="leancloud_visitors"
-                data-flag-title="App启动优化">
-                <em class="post-meta-item-text">阅读量 </em>
-                <i class="leancloud-visitors-count">0</i>
-            </span>
             
 
             
@@ -363,11 +369,12 @@ Debug.stopMethodTracing();
 
             <script>
   let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
-
+  
   if (mainNavLinks == null || mainNavLinks.length == 0) {
     let tocContainer = document.querySelector(".toc-container");
     tocContainer.classList.remove("toc-container")
-    tocContainer.parentElement.firstElementChild.style.width="100%"
+    tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
   } else {
 
     // This should probably be throttled.

@@ -7,7 +7,7 @@
 
 <title>Dagger 2 Component 与 SubComponent | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607336280860">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607340326696">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -47,7 +47,7 @@
         <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-nav mr-auto" style="text-align: center">
+        <div class="navbar-nav " style="text-align: center">
             
                 <div class="nav-item">
                     
@@ -83,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607336280860" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607340326696" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -93,28 +93,41 @@
 
         <div class="post-container">
 
-            <div class="post-detail gt-bg-theme-color-second">
-                <article class="gt-post-content">
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
                     <h2 class="post-title">
                         Dagger 2 Component 与 SubComponent
                     </h2>
                     <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            · 2020-12-05 ·
-                        </time>
-                        
-                        <a href="https://jxiaow.gitee.io/tag/f3tbfHeq9/" class="post-tags">
-                            # Android
-                        </a>
-                        
-                        <a href="https://jxiaow.gitee.io/tag/M2AgbDvmt8/" class="post-tags">
-                            # Dagger2
-                        </a>
-                        
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2020-12-05 ·
+                            </time>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/f3tbfHeq9/" class="post-tags">
+                                # Android
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/M2AgbDvmt8/" class="post-tags">
+                                # Dagger2
+                            </a>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/e30bee8a/"
+                                class="leancloud_visitors" data-flag-title="Dagger 2 Component 与 SubComponent">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
                     </div>
-                    <div class="post-content-wrapper">
-                        <div class="post-content">
-                            <p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
 <a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
 <a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
 <a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
@@ -410,9 +423,11 @@ DaggerComponentOne.create().componentThreeBuilder()
 <h2 id="总结">总结</h2>
 <p>Component 之间共用相同依赖，可以有两种组织关系：依赖关系与继承关系。至于如何选择试具体情况而定，但在 Android 开发中，一般使用继承关系，以 AppComponent 作为 root Component，AppComponent 一般还会使用 @Singleton 作用域，而 ActivityComponent 为 SubComponent。</p>
 
-                        </div>
-                        <div class="toc-container">
-                            <ul class="markdownIt-TOC">
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
 <li>
 <ul>
 <li><a href="#component-%E7%9A%84%E7%BB%84%E7%BB%87%E5%85%B3%E7%B3%BB">Component 的组织关系</a>
@@ -433,10 +448,9 @@ DaggerComponentOne.create().componentThreeBuilder()
 </li>
 </ul>
 
-                        </div>
-                    </div>
-                </article>
-            </div>
+                </div>
+            </article>
+            <!-- </div> -->
 
             
             <div class="next-post">
@@ -445,14 +459,6 @@ DaggerComponentOne.create().componentThreeBuilder()
                     Dagger 2 进阶使用
                 </a>
             </div>
-            
-
-            
-            <span id="/posts/e30bee8a/" class="leancloud_visitors"
-                data-flag-title="Dagger 2 Component 与 SubComponent">
-                <em class="post-meta-item-text">阅读量 </em>
-                <i class="leancloud-visitors-count">0</i>
-            </span>
             
 
             
@@ -521,11 +527,12 @@ DaggerComponentOne.create().componentThreeBuilder()
 
             <script>
   let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
-
+  
   if (mainNavLinks == null || mainNavLinks.length == 0) {
     let tocContainer = document.querySelector(".toc-container");
     tocContainer.classList.remove("toc-container")
-    tocContainer.parentElement.firstElementChild.style.width="100%"
+    tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
   } else {
 
     // This should probably be throttled.

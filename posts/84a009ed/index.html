@@ -7,7 +7,7 @@
 
 <title>Http框架封装 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607336280860">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607340326696">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -47,7 +47,7 @@
         <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-nav mr-auto" style="text-align: center">
+        <div class="navbar-nav " style="text-align: center">
             
                 <div class="nav-item">
                     
@@ -83,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607336280860" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607340326696" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -93,20 +93,33 @@
 
         <div class="post-container">
 
-            <div class="post-detail gt-bg-theme-color-second">
-                <article class="gt-post-content">
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
                     <h2 class="post-title">
                         Http框架封装
                     </h2>
                     <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            · 2020-04-26 ·
-                        </time>
-                        
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2020-04-26 ·
+                            </time>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/84a009ed/"
+                                class="leancloud_visitors" data-flag-title="Http框架封装">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
                     </div>
-                    <div class="post-content-wrapper">
-                        <div class="post-content">
-                            <p>用过了现有的一些<code>http</code>请求框架，决定自己也来简单的封装一个。本文只是基于一些http请求框架二次封装的，高手勿喷。<a href="https://github.com/ixiaow/ppjoke/tree/master/network/src/main/java/com/mooc/network">源码</a></p>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <p>用过了现有的一些<code>http</code>请求框架，决定自己也来简单的封装一个。本文只是基于一些http请求框架二次封装的，高手勿喷。<a href="https://github.com/ixiaow/ppjoke/tree/master/network/src/main/java/com/mooc/network">源码</a></p>
 <!-- more -->
 <h2 id="http的请求和响应">http的请求和响应</h2>
 <p>一个http的请求通常包含请求头、请求体、响应头和响应体，考虑到这些因素，<code>HttpConfig</code>和 <code>ApiResponse</code>就诞生了: <a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/http/HttpConfig.java">HttpConfig</a></p>
@@ -726,9 +739,11 @@ public &lt;T&gt; void observe(LifecycleOwner owner,
 }
 </code></pre>
 
-                        </div>
-                        <div class="toc-container">
-                            <ul class="markdownIt-TOC">
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
 <li>
 <ul>
 <li><a href="#http%E7%9A%84%E8%AF%B7%E6%B1%82%E5%92%8C%E5%93%8D%E5%BA%94">http的请求和响应</a>
@@ -788,10 +803,9 @@ public &lt;T&gt; void observe(LifecycleOwner owner,
 </li>
 </ul>
 
-                        </div>
-                    </div>
-                </article>
-            </div>
+                </div>
+            </article>
+            <!-- </div> -->
 
             
             <div class="next-post">
@@ -800,14 +814,6 @@ public &lt;T&gt; void observe(LifecycleOwner owner,
                     PicGo搭建github图床
                 </a>
             </div>
-            
-
-            
-            <span id="/posts/84a009ed/" class="leancloud_visitors"
-                data-flag-title="Http框架封装">
-                <em class="post-meta-item-text">阅读量 </em>
-                <i class="leancloud-visitors-count">0</i>
-            </span>
             
 
             
@@ -876,11 +882,12 @@ public &lt;T&gt; void observe(LifecycleOwner owner,
 
             <script>
   let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
-
+  
   if (mainNavLinks == null || mainNavLinks.length == 0) {
     let tocContainer = document.querySelector(".toc-container");
     tocContainer.classList.remove("toc-container")
-    tocContainer.parentElement.firstElementChild.style.width="100%"
+    tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
   } else {
 
     // This should probably be throttled.

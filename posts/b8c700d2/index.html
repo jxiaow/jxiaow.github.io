@@ -7,7 +7,7 @@
 
 <title>Dart 语言简述 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607336280860">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607340326696">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -47,7 +47,7 @@
         <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-nav mr-auto" style="text-align: center">
+        <div class="navbar-nav " style="text-align: center">
             
                 <div class="nav-item">
                     
@@ -83,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607336280860" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607340326696" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -93,20 +93,33 @@
 
         <div class="post-container">
 
-            <div class="post-detail gt-bg-theme-color-second">
-                <article class="gt-post-content">
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
                     <h2 class="post-title">
                         Dart 语言简述
                     </h2>
                     <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            · 2019-12-05 ·
-                        </time>
-                        
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2019-12-05 ·
+                            </time>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/b8c700d2/"
+                                class="leancloud_visitors" data-flag-title="Dart 语言简述">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
                     </div>
-                    <div class="post-content-wrapper">
-                        <div class="post-content">
-                            <p>最近开始接触Flutter相关的项目，通过源码、例子和一些资料的阅读，发现如果掌握了Dart的一些语法和一些基础对于Flutter的学习有着事半功倍的效果。下面是我在查阅一些资料和实际的开发中的一些总结。希望对今后的学习有所帮助。</p>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <p>最近开始接触Flutter相关的项目，通过源码、例子和一些资料的阅读，发现如果掌握了Dart的一些语法和一些基础对于Flutter的学习有着事半功倍的效果。下面是我在查阅一些资料和实际的开发中的一些总结。希望对今后的学习有所帮助。</p>
 <!--more-->
 <blockquote>
 <p>Dart 诞生于 2011.10.10 日， 谷歌 Dart 语言项目的领导人 Lars Bak 在丹麦举行的Goto 会议上 布， Dart 种“结构化的 Web 程”语言， Dart 编程语言在所有现代浏览器和环境中提供高性能。</p>
@@ -974,9 +987,11 @@ void testScheduleMicrotask(){
 </li>
 </ul>
 
-                        </div>
-                        <div class="toc-container">
-                            <ul class="markdownIt-TOC">
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
 <li>
 <ul>
 <li><a href="#%E5%8F%98%E9%87%8F%E4%B8%8E%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B">变量与基本类型</a>
@@ -1042,10 +1057,9 @@ void testScheduleMicrotask(){
 </li>
 </ul>
 
-                        </div>
-                    </div>
-                </article>
-            </div>
+                </div>
+            </article>
+            <!-- </div> -->
 
             
             <div class="next-post">
@@ -1054,14 +1068,6 @@ void testScheduleMicrotask(){
                     Java高级语言特性
                 </a>
             </div>
-            
-
-            
-            <span id="/posts/b8c700d2/" class="leancloud_visitors"
-                data-flag-title="Dart 语言简述">
-                <em class="post-meta-item-text">阅读量 </em>
-                <i class="leancloud-visitors-count">0</i>
-            </span>
             
 
             
@@ -1130,11 +1136,12 @@ void testScheduleMicrotask(){
 
             <script>
   let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
-
+  
   if (mainNavLinks == null || mainNavLinks.length == 0) {
     let tocContainer = document.querySelector(".toc-container");
     tocContainer.classList.remove("toc-container")
-    tocContainer.parentElement.firstElementChild.style.width="100%"
+    tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
   } else {
 
     // This should probably be throttled.

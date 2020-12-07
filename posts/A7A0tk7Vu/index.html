@@ -7,7 +7,7 @@
 
 <title>Typora + PicGo-Core + Github 实现图片上传到Github | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607336280860">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607340326696">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -47,7 +47,7 @@
         <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-nav mr-auto" style="text-align: center">
+        <div class="navbar-nav " style="text-align: center">
             
                 <div class="nav-item">
                     
@@ -83,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607336280860" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607340326696" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -93,32 +93,45 @@
 
         <div class="post-container">
 
-            <div class="post-detail gt-bg-theme-color-second">
-                <article class="gt-post-content">
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
                     <h2 class="post-title">
                         Typora + PicGo-Core + Github 实现图片上传到Github
                     </h2>
                     <div class="post-info">
-                        <time class="post-time gt-c-content-color-first">
-                            · 2020-11-07 ·
-                        </time>
-                        
-                        <a href="https://jxiaow.gitee.io/tag/0OrIPjcs6/" class="post-tags">
-                            # Typora
-                        </a>
-                        
-                        <a href="https://jxiaow.gitee.io/tag/eW38P0w-Zy/" class="post-tags">
-                            # PicGo
-                        </a>
-                        
-                        <a href="https://jxiaow.gitee.io/tag/9qCsgBZE1z/" class="post-tags">
-                            # Github
-                        </a>
-                        
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2020-11-07 ·
+                            </time>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/0OrIPjcs6/" class="post-tags">
+                                # Typora
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/eW38P0w-Zy/" class="post-tags">
+                                # PicGo
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/9qCsgBZE1z/" class="post-tags">
+                                # Github
+                            </a>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/A7A0tk7Vu/"
+                                class="leancloud_visitors" data-flag-title="Typora + PicGo-Core + Github 实现图片上传到Github">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
                     </div>
-                    <div class="post-content-wrapper">
-                        <div class="post-content">
-                            <p>为了解决<code>为知笔记</code>使用<code>Typora</code>编辑<code>markdown</code>文件图片丢失的问题，我采用了<code>PicGo-Core +Github</code>实现了自定图床的功能。</p>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <p>为了解决<code>为知笔记</code>使用<code>Typora</code>编辑<code>markdown</code>文件图片丢失的问题，我采用了<code>PicGo-Core +Github</code>实现了自定图床的功能。</p>
 <!--more-->
 <h2 id="下载picgo-core">下载PicGo-Core</h2>
 <p>由于我的电脑有<code>nodejs</code>环境，所以我使用的是<code>npm</code>命令安装<code>picgo</code>, 命令如下：</p>
@@ -205,9 +218,11 @@
 <p><strong>注意：</strong> 由于这个插件安装过程中需要下载字体，会导致下载特别慢，尽可能使用代理。</p>
 <p><strong>website:</strong> <a href="https://xiaowujiang.cn">xiaowujiang.cn</a></p>
 
-                        </div>
-                        <div class="toc-container">
-                            <ul class="markdownIt-TOC">
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
 <li>
 <ul>
 <li><a href="#%E4%B8%8B%E8%BD%BDpicgo-core">下载PicGo-Core</a></li>
@@ -225,10 +240,9 @@
 </li>
 </ul>
 
-                        </div>
-                    </div>
-                </article>
-            </div>
+                </div>
+            </article>
+            <!-- </div> -->
 
             
             <div class="next-post">
@@ -237,14 +251,6 @@
                     Http框架封装
                 </a>
             </div>
-            
-
-            
-            <span id="/posts/A7A0tk7Vu/" class="leancloud_visitors"
-                data-flag-title="Typora + PicGo-Core + Github 实现图片上传到Github">
-                <em class="post-meta-item-text">阅读量 </em>
-                <i class="leancloud-visitors-count">0</i>
-            </span>
             
 
             
@@ -313,11 +319,12 @@
 
             <script>
   let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
-
+  
   if (mainNavLinks == null || mainNavLinks.length == 0) {
     let tocContainer = document.querySelector(".toc-container");
     tocContainer.classList.remove("toc-container")
-    tocContainer.parentElement.firstElementChild.style.width="100%"
+    tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
   } else {
 
     // This should probably be throttled.
