@@ -508,7 +508,7 @@ ul li {
   margin-left: 16px;
 }
 .navbar .navbar-nav {
-  width: 100%;
+  width: 80%;
   justify-content: flex-end;
 }
 .navbar .navbar-nav .nav-item {
@@ -1018,7 +1018,7 @@ pre::-webkit-scrollbar-thumb:hover {
 }
 code::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
+  height: 4px;
 }
 code::-webkit-scrollbar-thumb {
   border-radius: 6px;
