@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2020-12-07T09:02:46.965Z</updated>
+    <updated>2020-12-07T09:32:52.743Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -2382,6 +2382,102 @@ CharSequence label = resolveInfo.loadLabel(packageManager);
 ]]></content>
     </entry>
     <entry>
+        <title type="html"><![CDATA[Typora + PicGo-Core + Github 实现图片上传到Github]]></title>
+        <id>https://jxiaow.gitee.io/posts/A7A0tk7Vu/</id>
+        <link href="https://jxiaow.gitee.io/posts/A7A0tk7Vu/">
+        </link>
+        <updated>2020-11-07T08:10:37.000Z</updated>
+        <summary type="html"><![CDATA[<p>为了解决<code>为知笔记</code>使用<code>Typora</code>编辑<code>markdown</code>文件图片丢失的问题，我采用了<code>PicGo-Core +Github</code>实现了自定图床的功能。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>为了解决<code>为知笔记</code>使用<code>Typora</code>编辑<code>markdown</code>文件图片丢失的问题，我采用了<code>PicGo-Core +Github</code>实现了自定图床的功能。</p>
+<!--more-->
+<h2 id="下载picgo-core">下载PicGo-Core</h2>
+<p>由于我的电脑有<code>nodejs</code>环境，所以我使用的是<code>npm</code>命令安装<code>picgo</code>, 命令如下：</p>
+<pre><code class="language-shell">npm install picgo -g
+</code></pre>
+<p>安装完成后，检查命令行输出, 记录下红色框内的路径。<br>
+<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105201730919.png" alt="image-20201105201730919" loading="lazy"></p>
+<p>输入命令查看版本，如果有输出则添加成功。</p>
+<pre><code class="language-shell">picgo -v
+</code></pre>
+<h2 id="安装github-plus">安装github-plus</h2>
+<p>官方提供的github上传图库不好用，安装一款新的上传插件<code>github-plus</code>, 命令行执行：</p>
+<pre><code class="language-shell">picgo install github-plus
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105223054898.png" alt="image-20201105223054898" loading="lazy"></figure>
+<p>安装成功后会有提示。</p>
+<h2 id="typora图像设置">Typora图像设置</h2>
+<p>在<code>Typora</code>中配置图像上传信息。</p>
+<h3 id="设置picgo的配置信息">设置PicGo的配置信息</h3>
+<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105223720354.png" alt="" loading="lazy"></figure>
+<p>如上图所示，分为2个步骤：</p>
+<ol>
+<li><strong>上传服务</strong>选择<code>PicGo-Core(command line)</code></li>
+<li>打开配置文件，在打开的配置文件，添加相关信息。</li>
+</ol>
+<pre><code class="language-json">{
+ &quot;picBed&quot;: {
+   &quot;uploader&quot;: &quot;githubPlus&quot;,
+   &quot;current&quot;: &quot;githubPlus&quot;,
+   &quot;githubPlus&quot;: {
+     &quot;branch&quot;: &quot;master&quot;,// 仓库分支
+     &quot;customUrl&quot;: &quot;https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest&quot;, // 访问的自定义url
+     &quot;origin&quot;: &quot;github&quot;, // 存放的图片类型
+     &quot;repo&quot;: &quot;jxiaow/cdn-images&quot;, // 存放图片的仓库
+     &quot;path&quot;: &quot;blog-images&quot;,// 存放图片的仓库目录下的文件夹
+     &quot;token&quot;: &quot;&quot; // 访问github的仓库的token, 不知道怎么设置的自行百度
+   }
+ },
+ &quot;picgoPlugins&quot;: {
+   &quot;picgo-plugin-github-plus&quot;: true // 启用github-plus插件
+ },
+ &quot;picgo-plugin-github-plus&quot;: {
+   &quot;lastSync&quot;: &quot;2020-11-05 07:54:47&quot;
+ }
+}
+</code></pre>
+<h3 id="测试配置">测试配置</h3>
+<p>根据上述配置完毕后我们需要进行测试链接是否成功，在测试之前还要进行如图所示的修改：<br>
+<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105224420441.png" alt="image-20201105224420441" loading="lazy"></p>
+<ol>
+<li><strong>上传服务</strong>修改为<code>Custom Command</code></li>
+<li>自定义命令 ： <code>picgo upload</code></li>
+<li>点击验证图片上传选项</li>
+<li>如果显示验证成功，则表示配置完成。<br>
+<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105225415181.png" alt="image-20201105225415181" loading="lazy"></li>
+</ol>
+<h2 id="图片上传">图片上传</h2>
+<p>将图片拖入Typora中，然后在图片单击右键，图片上传即可。</p>
+<h2 id="安装文件重命名插件-picgo-plugin-rename-file">安装文件重命名插件 <a href="https://github.com/liuwave/picgo-plugin-rename-file">picgo-plugin-rename-file</a></h2>
+<p><code>picgo-plugin-rename-file</code> 插件可以帮我们安装一定的规则将文件进行重命名，具体设置请看github。</p>
+<p>输入一下命令安装:</p>
+<pre><code class="language-shell">picgo install rename-file
+</code></pre>
+<p>安装完成后，打开<code>picgo</code>的配置文件<code>C:\Users\xxx\.picgo\config.json</code>末尾最后一个大括号前添加一下信息即可。</p>
+<pre><code class="language-json">,
+&quot;picgo-plugin-rename-file&quot;: {
+    &quot;format&quot;: &quot;{y}/{m}/{d}/{hash}-{origin}-{rand:6}&quot;
+}
+</code></pre>
+<h2 id="添加水印">添加水印</h2>
+<p><em><strong>注意：此插件目前会导致文件上传重命名插件不生效</strong></em><br>
+插件地址: <a href="https://github.com/Dec-F/picgo-plugin-watermark">picgo-plugin-watermark</a> ，<code>watermark</code>插件可以帮我们在上传图片的时候添加水印。</p>
+<p>安装命令：</p>
+<pre><code class="language-shell">picgo install watermark
+</code></pre>
+<p>安装成功后，<code>C:\Users\xxx\.picgo\config.json</code>末尾最后一个大括号前添加一下信息即可。</p>
+<pre><code class="language-json">,
+&quot;picgo-plugin-watermark&quot;: { // 以下配置信息参考插件地址说明
+    &quot;text&quot;: &quot;jxiaow&quot;, // 水印名称
+    &quot;fontSize&quot;: 18, // 水印字体大小
+    &quot;position&quot;:&quot;rm&quot; // 水印位置
+},
+</code></pre>
+<p><strong>注意：</strong> 由于这个插件安装过程中需要下载字体，会导致下载特别慢，尽可能使用代理。</p>
+<p><strong>website:</strong> <a href="https://xiaowujiang.cn">xiaowujiang.cn</a></p>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[Http框架封装]]></title>
         <id>https://jxiaow.gitee.io/posts/84a009ed/</id>
         <link href="https://jxiaow.gitee.io/posts/84a009ed/">
@@ -3008,82 +3104,6 @@ public &lt;T&gt; void observe(LifecycleOwner owner,
     sHttpEngine.execute(mConfig, liveData);
 }
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[PicGo搭建github图床]]></title>
-        <id>https://jxiaow.gitee.io/posts/2513fba4/</id>
-        <link href="https://jxiaow.gitee.io/posts/2513fba4/">
-        </link>
-        <updated>2020-04-13T09:35:45.000Z</updated>
-        <summary type="html"><![CDATA[<p>使用图床可以节省本地服务器空间，加快图片打开速度，对于写博客或者一些网站使用很有必要，本次介绍的是PicGo的使用。</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>使用图床可以节省本地服务器空间，加快图片打开速度，对于写博客或者一些网站使用很有必要，本次介绍的是PicGo的使用。</p>
-<!-- more -->
-<ol>
-<li>
-<p>下载<a href="https://github.com/Molunerfinn/PicGo/releases">PicGo</a>并安装；</p>
-</li>
-<li>
-<p>生成<a href="https://github.com/">Github</a>token</p>
-</li>
-</ol>
-<p>步骤如下：</p>
-<ul>
-<li>
-<p>点击个人中心，选择<code>Settings</code>,打开个人设置页面；</p>
-</li>
-<li>
-<p>在个人设置页面选择<code>Developer Settings</code></p>
-</li>
-</ul>
-<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-52-50-github-developer-settings.png" alt="github-developer-settings.png" loading="lazy"></figure>
-<ul>
-<li>进入<code>Developer settings</code>页后，点击<code>Personal access tokens</code>打开新的页面后,并点击右边的<code>Generate new token</code> 生成<code>token</code></li>
-</ul>
-<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-54-02-image-20200413170324831.png" alt="image-20200413170324831.png" loading="lazy"></figure>
-<ul>
-<li>在生成<code>token</code>页面，勾选<code>repo</code></li>
-</ul>
-<figure data-type="image" tabindex="3"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-54-38-image-20200413170138935.png" alt="image-20200413170138935.png" loading="lazy"></figure>
-<ol start="3">
-<li>创建公共仓库，用来存放相关资源图片</li>
-</ol>
-<p>​    在github上创建一个仓库，用来存放一些资源</p>
-<figure data-type="image" tabindex="4"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-55-22-image-20200413172848852.png" alt="image-20200413172848852.png" loading="lazy"></figure>
-<ol start="4">
-<li>在PicGo中配置github图床相关信息</li>
-</ol>
-<ul>
-<li>
-<p>打开PicGo 后，先安装一个插件<code>github-plus</code>，该插件是用来将图片上传到<code>gitee</code>或<code>github</code>上，比自带的<code>github</code>图床方便(自带的没有办法删除远程记录)</p>
-</li>
-<li>
-<p>安装完成后，插件配置：</p>
-<figure data-type="image" tabindex="5"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-55-54-picgo-logo.png" alt="picgo-logo.png" loading="lazy"></figure>
-<p>① 处是需要存放图片的仓库，格式为 <code>github用户名/ 仓库名</code>;</p>
-<p>② 处是存放图片路径的仓库下的分支，默认<code>master</code>分支；</p>
-<p>③ token 为第二步骤上生成的<strong>github token</strong>；</p>
-<p>④ 远程仓库存放图片的的路径，可自定义，可不填；</p>
-<p>⑤ 自定义的图片路径，由于我使用了<code>jsDelivr</code>来实现github的<code>cdn缓存</code>，所以设置了此路径，如果不需要可不填；</p>
-<p><strong>jsDelivr路径规则：</strong> <code>https://cdn.jsdelivr.net/gh/用户名/仓库名@版本号</code>，我这边版本号设置的是<code>latest</code>表示获取最新资源。</p>
-<p>⑥ origin 表示 仓库可以是gitee或<code>github</code>,根据前面的步骤，此处只能是github；</p>
-<p>⑦ 将其设置为默认图床</p>
-</li>
-</ul>
-<p>** 注意事项**</p>
-<ul>
-<li>
-<p>如果仓库需要设置自定义域名，需要将我们的资源提交到一个<code>gh-pages</code>分区</p>
-</li>
-<li>
-<p>如果你的自定义域名配置dns区分了境外和国内，那么就需要注意，访问该仓库可能会出现404的情况</p>
-<p>解决办法：</p>
-<ul>
-<li>创建一条新的cname解析，添加一个二级域名即可</li>
-</ul>
-</li>
-</ul>
 ]]></content>
     </entry>
 </feed>

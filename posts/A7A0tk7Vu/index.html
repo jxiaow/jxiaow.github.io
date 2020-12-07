@@ -5,7 +5,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Java中的静态代码块在kotlin中的表现形式 | Xiaowu</title>
+<title>Typora + PicGo-Core + Github 实现图片上传到Github | Xiaowu</title>
 
 <link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607333280465">
 
@@ -96,76 +96,135 @@
             <div class="post-detail gt-bg-theme-color-second">
                 <article class="gt-post-content">
                     <h2 class="post-title">
-                        Java中的静态代码块在kotlin中的表现形式
+                        Typora + PicGo-Core + Github 实现图片上传到Github
                     </h2>
                     <div class="post-info">
                         <time class="post-time gt-c-content-color-first">
-                            · 2019-07-17 ·
+                            · 2020-11-07 ·
                         </time>
                         
-                        <a href="https://jxiaow.gitee.io/tag/MdNTWVzNi/" class="post-tags">
-                            # kotlin
+                        <a href="https://jxiaow.gitee.io/tag/0OrIPjcs6/" class="post-tags">
+                            # Typora
+                        </a>
+                        
+                        <a href="https://jxiaow.gitee.io/tag/eW38P0w-Zy/" class="post-tags">
+                            # PicGo
+                        </a>
+                        
+                        <a href="https://jxiaow.gitee.io/tag/9qCsgBZE1z/" class="post-tags">
+                            # Github
                         </a>
                         
                     </div>
                     <div class="post-content-wrapper">
                         <div class="post-content">
-                            <p>在<code>java</code>中我们有时候会用到类的静态代码块来初始化一些变量，那么在<code>kotlin</code>中如何表示呢？</p>
+                            <p>为了解决<code>为知笔记</code>使用<code>Typora</code>编辑<code>markdown</code>文件图片丢失的问题，我采用了<code>PicGo-Core +Github</code>实现了自定图床的功能。</p>
 <!--more-->
-<p>看以下代码：</p>
-<p><code>TestStatic.java</code></p>
-<pre><code class="language-java">public class TestStatic {
-    static {
-        System.out.println(&quot;static test&quot;);
-    }
-}
+<h2 id="下载picgo-core">下载PicGo-Core</h2>
+<p>由于我的电脑有<code>nodejs</code>环境，所以我使用的是<code>npm</code>命令安装<code>picgo</code>, 命令如下：</p>
+<pre><code class="language-shell">npm install picgo -g
 </code></pre>
-<p>这段代码，在<code>kotlin</code>中可以这样表示：</p>
-<p><code>TestStatic.kt</code></p>
-<pre><code class="language-kotlin">class TestStatic {
-
-    companion oject {
-        init {
-            println(&quot;static test&quot;)
-        }
-
-        fun test(){
-            println(&quot;test&quot;)
-        }
-    }
-}
+<p>安装完成后，检查命令行输出, 记录下红色框内的路径。<br>
+<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105201730919.png" alt="image-20201105201730919" loading="lazy"></p>
+<p>输入命令查看版本，如果有输出则添加成功。</p>
+<pre><code class="language-shell">picgo -v
 </code></pre>
-<p>编译后的<code>java</code>代码:</p>
-<pre><code class="language-java">...
-public final class StaticTest {
-   public static final StaticTest.Companion Companion = new StaticTest.Companion((DefaultConstructorMarker)null);
-
-   static {
-      String var0 = &quot;static&quot;;
-      System.out.println(var0);
+<h2 id="安装github-plus">安装github-plus</h2>
+<p>官方提供的github上传图库不好用，安装一款新的上传插件<code>github-plus</code>, 命令行执行：</p>
+<pre><code class="language-shell">picgo install github-plus
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105223054898.png" alt="image-20201105223054898" loading="lazy"></figure>
+<p>安装成功后会有提示。</p>
+<h2 id="typora图像设置">Typora图像设置</h2>
+<p>在<code>Typora</code>中配置图像上传信息。</p>
+<h3 id="设置picgo的配置信息">设置PicGo的配置信息</h3>
+<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105223720354.png" alt="" loading="lazy"></figure>
+<p>如上图所示，分为2个步骤：</p>
+<ol>
+<li><strong>上传服务</strong>选择<code>PicGo-Core(command line)</code></li>
+<li>打开配置文件，在打开的配置文件，添加相关信息。</li>
+</ol>
+<pre><code class="language-json">{
+ &quot;picBed&quot;: {
+   &quot;uploader&quot;: &quot;githubPlus&quot;,
+   &quot;current&quot;: &quot;githubPlus&quot;,
+   &quot;githubPlus&quot;: {
+     &quot;branch&quot;: &quot;master&quot;,// 仓库分支
+     &quot;customUrl&quot;: &quot;https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest&quot;, // 访问的自定义url
+     &quot;origin&quot;: &quot;github&quot;, // 存放的图片类型
+     &quot;repo&quot;: &quot;jxiaow/cdn-images&quot;, // 存放图片的仓库
+     &quot;path&quot;: &quot;blog-images&quot;,// 存放图片的仓库目录下的文件夹
+     &quot;token&quot;: &quot;&quot; // 访问github的仓库的token, 不知道怎么设置的自行百度
    }
-...
-   public static final class Companion {
-      public final void test() {
-         String var1 = &quot;test&quot;;
-         System.out.println(var1);
-      }
-
-      private Companion() {
-      }
-
-      // $FF: synthetic method
-      public Companion(DefaultConstructorMarker $constructor_marker) {
-         this();
-      }
-   }
+ },
+ &quot;picgoPlugins&quot;: {
+   &quot;picgo-plugin-github-plus&quot;: true // 启用github-plus插件
+ },
+ &quot;picgo-plugin-github-plus&quot;: {
+   &quot;lastSync&quot;: &quot;2020-11-05 07:54:47&quot;
+ }
 }
 </code></pre>
-<p>可以看到，<code>init</code>方法最终被编译成了<code>static</code>代码块。</p>
+<h3 id="测试配置">测试配置</h3>
+<p>根据上述配置完毕后我们需要进行测试链接是否成功，在测试之前还要进行如图所示的修改：<br>
+<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105224420441.png" alt="image-20201105224420441" loading="lazy"></p>
+<ol>
+<li><strong>上传服务</strong>修改为<code>Custom Command</code></li>
+<li>自定义命令 ： <code>picgo upload</code></li>
+<li>点击验证图片上传选项</li>
+<li>如果显示验证成功，则表示配置完成。<br>
+<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105225415181.png" alt="image-20201105225415181" loading="lazy"></li>
+</ol>
+<h2 id="图片上传">图片上传</h2>
+<p>将图片拖入Typora中，然后在图片单击右键，图片上传即可。</p>
+<h2 id="安装文件重命名插件-picgo-plugin-rename-file">安装文件重命名插件 <a href="https://github.com/liuwave/picgo-plugin-rename-file">picgo-plugin-rename-file</a></h2>
+<p><code>picgo-plugin-rename-file</code> 插件可以帮我们安装一定的规则将文件进行重命名，具体设置请看github。</p>
+<p>输入一下命令安装:</p>
+<pre><code class="language-shell">picgo install rename-file
+</code></pre>
+<p>安装完成后，打开<code>picgo</code>的配置文件<code>C:\Users\xxx\.picgo\config.json</code>末尾最后一个大括号前添加一下信息即可。</p>
+<pre><code class="language-json">,
+&quot;picgo-plugin-rename-file&quot;: {
+    &quot;format&quot;: &quot;{y}/{m}/{d}/{hash}-{origin}-{rand:6}&quot;
+}
+</code></pre>
+<h2 id="添加水印">添加水印</h2>
+<p><em><strong>注意：此插件目前会导致文件上传重命名插件不生效</strong></em><br>
+插件地址: <a href="https://github.com/Dec-F/picgo-plugin-watermark">picgo-plugin-watermark</a> ，<code>watermark</code>插件可以帮我们在上传图片的时候添加水印。</p>
+<p>安装命令：</p>
+<pre><code class="language-shell">picgo install watermark
+</code></pre>
+<p>安装成功后，<code>C:\Users\xxx\.picgo\config.json</code>末尾最后一个大括号前添加一下信息即可。</p>
+<pre><code class="language-json">,
+&quot;picgo-plugin-watermark&quot;: { // 以下配置信息参考插件地址说明
+    &quot;text&quot;: &quot;jxiaow&quot;, // 水印名称
+    &quot;fontSize&quot;: 18, // 水印字体大小
+    &quot;position&quot;:&quot;rm&quot; // 水印位置
+},
+</code></pre>
+<p><strong>注意：</strong> 由于这个插件安装过程中需要下载字体，会导致下载特别慢，尽可能使用代理。</p>
+<p><strong>website:</strong> <a href="https://xiaowujiang.cn">xiaowujiang.cn</a></p>
 
                         </div>
                         <div class="toc-container">
-                            
+                            <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E4%B8%8B%E8%BD%BDpicgo-core">下载PicGo-Core</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85github-plus">安装github-plus</a></li>
+<li><a href="#typora%E5%9B%BE%E5%83%8F%E8%AE%BE%E7%BD%AE">Typora图像设置</a>
+<ul>
+<li><a href="#%E8%AE%BE%E7%BD%AEpicgo%E7%9A%84%E9%85%8D%E7%BD%AE%E4%BF%A1%E6%81%AF">设置PicGo的配置信息</a></li>
+<li><a href="#%E6%B5%8B%E8%AF%95%E9%85%8D%E7%BD%AE">测试配置</a></li>
+</ul>
+</li>
+<li><a href="#%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0">图片上传</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85%E6%96%87%E4%BB%B6%E9%87%8D%E5%91%BD%E5%90%8D%E6%8F%92%E4%BB%B6-picgo-plugin-rename-file">安装文件重命名插件 picgo-plugin-rename-file</a></li>
+<li><a href="#%E6%B7%BB%E5%8A%A0%E6%B0%B4%E5%8D%B0">添加水印</a></li>
+</ul>
+</li>
+</ul>
+
                         </div>
                     </div>
                 </article>
@@ -174,15 +233,15 @@ public final class StaticTest {
             
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://jxiaow.gitee.io/posts/a02aa504/" class="post-title gt-a-link">
-                    deepin日常使用
+                <a href="https://jxiaow.gitee.io/posts/84a009ed/" class="post-title gt-a-link">
+                    Http框架封装
                 </a>
             </div>
             
 
             
-            <span id="/posts/8f46bf8a/" class="leancloud_visitors"
-                data-flag-title="Java中的静态代码块在kotlin中的表现形式">
+            <span id="/posts/A7A0tk7Vu/" class="leancloud_visitors"
+                data-flag-title="Typora + PicGo-Core + Github 实现图片上传到Github">
                 <em class="post-meta-item-text">阅读量 </em>
                 <i class="leancloud-visitors-count">0</i>
             </span>
