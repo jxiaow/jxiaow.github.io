@@ -7,7 +7,7 @@
 
 <title>360加固Gradle插件实现 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607266608944">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607331762348">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -83,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607266608944" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607331762348" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -107,7 +107,7 @@
                     <div class="post-content-wrapper">
                         <div class="post-content">
                             <p>最近码了一个基于360加固的流程实现的Gradle插件，在自动编译打包后进行360加固流程操作。只需要配置一些参数后，就可以实现自动打包编译和加固。</p>
-<p>项目地址:https://github.com/ixiaow/android-gradle-plugin</p>
+<p>项目地址:https://github.com/jxiaow/android-gradle-plugin</p>
 <h3 id="使用步骤">使用步骤</h3>
 <h4 id="1-添加依赖">1. 添加依赖</h4>
 <ul>
@@ -121,14 +121,14 @@
 
 dependencies {
     ...
-    classpath 'com.github.ixiaow:android-gradle-plugin:$version'
+    classpath 'com.github.jxiaow:android-gradle-plugin:$version'
 }
 </code></pre>
-<p>(请替换 <code>$version</code>为最新的版本号:<a href="https://jitpack.io/#ixiaow/android-gradle-plugin"><img src="https://jitpack.io/v/jxiaow/android-gradle-plugin.svg" alt="" loading="lazy"></a>)</p>
+<p>(请替换 <code>$version</code>为最新的版本号:<a href="https://jitpack.io/#jxiaow/android-gradle-plugin"><img src="https://jitpack.io/v/jxiaow/android-gradle-plugin.svg" alt="" loading="lazy"></a>)</p>
 <ul>
 <li>在<code>app</code>的模块<code>build.gradle</code>中添加：</li>
 </ul>
-<pre><code class="language-groovy">apply plugin: 'com.github.ixiaow.jiagu'
+<pre><code class="language-groovy">apply plugin: 'com.github.jxiaow.jiagu'
 </code></pre>
 <h4 id="2-参数配置">2. 参数配置</h4>
 <p>使用这款插件需要在<code>app</code>的<code>build.gradle</code>中添加一些配置信息，如下：</p>
@@ -154,7 +154,7 @@ dependencies {
 ./gradlew clean jiaGuApk 
 </code></pre>
 <h3 id="文档">文档</h3>
-<p><a href="https://ixiaow.github.io/android-gradle-plugin/plugin/com.github.ixiaow.jiagu/index.html">android-gradle-plugin</a></p>
+<p><a href="https://jxiaow.github.io/android-gradle-plugin/plugin/com.github.jxiaow.jiagu/index.html">android-gradle-plugin</a></p>
 <h3 id="360加固助手">360加固助手</h3>
 <p><a href="https://jiagu.360.cn/#/global/download">360加固助手</a></p>
 
