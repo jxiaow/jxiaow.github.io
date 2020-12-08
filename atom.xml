@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2020-12-07T13:19:01.951Z</updated>
+    <updated>2020-12-08T10:01:07.232Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -10,6 +10,553 @@
     <logo>https://jxiaow.gitee.io/images/avatar.png</logo>
     <icon>https://jxiaow.gitee.io/favicon.ico</icon>
     <rights>All rights reserved 2020, Xiaowu</rights>
+    <entry>
+        <title type="html"><![CDATA[UI布局绘制入口]]></title>
+        <id>https://jxiaow.gitee.io/posts/qWGkF-lZG/</id>
+        <link href="https://jxiaow.gitee.io/posts/qWGkF-lZG/">
+        </link>
+        <updated>2020-12-08T09:26:35.000Z</updated>
+        <summary type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/03/dd54efe6dc0cf2678d09ae0aa9551b0f-Android%20UI%E7%BB%98%E5%88%B6%E6%B5%81%E7%A8%8B-d85b30.svg" alt="Android UI绘制流程" loading="lazy"></figure>
+]]></summary>
+        <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/03/dd54efe6dc0cf2678d09ae0aa9551b0f-Android%20UI%E7%BB%98%E5%88%B6%E6%B5%81%E7%A8%8B-d85b30.svg" alt="Android UI绘制流程" loading="lazy"></figure>
+<!--more-->
+<p>在Activity的生命周期中，系统服务AMS会调用到ActivityThread中的<code>handleResumeActivity</code>方法，在这个方法中，可以看到：</p>
+<pre><code class="language-java">@Override
+
+public void handleResumeActivity(IBinder token, boolean finalStateRequest, boolean isForward, String reason) {
+    // ...
+    // TODO Push resumeArgs into the activity for consideration
+    final ActivityClientRecord r = performResumeActivity(token, finalStateRequest, reason);
+    if (r == null) {
+        // We didn't actually resume the activity, so skipping any follow-up actions.
+        return;
+    }
+
+    // ...
+    if (r.window == null &amp;&amp; !a.mFinished &amp;&amp; willBeVisible) {
+        // 获取window
+        r.window = r.activity.getWindow();
+        // 获取decor
+        View decor = r.window.getDecorView();
+        // 先将decorView设置不可见
+        decor.setVisibility(View.INVISIBLE);
+        // 获取windowManager
+        ViewManager wm = a.getWindowManager();
+        WindowManager.LayoutParams l = r.window.getAttributes();
+        a.mDecor = decor;
+        // 设置window的层级
+        l.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+           // ...
+        if (a.mVisibleFromClient) {
+            if (!a.mWindowAdded) {
+                a.mWindowAdded = true;
+                wm.addView(decor, l);
+            }
+            // ...
+        }
+        // ...
+    }
+
+    // Get rid of anything left hanging around.
+    cleanUpPendingRemoveWindows(r, false /* force */);
+    // The window is now visible if it has been added, we are not
+    // simply finishing, and we are not starting another activity.
+    if (!r.activity.mFinished &amp;&amp; willBeVisible &amp;&amp; r.activity.mDecor != null &amp;&amp; !r.hideForNow) {
+        // ...
+        // 设置decor可见
+        if (r.activity.mVisibleFromClient) {
+            r.activity.makeVisible();
+        }
+    }
+    // ...
+}
+</code></pre>
+<ol>
+<li>获取activity中的window；</li>
+<li>获取window中的decorView并设置为不可见；</li>
+<li>获取windowManager并调用addView方法添加decorView；</li>
+<li>添加完毕后，通过activity.makeVisible()设置decorView可见。</li>
+</ol>
+<h2 id="windowmanager">WindowManager</h2>
+<p>我们知道<code>WindowManager</code>是用来管理view窗口的，它是<code>ViewManager</code>的子类，它的实现类是<code>WindowManagerImpl</code>。</p>
+<pre><code class="language-java">public interface WindowManager extends ViewManager {}
+</code></pre>
+<pre><code class="language-java">public interface ViewManager{
+    // 添加view
+    public void addView(View view, ViewGroup.LayoutParams params);
+    // 更新布局
+    public void updateViewLayout(View view, ViewGroup.LayoutParams params);
+    // 移除view
+    public void removeView(View view);
+}
+</code></pre>
+<pre><code class="language-java">public final class WindowManagerImpl implements WindowManager {
+    // windowManager中持有一个WindowManagerGlobal单例
+    private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
+}
+</code></pre>
+<h3 id="addview">addView</h3>
+<p>在上面<code>handleResumeActivity</code>中调用了<code>WindowManager</code>的<code>addView</code>方法。在 addView中：</p>
+<pre><code class="language-java">@Override
+public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
+    applyDefaultToken(params);
+    // 调用了WindowManagerGlobal中的addView方法
+    mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);
+}
+</code></pre>
+<p>在<code>WindowManagerImpl</code>的<code>addView</code>中调用了<code>WindowManagerGlobal</code>中<code>addView</code>。</p>
+<pre><code class="language-java">public void addView(View view, ViewGroup.LayoutParams params,
+                    Display display, Window parentWindow) {
+    // ...
+    final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
+    if (parentWindow != null) {
+        parentWindow.adjustLayoutParamsForSubWindow(wparams);
+    } else {
+        // If there's no parent, then hardware acceleration for this view is
+        // set from the application's hardware acceleration setting.
+        final Context context = view.getContext();
+        if (context != null
+            &amp;&amp; (context.getApplicationInfo().flags
+                &amp; ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
+            wparams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        }
+    }
+    ViewRootImpl root;
+    View panelParentView = null;
+    synchronized (mLock) {
+        // ...
+        root = new ViewRootImpl(view.getContext(), display);
+        view.setLayoutParams(wparams);
+        mViews.add(view);
+        mRoots.add(root);
+        mParams.add(wparams);
+        // do this last because it fires off messages to start doing things
+        try {
+            root.setView(view, wparams, panelParentView);
+        } catch (RuntimeException e) {
+            // BadTokenException or InvalidDisplayException, clean up.
+            if (index &gt;= 0) {
+                removeViewLocked(index, true);
+            }
+            throw e;
+        }
+    }
+}
+</code></pre>
+<p>mViews保存的是View对象，DecorView<br>
+mRoots保存和顶层View关联的ViewRootImpl对象<br>
+mParams保存的是创建顶层View的layout参数。<br>
+调用<code>root.setView</code>将参数和视图同时交给了<code>ViewRootImpl</code>。</p>
+<pre><code class="language-java">public final class ViewRootImpl implements ViewParent,
+        View.AttachInfo.Callbacks, ThreadedRenderer.DrawCallbacks {}
+</code></pre>
+<pre><code class="language-java">public interface ViewParent {}
+</code></pre>
+<h3 id="setview">setView</h3>
+<pre><code class="language-java">/**
+  * We have one child
+  */
+public void setView(View view, WindowManager.LayoutParams attrs, View panelParentView) {
+    synchronized (this) {
+        if (mView == null) {
+            mView = view;
+            // ...
+            mAdded = true;
+            int res; /* = WindowManagerImpl.ADD_OKAY; */
+            // Schedule the first layout -before- adding to the window
+            // manager, to make sure we do the relayout before receiving
+            // any other events from the system.
+            requestLayout();
+            // ...
+            try {
+                // ...
+                res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes, 
+                                                  getHostVisibility(),
+                                                  mDisplay.getDisplayId(),
+                                                  mTmpFrame,
+                                                  mAttachInfo.mContentInsets,
+                                                  mAttachInfo.mStableInsets,
+                                                  mAttachInfo.mOutsets,
+                                                  mAttachInfo.mDisplayCutout, mInputChannel,  mTempInsets);
+                setFrame(mTmpFrame);
+            } catch (RemoteException e) {
+                // ...
+                throw new RuntimeException(&quot;Adding window failed&quot;, e);
+            } finally {
+                if (restore) {
+                    attrs.restore();
+                }
+            }
+            // ...
+            view.assignParent(this);
+            // ...
+        }
+    }
+}
+</code></pre>
+<h3 id="requestlayout">requestLayout</h3>
+<pre><code class="language-java">@Override
+public void requestLayout() {
+    if (!mHandlingLayoutInLayoutRequest) {
+        checkThread();
+        mLayoutRequested = true;
+        scheduleTraversals();
+    }
+}
+</code></pre>
+<h3 id="scheduletraversals">scheduleTraversals</h3>
+<pre><code class="language-java">void scheduleTraversals() {
+    if (!mTraversalScheduled) {
+        mTraversalScheduled = true;
+        mTraversalBarrier = mHandler.getLooper().getQueue().postSyncBarrier();
+        // 利用handle回调了 mTraversalRunnable
+        mChoreographer.postCallback(
+            Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);
+        if (!mUnbufferedInputDispatch) {
+            scheduleConsumeBatchedInput();
+        }
+        notifyRendererOfFramePending();
+        pokeDrawLockIfNeeded();
+    }
+}
+</code></pre>
+<h3 id="mtraversalrunnable">mTraversalRunnable</h3>
+<pre><code class="language-java">final TraversalRunnable mTraversalRunnable = new TraversalRunnable();
+final class TraversalRunnable implements Runnable {
+    @Override
+    public void run() {
+        doTraversal();
+    }
+}
+</code></pre>
+<h3 id="dotraversal">doTraversal</h3>
+<pre><code class="language-java">void doTraversal() {
+    if (mTraversalScheduled) {
+        mTraversalScheduled = false;
+        mHandler.getLooper().getQueue().removeSyncBarrier(mTraversalBarrier);
+        if (mProfile) {
+            Debug.startMethodTracing(&quot;ViewAncestor&quot;);
+        }
+        performTraversals();
+        if (mProfile) {
+            Debug.stopMethodTracing();
+            mProfile = false;
+        }
+    }
+}
+</code></pre>
+<h3 id="performtraversals">performTraversals</h3>
+<pre><code class="language-java">private void performTraversals() {
+    // ...
+    if (mFirst || windowShouldResize || insetsChanged ||
+        viewVisibilityChanged || params != null || mForceNextWindowRelayout) {
+        mForceNextWindowRelayout = false;
+        // ...
+        if (!mStopped || mReportNextDraw) {
+            boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
+                (relayoutResult&amp;WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE) != 0);
+            if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()  || mHeight != host.getMeasuredHeight() || contentInsetsChanged ||
+                updatedConfiguration) {
+                int childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
+                int childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height);
+                // ...
+                // Ask host how big it wants to be
+                performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
+                // Implementation of weights from WindowManager.LayoutParams
+                // We just grow the dimensions as needed and re-measure if
+                // needs be
+                int width = host.getMeasuredWidth();
+                int height = host.getMeasuredHeight();
+                boolean measureAgain = false;
+                if (lp.horizontalWeight &gt; 0.0f) {
+                    width += (int) ((mWidth - width) * lp.horizontalWeight);
+                    childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(width,
+                    MeasureSpec.EXACTLY);
+                    measureAgain = true;
+                }
+                if (lp.verticalWeight &gt; 0.0f) {
+                    height += (int) ((mHeight - height) * lp.verticalWeight);
+                    childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+                    measureAgain = true;
+                }
+                if (measureAgain) {
+                    // 进行UI布局的测量
+                    performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
+                }
+                layoutRequested = true;
+            }
+        }
+    }
+    // ...
+    final boolean didLayout = layoutRequested &amp;&amp; (!mStopped || mReportNextDraw);
+    boolean triggerGlobalLayoutListener = didLayout
+        || mAttachInfo.mRecomputeGlobalAttributes;
+    if (didLayout) {
+        // 进行UI控件的摆放
+        performLayout(lp, mWidth, mHeight);
+        // ...
+    }
+    // Remember if we must report the next draw.
+    if ((relayoutResult &amp; WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
+        reportNextDraw();
+    }
+    boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;
+    if (!cancelDraw) {
+        if (mPendingTransitions != null &amp;&amp; mPendingTransitions.size() &gt; 0) {
+            for (int i = 0; i &lt; mPendingTransitions.size(); ++i) {
+                mPendingTransitions.get(i).startChangingAnimations();
+            }
+            mPendingTransitions.clear();
+        }
+        // 进行图形的绘画
+        performDraw();
+    } else {
+        if (isViewVisible) {
+            // Try again
+            scheduleTraversals();
+        } else if (mPendingTransitions != null &amp;&amp; mPendingTransitions.size() &gt; 0) {
+            for (int i = 0; i &lt; mPendingTransitions.size(); ++i) {
+                mPendingTransitions.get(i).endChangingAnimations();
+            }
+            mPendingTransitions.clear();
+        }
+    }
+    mIsInTraversal = false;
+}
+</code></pre>
+<p>在<code>performTravals()</code>中主要调用了<code>performMeasure()</code>、<code>performLayout()</code>和<code>performDraw()</code>来进行UI的测量、布局和绘制。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[UI整体绘制流程]]></title>
+        <id>https://jxiaow.gitee.io/posts/23SClUqqh/</id>
+        <link href="https://jxiaow.gitee.io/posts/23SClUqqh/">
+        </link>
+        <updated>2020-12-08T08:01:23.000Z</updated>
+        <summary type="html"><![CDATA[<p>在阅读本篇文章时，要我们需要考虑以下几点：</p>
+<ol>
+<li>Android程序是如何启动的，Activity生命周期是如何被调用的？</li>
+<li>在Activity的<code>onCreate()</code>方法中<code>setContentView()</code> 是如何加载UI文件的？</li>
+<li>UI是如何绘制的？</li>
+</ol>
+<blockquote>
+<p>源码分析基于API 29</p>
+</blockquote>
+]]></summary>
+        <content type="html"><![CDATA[<p>在阅读本篇文章时，要我们需要考虑以下几点：</p>
+<ol>
+<li>Android程序是如何启动的，Activity生命周期是如何被调用的？</li>
+<li>在Activity的<code>onCreate()</code>方法中<code>setContentView()</code> 是如何加载UI文件的？</li>
+<li>UI是如何绘制的？</li>
+</ol>
+<blockquote>
+<p>源码分析基于API 29</p>
+</blockquote>
+<!--more-->
+<h1 id="android-程序简单的启动流程">Android 程序简单的启动流程</h1>
+<p>在刚接触<code>Java</code>时，我们知道Java程序的运行入口是<code>main()</code>方法，然而我们在日常App的开发中并没有发现<code>main()</code> 方法的存在，那么<code>Android</code> 中的程序是如何开始运行的呢？</p>
+<p>查阅官方资料中我们会发现在<code>Android</code>的源码中有一个叫做<code>ActivityThread</code>的类，这个类就是<code>Android 中的主线程</code>，在ActivityThread中我们可以看到<code>main()</code> 方法的存在。</p>
+<h2 id="activitythreadmain">ActivityThread#main()</h2>
+<pre><code class="language-java">public static void main(String[] args) {
+    //...
+    Looper.prepareMainLooper();
+    //...
+    ActivityThread thread = new ActivityThread();
+    thread.attach(false, startSeq);
+
+    if (sMainThreadHandler == null) {
+        sMainThreadHandler = thread.getHandler();
+    }
+    // ...
+    Looper.loop();
+}
+</code></pre>
+<p>在<code>main()</code> 方法中实例化了<code>ActivityThread</code>类并调用了<code>attach()</code> 方法。</p>
+<h2 id="activitythreadattach">ActivityThread#attach()</h2>
+<pre><code class="language-java">@UnsupportedAppUsage
+private void attach(boolean system, long startSeq) {
+    sCurrentActivityThread = this;
+    mSystemThread = system;
+    if (!system) {
+        // ...
+        final IActivityManager mgr = ActivityManager.getService();
+        try {
+            mgr.attachApplication(mAppThread, startSeq);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+        // ...
+    }
+}
+</code></pre>
+<p>在<code>attach()</code> 方法中可以看到通过<code>ActivityManager.getService()</code> 获取到了<code>IActivityManager</code> ，然后调用了<code>IActivityManager.attachApplication()</code> 方法并将<code>ApplicationThread</code>实例传入。</p>
+<p><strong>注意：</strong> <code>IActivityManager</code>是一个接口，它的的实现类类是<code>ActivityManagerService</code>。</p>
+<h2 id="activitymanagergetservice">ActivityManager#getService()</h2>
+<pre><code class="language-java">@UnsupportedAppUsage
+public static IActivityManager getService() {
+    return IActivityManagerSingleton.get();
+}
+</code></pre>
+<pre><code class="language-java">@UnsupportedAppUsage
+private static final Singleton&lt;IActivityManager&gt; IActivityManagerSingleton =
+    new Singleton&lt;IActivityManager&gt;() {
+    @Override
+    protected IActivityManager create() {
+        final IBinder b = ServiceManager.getService(Context.ACTIVITY_SERVICE);
+        final IActivityManager am = IActivityManager.Stub.asInterface(b);
+        return am;
+    }
+};
+</code></pre>
+<p>通过上述两段代码可知，<code>ActivityManager.getService()</code> 是通过<code>Binder</code>机制获取了系统服务<code>ActivityManagerService</code>。</p>
+<h2 id="activitymanagerserviceattachapplication">ActivityManagerService#attachApplication()</h2>
+<p>在<code>ActivityThread#attach()</code>中调用了<code>attachApplication()</code>方法。</p>
+<pre><code class="language-java">@Override
+public final void attachApplication(IApplicationThread thread, long startSeq) {
+    synchronized (this) {
+        // ...
+        attachApplicationLocked(thread, callingPid, callingUid, startSeq);
+        // ...
+    }
+}
+</code></pre>
+<pre><code class="language-java">private final boolean attachApplicationLocked(IApplicationThread thread,
+           int pid, int callingUid, long startSeq) {
+     //....
+    thread.bindApplication(processName, appInfo, providers,
+                        instr2.mClass,
+                        profilerInfo, instr2.mArguments,
+                        instr2.mWatcher,
+                        instr2.mUiAutomationConnection, testMode,
+                        mBinderTransactionTrackingEnabled, enableTrackAllocation,
+                        isRestrictedBackupMode || !normalMode, app.isPersistent(),
+                        new Configuration(app.getWindowProcessController().getConfiguration()),
+                        app.compat, getCommonServicesLocked(app.isolated),
+                        mCoreSettingsObserver.getCoreSettingsLocked(),
+                        buildSerial, autofillOptions, contentCaptureOptions);
+    //...
+}
+</code></pre>
+<p><code>attachApplication</code> 的作用实际上是将<code>ActivityThread</code> 与<code>ApplicationThread</code>关联，<code>ApplicationThread</code>类为<code>Activity</code>的各种生命周期状态做了相对应的代理工作并进行 <code>Application</code>的初始化工作。</p>
+<h2 id="applicationthread">ApplicationThread</h2>
+<pre><code class="language-java">private class ApplicationThread extends IApplicationThread.Stub {}
+</code></pre>
+<p><code>ApplicationThread</code>的方法分析就不在此处赘述了，后面的<code>Activity的启动流程</code>会详细分析。</p>
+<h1 id="activity-视图设置">Activity 视图设置</h1>
+<p>在 <code>onCreate()</code>当中我们往往会使用<code>setContentView()</code> 去进行我们自己的布局文件或者view, 我们可以通过源码分析看看具体的流程。</p>
+<h2 id="activitysetcontentview">Activity#setContentView()</h2>
+<pre><code class="language-java">// Activity.java
+public void setContentView(@LayoutRes int layoutResID) {
+    getWindow().setContentView(layoutResID);
+    initWindowDecorActionBar();
+}
+</code></pre>
+<p><code>Activity</code> 中的<code>setContentView()</code> 通过<code>getWindow()</code> 调用了<code>setContentView()</code> ，而 <code>getWindow()</code> 返回的是<code>PhoneWindow</code>。</p>
+<h2 id="phonewindowsetcontentview">PhoneWindow#setContentView()</h2>
+<pre><code class="language-java">// PhoneWindow.java
+@Override
+public void setContentView(int layoutResID) {
+    // Note: FEATURE_CONTENT_TRANSITIONS may be set in the process of installing the window
+    // decor, when theme attributes and the like are crystalized. Do not check the feature
+    // before  this happens.
+    if (mContentParent == null) {
+        installDecor();
+    } else if (!hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+        mContentParent.removeAllViews();
+    }
+
+    if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+        final Scene newScene
+            = Scene.getSceneForLayout(mContentParent, layoutResID, getContext());
+        transitionTo(newScene);
+    } else {
+        mLayoutInflater.inflate(layoutResID, mContentParent);
+    }
+    mContentParent.requestApplyInsets();
+    // ...
+}
+</code></pre>
+<p>在<code>PhoneWindow#setCcontentView()</code>中做了两件事（<code>installDecor和 inflate</code>）。</p>
+<h2 id="phonewindowinstalldecor">PhoneWindow#installDecor()</h2>
+<p><code>installDecor</code>中主要是创建了<code>Decor</code>（顶层视图）和<code>contentParent</code>视图（我们写的布局的父视图）。</p>
+<pre><code class="language-java">private void installDecor() {
+    mForceDecorInstall = false;
+    if (mDecor == null) {
+        mDecor = generateDecor(-1);
+        mDecor.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
+        mDecor.setIsRootNamespace(true);
+        if (!mInvalidatePanelMenuPosted &amp;&amp; mInvalidatePanelMenuFeatures != 0) {
+            mDecor.postOnAnimation(mInvalidatePanelMenuRunnable);
+        }
+    } else {
+        mDecor.setWindow(this);
+    }
+    if (mContentParent == null) {
+        mContentParent = generateLayout(mDecor);
+        // ...
+    }
+    // ...
+}
+</code></pre>
+<h2 id="phonewindowgeneratedecor">PhoneWindow#generateDecor()</h2>
+<p>在<code>Window</code>中创建顶级的view。</p>
+<pre><code class="language-java">protected DecorView generateDecor(int featureId) {
+    // ...
+    return new DecorView(context, featureId, this, getAttributes());
+}
+</code></pre>
+<h2 id="phonewindowgeneratelayout">PhoneWindow#generateLayout()</h2>
+<p>根据App设置的不同主题获取不同的系统父布局文件，进行布局初始化并查找<code>id</code> 为 <code>com.android.internal.R.id.content</code> 中的<code>contentParent</code>。</p>
+<pre><code class="language-java">protected ViewGroup generateLayout(DecorView decor) {
+    // Apply data from current theme.
+    // 根据配置的不同主题，选择系统父布局文件
+    layoutResource = R.layout.screen_simple;
+    mDecor.startChanging();
+    // 加载布局文件
+    mDecor.onResourcesLoaded(mLayoutInflater, layoutResource);
+
+    // ...
+    ViewGroup contentParent = (ViewGroup)findViewById(ID_ANDROID_CONTENT);
+    // ...
+    return contentParent;
+}
+</code></pre>
+<h2 id="decorviewonresourcesloaded">DecorView#onResourcesLoaded()</h2>
+<p><code>onResourcesLoaded</code> 加载系统父布局文件，并将其添加到<code>DecorView</code>中。</p>
+<pre><code class="language-java">void onResourcesLoaded(LayoutInflater inflater, int layoutResource) {
+    //...
+    final View root = inflater.inflate(layoutResource, null);
+    // ...
+    // Put it below the color views.
+    addView(root, 0, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+    // ...
+}
+</code></pre>
+<h2 id="rlayoutscreen_simplexml">R.layout.screen_simple.xml</h2>
+<pre><code class="language-xml">&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    android:fitsSystemWindows=&quot;true&quot;
+    android:orientation=&quot;vertical&quot;&gt;
+    &lt;ViewStub android:id=&quot;@+id/action_mode_bar_stub&quot;
+              android:inflatedId=&quot;@+id/action_mode_bar&quot;
+              android:layout=&quot;@layout/action_mode_bar&quot;
+              android:layout_width=&quot;match_parent&quot;
+              android:layout_height=&quot;wrap_content&quot;
+              android:theme=&quot;?attr/actionBarTheme&quot; /&gt;
+    &lt;FrameLayout
+         android:id=&quot;@android:id/content&quot;
+         android:layout_width=&quot;match_parent&quot;
+         android:layout_height=&quot;match_parent&quot;
+         android:foregroundInsidePadding=&quot;false&quot;
+         android:foregroundGravity=&quot;fill_horizontal|top&quot;
+         android:foreground=&quot;?android:attr/windowContentOverlay&quot; /&gt;
+&lt;/LinearLayout&gt;
+</code></pre>
+<h2 id="activity的窗口ui布局层级">Activity的窗口UI布局层级</h2>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/Activity-Activity%E8%A7%86%E5%9B%BE%E7%BB%93%E6%9E%84%E5%AE%B9%E5%99%A8.svg" alt="Activity-Activity视图结构容器" loading="lazy"></figure>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[网站收藏]]></title>
         <id>https://jxiaow.gitee.io/posts/S4_SFaWSH/</id>
@@ -2377,731 +2924,6 @@ CharSequence label = resolveInfo.loadLabel(packageManager);
     intent.setComponent(new Component(pkg, cls));
     intent.putExtra(Intent.EXTRA_TEXT, shareContent);
     context.startActivity(intent);
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Typora + PicGo-Core + Github 实现图片上传到Github]]></title>
-        <id>https://jxiaow.gitee.io/posts/A7A0tk7Vu/</id>
-        <link href="https://jxiaow.gitee.io/posts/A7A0tk7Vu/">
-        </link>
-        <updated>2020-11-07T08:10:37.000Z</updated>
-        <summary type="html"><![CDATA[<p>为了解决<code>为知笔记</code>使用<code>Typora</code>编辑<code>markdown</code>文件图片丢失的问题，我采用了<code>PicGo-Core +Github</code>实现了自定图床的功能。</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>为了解决<code>为知笔记</code>使用<code>Typora</code>编辑<code>markdown</code>文件图片丢失的问题，我采用了<code>PicGo-Core +Github</code>实现了自定图床的功能。</p>
-<!--more-->
-<h2 id="下载picgo-core">下载PicGo-Core</h2>
-<p>由于我的电脑有<code>nodejs</code>环境，所以我使用的是<code>npm</code>命令安装<code>picgo</code>, 命令如下：</p>
-<pre><code class="language-shell">npm install picgo -g
-</code></pre>
-<p>安装完成后，检查命令行输出, 记录下红色框内的路径。<br>
-<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105201730919.png" alt="image-20201105201730919" loading="lazy"></p>
-<p>输入命令查看版本，如果有输出则添加成功。</p>
-<pre><code class="language-shell">picgo -v
-</code></pre>
-<h2 id="安装github-plus">安装github-plus</h2>
-<p>官方提供的github上传图库不好用，安装一款新的上传插件<code>github-plus</code>, 命令行执行：</p>
-<pre><code class="language-shell">picgo install github-plus
-</code></pre>
-<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105223054898.png" alt="image-20201105223054898" loading="lazy"></figure>
-<p>安装成功后会有提示。</p>
-<h2 id="typora图像设置">Typora图像设置</h2>
-<p>在<code>Typora</code>中配置图像上传信息。</p>
-<h3 id="设置picgo的配置信息">设置PicGo的配置信息</h3>
-<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105223720354.png" alt="" loading="lazy"></figure>
-<p>如上图所示，分为2个步骤：</p>
-<ol>
-<li><strong>上传服务</strong>选择<code>PicGo-Core(command line)</code></li>
-<li>打开配置文件，在打开的配置文件，添加相关信息。</li>
-</ol>
-<pre><code class="language-json">{
- &quot;picBed&quot;: {
-   &quot;uploader&quot;: &quot;githubPlus&quot;,
-   &quot;current&quot;: &quot;githubPlus&quot;,
-   &quot;githubPlus&quot;: {
-     &quot;branch&quot;: &quot;master&quot;,// 仓库分支
-     &quot;customUrl&quot;: &quot;https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest&quot;, // 访问的自定义url
-     &quot;origin&quot;: &quot;github&quot;, // 存放的图片类型
-     &quot;repo&quot;: &quot;jxiaow/cdn-images&quot;, // 存放图片的仓库
-     &quot;path&quot;: &quot;blog-images&quot;,// 存放图片的仓库目录下的文件夹
-     &quot;token&quot;: &quot;&quot; // 访问github的仓库的token, 不知道怎么设置的自行百度
-   }
- },
- &quot;picgoPlugins&quot;: {
-   &quot;picgo-plugin-github-plus&quot;: true // 启用github-plus插件
- },
- &quot;picgo-plugin-github-plus&quot;: {
-   &quot;lastSync&quot;: &quot;2020-11-05 07:54:47&quot;
- }
-}
-</code></pre>
-<h3 id="测试配置">测试配置</h3>
-<p>根据上述配置完毕后我们需要进行测试链接是否成功，在测试之前还要进行如图所示的修改：<br>
-<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105224420441.png" alt="image-20201105224420441" loading="lazy"></p>
-<ol>
-<li><strong>上传服务</strong>修改为<code>Custom Command</code></li>
-<li>自定义命令 ： <code>picgo upload</code></li>
-<li>点击验证图片上传选项</li>
-<li>如果显示验证成功，则表示配置完成。<br>
-<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105225415181.png" alt="image-20201105225415181" loading="lazy"></li>
-</ol>
-<h2 id="图片上传">图片上传</h2>
-<p>将图片拖入Typora中，然后在图片单击右键，图片上传即可。</p>
-<h2 id="安装文件重命名插件-picgo-plugin-rename-file">安装文件重命名插件 <a href="https://github.com/liuwave/picgo-plugin-rename-file">picgo-plugin-rename-file</a></h2>
-<p><code>picgo-plugin-rename-file</code> 插件可以帮我们安装一定的规则将文件进行重命名，具体设置请看github。</p>
-<p>输入一下命令安装:</p>
-<pre><code class="language-shell">picgo install rename-file
-</code></pre>
-<p>安装完成后，打开<code>picgo</code>的配置文件<code>C:\Users\xxx\.picgo\config.json</code>末尾最后一个大括号前添加一下信息即可。</p>
-<pre><code class="language-json">,
-&quot;picgo-plugin-rename-file&quot;: {
-    &quot;format&quot;: &quot;{y}/{m}/{d}/{hash}-{origin}-{rand:6}&quot;
-}
-</code></pre>
-<h2 id="添加水印">添加水印</h2>
-<p><em><strong>注意：此插件目前会导致文件上传重命名插件不生效</strong></em><br>
-插件地址: <a href="https://github.com/Dec-F/picgo-plugin-watermark">picgo-plugin-watermark</a> ，<code>watermark</code>插件可以帮我们在上传图片的时候添加水印。</p>
-<p>安装命令：</p>
-<pre><code class="language-shell">picgo install watermark
-</code></pre>
-<p>安装成功后，<code>C:\Users\xxx\.picgo\config.json</code>末尾最后一个大括号前添加一下信息即可。</p>
-<pre><code class="language-json">,
-&quot;picgo-plugin-watermark&quot;: { // 以下配置信息参考插件地址说明
-    &quot;text&quot;: &quot;jxiaow&quot;, // 水印名称
-    &quot;fontSize&quot;: 18, // 水印字体大小
-    &quot;position&quot;:&quot;rm&quot; // 水印位置
-},
-</code></pre>
-<p><strong>注意：</strong> 由于这个插件安装过程中需要下载字体，会导致下载特别慢，尽可能使用代理。</p>
-<p><strong>website:</strong> <a href="https://xiaowujiang.cn">xiaowujiang.cn</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Http框架封装]]></title>
-        <id>https://jxiaow.gitee.io/posts/84a009ed/</id>
-        <link href="https://jxiaow.gitee.io/posts/84a009ed/">
-        </link>
-        <updated>2020-04-26T02:03:07.000Z</updated>
-        <summary type="html"><![CDATA[<p>用过了现有的一些<code>http</code>请求框架，决定自己也来简单的封装一个。本文只是基于一些http请求框架二次封装的，高手勿喷。<a href="https://github.com/ixiaow/ppjoke/tree/master/network/src/main/java/com/mooc/network">源码</a></p>
-]]></summary>
-        <content type="html"><![CDATA[<p>用过了现有的一些<code>http</code>请求框架，决定自己也来简单的封装一个。本文只是基于一些http请求框架二次封装的，高手勿喷。<a href="https://github.com/ixiaow/ppjoke/tree/master/network/src/main/java/com/mooc/network">源码</a></p>
-<!-- more -->
-<h2 id="http的请求和响应">http的请求和响应</h2>
-<p>一个http的请求通常包含请求头、请求体、响应头和响应体，考虑到这些因素，<code>HttpConfig</code>和 <code>ApiResponse</code>就诞生了: <a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/http/HttpConfig.java">HttpConfig</a></p>
-<h3 id="httpconfig">HttpConfig</h3>
-<p>http参数配置类，应该包含如下属性:</p>
-<ul>
-<li>baseUrl/url</li>
-</ul>
-<p>如果使用restful形式，baseUrl是不能为空并且url为业务path, 如果是非restful,url必须为请求全路径</p>
-<ul>
-<li>GET/POST</li>
-</ul>
-<p>有了url，接下来需要有请求的方法类型，由于我这边只用到了<code>GET</code>和<code>POST</code>,所以只对此做了封装。</p>
-<p><strong>特别说明：</strong> POST 有三种提交方式（form表单、json形式和 复杂形式）</p>
-<pre><code class="language-java">FORM_DATA(&quot;application/x-www-form-urlencoded;charset=utf-8&quot;),
-JSON_DATA(&quot;application/json;charset=utf-8&quot;),
-MULTI_PART_DATA(&quot;multipart/form-data;charset=utf-8&quot;);
-</code></pre>
-<ul>
-<li>headers</li>
-</ul>
-<p>http的请求头封装，采用<code>(Map&lt;String,String&gt;)</code>集合</p>
-<ul>
-<li>params</li>
-</ul>
-<p>http的请求参数，采用<code>(Map&lt;String,Object&gt;)</code>如果请求方法是<code>GET</code>形式，那么采用拼接字符串的形式将参数拼接到url中; 如果请求方法是<code>POST</code>形式，则需要根据提交参数的方式不同，会有不同的请求体。</p>
-<ul>
-<li>cacheStrategy</li>
-</ul>
-<p>考虑到App的使用交互和服务器减压，我们要考虑有一些请求可以做一些缓存，那么常用的缓存策略有<code>CACHE_ONLY</code>、<code>CACHE_FIRST</code>、<code>NET_ONLY</code>和<code>NET_CACHE</code></p>
-<ul>
-<li>type</li>
-</ul>
-<p>type是响应数据的type,这个主要用在Http请求结果返回后将json转为bean对象的映射类型，需要考虑泛型和非泛型（Class和ParamizableType）</p>
-<ul>
-<li>tag</li>
-</ul>
-<p>给每一个请求链接打一个标签，可用于一些其它的操作，如根据tag取消请求</p>
-<ul>
-<li>isAsync</li>
-</ul>
-<p>当前请求是同步执行还是异步执行的标志，异步执行会在子线程中进行http请求，同步执行在当前线程中执行http请求。</p>
-<h4 id="apiresponset">ApiResponse<T></h4>
-<p>使用<a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/ApiResponse.java">ApiResponse</a>的原因是为了规范请求结果返回的表现形式，他有一个<code>T</code>类型的数据。</p>
-<ul>
-<li>code</li>
-</ul>
-<p>状态码,与http请求响应状态码一致，200~300 请求成功，304 使用缓存</p>
-<ul>
-<li>message</li>
-</ul>
-<p>请求响应的错误信息</p>
-<ul>
-<li>data</li>
-</ul>
-<p>响应的数据，泛型T, 根据<code>httpConfig</code>中的type,映射 json--&gt; bean</p>
-<h2 id="http引擎">Http引擎</h2>
-<p><a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/http/IHttpEngine.java">IHttpEngine</a>是一个接口，使用者可以根据实际的情况做具体的实现。</p>
-<pre><code class="language-java">public interface IHttpEngine {
-
-    // 开始执行 http请求
-    &lt;T&gt; execute(HttpConfig config, MultableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData);
-    // 根据tag取消
-    void cancel(Object tag);
-}
-</code></pre>
-<p>由于http请求有同步和异步两种情况并且又牵扯到了缓存策略问题（如果先进行缓存返回在执行网络请求并返回数据），在异步回调的情况下这些问题可以通过回调解决，但是在同步情况下，这些问题并不能很好的处理，曾经有使用过将当前请求<code>clone</code>,然后再次调用请求服务器的方法，但是在使用过<code>jetpack</code>的<code>LiveData</code>框架后这些问题都可以解决了。</p>
-<h2 id="okhttpengine">OkhttpEngine</h2>
-<p>Android开发目前来说大多数项目使用的都是<code>Okhttp</code>来做请求，本次我使用的默认引擎也是使用它来作为默认的实现。<a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/http/okhttp/OkHttpEngine.java">OkHttpEngine</a></p>
-<h3 id="okhttp简单配置">okhttp简单配置</h3>
-<p>对okhttp进行一些简单的配置就可以进行网络请求了，如下：</p>
-<ul>
-<li>创建okHttpClient</li>
-</ul>
-<pre><code class="language-java"> private static final OkHttpClient OK_HTTP_CLIENT;
-
- // 添加日志拦截器
- HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
- loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
- OK_HTTP_CLIENT = new OkHttpClient.Builder()
-               .connectTimeout(15, TimeUnit.SECONDS)
-               .readTimeout(15, TimeUnit.SECONDS)
-               .writeTimeout(15, TimeUnit.SECONDS)
-               .addInterceptor(loggingInterceptor)
-               .build();
-</code></pre>
-<ul>
-<li>添加证书管理</li>
-</ul>
-<pre><code class="language-java">TrustManager[] trustManagers = new TrustManager[]{
-    new X509TrustManager() {
-        @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
-        @Override
-        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
-        @Override
-        public X509Certificate[] getAcceptedIssuers() {
-            return new X509Certificate[0];
-        }
-     }
-};
-
-SSLContext sslContext = SSLContext.getInstance(&quot;SSL&quot;);
-sslContext.init(null, trustManagers, new SecureRandom());
-HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -&gt; true);
-</code></pre>
-<h3 id="实现http请求">实现Http请求</h3>
-<p>IHttpEngine中的<code>execute</code>方法是具体的http请求方法，所有实现<code>IHttpEngine</code>的方法都需要实现此方法。</p>
-<pre><code class="language-java">@NonNull
-@Override
-public &lt;T&gt; void execute(@NonNull Config config, 
-                        @NonNull MutableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData) {
-    Request request = generateRequest(config);
-    Call call = OK_HTTP_CLIENT.newCall(request);
-    if (!config.isAsync) {
-        execute(call, config, liveData);
-    } else {
-        enqueue(call, config, liveData);
-    }
-}
-</code></pre>
-<p><code>execute</code>方法中大致需要做以下事：</p>
-<ul>
-<li>创建request--&gt; genearteRequest</li>
-<li>发送http请求 ---&gt; execute/enqueue</li>
-</ul>
-<h4 id="创建httprequest">创建httpRequest</h4>
-<p><code>generateRequest()</code>根据<code>HttpConfig</code>中的请求方式来创建不同的http请求。</p>
-<pre><code class="language-java">/**
- * 根据配置信息生成request
- *
- * @param config 配置信息
- * @return request
- */
- @NonNull
- private Request generateRequest(@NonNull Config config) {
-    switch (config.method) {
-       case Config.GET:
-           return generateGetRequest(config);
-       case Config.POST:
-           return generatePostRequest(config);
-
-       default:
-           throw new IllegalStateException(&quot;this request method invalidate: &quot; + config.method);
-    }
-}
-</code></pre>
-<h5 id="get请求的创建方式">GET请求的创建方式</h5>
-<p><code>genearteGetReques()</code>方法，利用okhttp的Request类创建request实例，并利用<a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/http/UrlCreator.java">UrlCreator</a>将参数拼接到url中。Url拼接时需要注意使用<code>UrlEncoder</code>编码，不然可能会造成服务器和客户端解析数据不一致的情况。</p>
-<pre><code class="language-java">/**
- * 生成get方式的请求
- *
- * @param config 请求配置
- * @return 返回get方式的request
- */
-@NonNull
-private Request generateGetRequest(@NonNull Config config) {
-   Request.Builder builder = new Request.Builder().get();
-   builder.tag(config.tag);
-   addHeader(builder, config);
-   String url = UrlCreator.generateUrlForParams(config.url(), config.getParams());
-   return builder.url(url).build();
-}
-</code></pre>
-<h5 id="post请求的创建方式">POST请求的创建方式</h5>
-<p>POST请求方式提交内容时相对于GET方式要复杂许多，他需要根据提交方式的不同添加不同的<code>header</code>和内容<code>body</code>, 在<code>generatePostRequest()</code>方法中先利用okhttp的request类创建request实例，根据调用者在<code>HttpConfig</code>中设置<code>formData</code>来创建不同形式的<code>body</code>。</p>
-<pre><code class="language-java">/**
- * 生成post请求
- *
- * @param config http请求配置信息
- * @return 请求request
- */
-@NonNull
-private Request generatePostRequest(@NonNull Config config) {
-   Request.Builder builder = new Request.Builder().url(config.url());
-   builder.tag(config.tag);
-   addHeader(builder, config);
-
-   // 根据提交方式添加header信息
-   Pair&lt;String, String&gt; header = config.formData.getHeader();
-   builder.addHeader(header.first, header.second);
-
-   // 创建body
-   RequestBody body = generatePostRequestBody(config);
-   return builder.post(body).build();
-}
-</code></pre>
-<p>判断<code>formData</code>类型，创建不同的<code>request body</code>。</p>
-<pre><code class="language-java">/**
- * 获取post提交体
- *
- * @param config 请求配置信息
- * @return RequestBody
- */
-@NonNull
-private RequestBody generatePostRequestBody(@NonNull Config config) {
-   FormData formData = config.formData;
-   switch (formData) {
-       case FORM_DATA:
-           return getFormDataRequestBody(config);
-       case JSON_DATA:
-           return getJsonDataRequestBody(config);
-       case MULTI_PART_DATA:
-           return getMultiDataRequestBody(config);
-       default:
-           throw new IllegalArgumentException(&quot;post formData is invalidate: &quot; + formData);
-   }
-}
-</code></pre>
-<h6 id="创建formdata表单">创建FormData(表单)</h6>
-<p>form表单形式比较简单，只需要创建一个okhttp的FormBody并将param添加，需要注意的是添加param时调用的是<code>addEncoded</code>方法。</p>
-<pre><code class="language-java">/**
- * 生成form data形式的post数据
- *
- * @param config 请求配置
- * @return FromBody
- */
- @NonNull
- private RequestBody getFormDataRequestBody(@NonNull Config config) {
-     FormBody.Builder builder = new FormBody.Builder(StandardCharsets.UTF_8);
-     Map&lt;String, Object&gt; params = config.getParams();
-     for (Map.Entry&lt;String, Object&gt; entry : params.entrySet()) {
-          builder.addEncoded(entry.getKey(), String.valueOf(entry.getValue()));
-     }
-     return builder.build();
- }
-</code></pre>
-<h6 id="json形式">json形式</h6>
-<p>利用okHttp中的<code>RequestBody.create()</code>方法创建一个json形式的body,需要传递json和json形式的header。</p>
-<pre><code class="language-java">/**
- * 生成json形式的post数据
- *
- * @param config 请求配置
- * @return RequestBody
- */
- @NonNull
- private RequestBody getJsonDataRequestBody(@NonNull Config config) {
-   if (config.getParams().isEmpty()) {
-        throw new IllegalArgumentException(&quot;json data is null&quot;);
-   }
-   Object json = config.getParams().get(Config.JSON_KEY);
-   return RequestBody.create(String.valueOf(json), MediaType.parse(config.formData.getValue()));
- }
-</code></pre>
-<h6 id="复杂形式的body">复杂形式的body</h6>
-<p>复杂形式的body，主要是用在文件上传这一块儿。它需要判断当前param是普通key-value、单文件和多文件。</p>
-<p>利用okhttp的MultiparBody创建body对象并根据内容类型调用的不同的body,然后调用<code>addFormDataPart</code>添加到MultipartBody中。</p>
-<pre><code class="language-java">/**
- * 获取复杂的post提交体
- *
- * @param config 请求配置信息
- * @return MultipartBody
- */
-@NonNull
-@SuppressWarnings(&quot;unchecked&quot;)
-private RequestBody getMultiDataRequestBody(@NonNull Config config) {
-
-    MultipartBody.Builder builder = new MultipartBody.Builder();
-    builder.setType(MultipartBody.FORM);
-
-    for (Map.Entry&lt;String, Object&gt; entry : config.getParams().entrySet()) {
-        String key = entry.getKey();
-        Object value = entry.getValue();
-
-        if (value instanceof File) {
-            File file = (File) value;
-            RequestBody requestBody = MultipartBody.create(file, getFileMediaType(file));
-            builder.addFormDataPart(key, file.getName(), requestBody);
-        } else if (value instanceof List) {
-            List&lt;File&gt; files = (List&lt;File&gt;) value;
-            for (int i = 0; i &lt; files.size(); i++) {
-                File file = files.get(i);
-                RequestBody requestBody = MultipartBody.create(file, getFileMediaType(file));
-                builder.addFormDataPart(key + i, file.getName(), requestBody);
-            }
-        } else {
-            builder.addFormDataPart(key, String.valueOf(value));
-        }
-    }
-    return builder.build();
-}
-</code></pre>
-<p>添加文件时需要有文件的类型，文件类型的获取方式是通过<code>UrlConnection</code>的getFileNameMap方法获取。</p>
-<pre><code class="language-java">/**
- * 获取文件的type类型
- *
- * @param file 文件
- * @return MediaType
- */
-@Nullable
-private MediaType getFileMediaType(@NonNull File file) {
-    FileNameMap fileNameMap = URLConnection.getFileNameMap();
-    String contentTypeFor = fileNameMap.getContentTypeFor(file.getAbsolutePath());
-    if (contentTypeFor == null) {
-        contentTypeFor = &quot;application/octet-stream&quot;;
-    }
-    return MediaType.parse(contentTypeFor);
-</code></pre>
-<p>通过以上的几种方式就可以创建一个http请求了，接下来需要发送请求了，发送请求需要通过httpConfig中的<code>isAsync</code>来判断是开启一个子线程还是在当前线程中执行操作（同步与异步）。</p>
-<h4 id="发送http请求">发送http请求</h4>
-<p>发送http请求会有同步请求(execute)和异步请求(enqueue), 同步请求是在当前线程中发送http请求，异步请求采用okhttp线程池发送请求。处理请求时在合适的地方需要判断该请求是否被取消。</p>
-<pre><code class="language-java"> if (call.isCanceled()) {
-    return;
- }
-</code></pre>
-<h5 id="同步请求execute">同步请求(execute)</h5>
-<p>在发送http请求时会根据缓存策略进行响应的处理，而同步请求没有办法做到<code>return</code>后可以继续进行网络请求，所以引入了<code>LiveData</code>来发送数据。</p>
-<p>目前缓存策略有四种，我们需要根据判断来进行不同的操作，关于缓存的创建和获取后续会有说明，这块儿只有根据缓存策略处理数据。</p>
-<pre><code class="language-java">/**
- * 同步执行的方法
- */
-@SuppressWarnings(&quot;unchecked&quot;)
-private &lt;T&gt; void execute(Call call, Config config, MutableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData) {
-    ApiResponse&lt;T&gt; apiResponse;
-    Logs.d(&quot;execute before cache: &quot; + Thread.currentThread().getName());
-    // 只访问本地数据
-    if (config.cacheStrategy == Config.CACHE_ONLY) {
-        apiResponse = readCache(call.request().url().toString());
-        liveData.postValue(apiResponse);
-        return;
-    }
-
-    // 先访问本地数据，然后再发起网络请求
-    if (config.cacheStrategy == Config.CACHE_FIRST) {
-        apiResponse = readCache(call.request().url().toString());
-        liveData.postValue(apiResponse);
-    }
-
-    Logs.d(&quot;execute current thread: &quot; + Thread.currentThread().getName());
-    // ..... 此处开始进行http网络请求
-
-
-    if (call.isCanceled()) {
-        return;
-    }
-    // liveData发送数据
-    liveData.postValue(apiResponse);
-    if (config.cacheStrategy != Config.NET_ONLY) {
-        saveCache(call.request().url().toString(), apiResponse);
-    }
-}
-</code></pre>
-<p>使用okhttp的<code>execute</code>方法发送http请求,并利用<code>ConvertFactory</code>进行数据解析，ConvertFactory后续会介绍。</p>
-<pre><code class="language-java"> try {
-      Response response = call.execute();
-      IConvert&lt;Response, T&gt; convert = ConvertFactory.create();
-      apiResponse = convert.convert(response, config.type);
- } catch (IOException e) {
-      e.printStackTrace();
-      apiResponse = new ApiResponse&lt;&gt;();
-      apiResponse.status = 500;
-      apiResponse.message = e.getMessage();
- }
-</code></pre>
-<h5 id="异步请求enqueue">异步请求(enqueue)</h5>
-<p>异步请求与同步请求一样也需要进行缓存策略进行缓存处理，这块儿的处理逻辑一致，所以下面的代码块将这部分省略。使用okhttp的<code>enqueue</code>方法发送http请求,在<code>onResponse</code>中并利用<code>ConvertFactory</code>进行数据的解析，在<code>onFailure</code>中自定义错误信息的返回。</p>
-<pre><code class="language-java">private &lt;T&gt; void enqueue(Call call, Config config, MutableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData) {
-        //... 缓存策略判断数据处理返回
-        ...
-        // 开始请求服务器
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                if (call.isCanceled()) {
-                    return;
-                }
-                ApiResponse&lt;T&gt; apiResponse = new ApiResponse&lt;&gt;();
-                apiResponse.status = 500;
-                apiResponse.message = e.getMessage();
-                liveData.postValue(apiResponse);
-            }
-
-            @SuppressWarnings(&quot;unchecked&quot;)
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                if (call.isCanceled()) {
-                    return;
-                }
-                IConvert&lt;Response, T&gt; convert = ConvertFactory.create();
-                ApiResponse&lt;T&gt; apiResponse = convert.convert(response, config.type);
-                liveData.postValue(apiResponse);
-                if (config.cacheStrategy != Config.NET_ONLY) {
-                    saveCache(call.request().url().toString(), apiResponse);
-                }
-            }
-        });
-    }
-</code></pre>
-<h3 id="取消请求">取消请求</h3>
-<p><code>cancle()</code>方法中，利用Okhttp来取消请求，主要是比对tag, 如下：</p>
-<pre><code class="language-java">@Override
-public void cancel(@NonNull Object tag) {
-    if (OK_HTTP_CLIENT == null) {
-        return;
-    }
-
-    //查找当前需要取消的tag是否在未执行的请求中
-    for (Call call : OK_HTTP_CLIENT.dispatcher().queuedCalls()) {
-        if (tag.equals(call.request().tag())) {
-            call.cancel();
-        }
-    }
-
-    //查找当前需要请求的tag是否在正在执行的请求中
-    for (Call call : OK_HTTP_CLIENT.dispatcher().runningCalls()) {
-        if (tag.equals(call.request().tag())) {
-            call.cancel();
-        }
-    }
-}
-</code></pre>
-<h2 id="响应数据转换">响应数据转换</h2>
-<p>从服务器返回数据后，需要将数据格式进行转换成数据模型bean，由于数据返回的形式有多种，所以解析方式也会有多种，所以这块儿可以考虑使用数据解析工厂类去做数据解析，不同的解析数据做不同的逻辑实现，达到解偶。</p>
-<p>定义一个<code>Convert</code>类，利用泛型的方式进行参数传递。</p>
-<pre><code class="language-java">public interface IConvert&lt;T, R&gt; {
-    // 数据的返回形式必须是ApiResponse, type即为泛型T的类型
-    @NonNull
-    ApiResponse&lt;R&gt; convert(@NonNull T t, @NonNull Type type);
-}
-</code></pre>
-<p>这边提供了一种简单的convert调用方式，后面可以要考虑进行扩展选择：</p>
-<pre><code class="language-java"> IConvert&lt;Response, T&gt; convert = ConvertFactory.create();
- apiResponse = convert.convert(response, config.type);
-</code></pre>
-<p><code>ConverFactory</code>为<code>IConvert</code>的实现类。</p>
-<pre><code class="language-java">public class ConvertFactory&lt;R&gt; implements IConvert&lt;Response, R&gt; {
-    private static ConvertFactory convertFactory;
-
-
-    public static ConvertFactory create() {
-        if (convertFactory == null) {
-            convertFactory = new ConvertFactory();
-        }
-        return convertFactory;
-    }
-
-    ...........
-}
-</code></pre>
-<h2 id="本地缓存">本地缓存</h2>
-<p>数据缓存采用的是<code>Room</code>数据库进行数据的存储，room是jetpack中的一种组件。它的创建方式也很简单。</p>
-<h3 id="创建数据库表">创建数据库表</h3>
-<pre><code class="language-java">// Entity 表示该对象是一张数据库表
-@Entity(tableName = &quot;cache&quot;)
-public class Cache {
-    // primarykey表示表的主键
-    @PrimaryKey
-    @NonNull
-    public String key;
-    // ColumnInfo表示该字段在表中显示的字段名
-    @ColumnInfo(name = &quot;_data&quot;)
-    public byte[] data;
-}
-</code></pre>
-<h3 id="创建数据库">创建数据库</h3>
-<pre><code class="language-java">// entities 表示 需要在该数据库中创建的表，可以创建多张
-// version 数据库的版本号
-// exportSchema 导出表创建的语句
-@Database(entities = Cache.class, version = 1, exportSchema = true)
-public abstract class CacheDatabase extends RoomDatabase {
-    private static final CacheDatabase cacheDatabase;
-
-    static {
-        Application application = AppGlobals.getApplication();
-        cacheDatabase = Room.databaseBuilder(application, CacheDatabase.class, &quot;net_cache.db&quot;)
-                .allowMainThreadQueries()
-                .build();
-    }
-
-    // 数据库与Dao关联
-    public abstract CacheDao getCacheDao();
-
-    public static CacheDatabase get() {
-        return cacheDatabase;
-    }
-} 
-</code></pre>
-<h3 id="创建数据库表操作类dao">创建数据库表操作类Dao</h3>
-<pre><code class="language-java">// Dao 用来表示当前类是数据库表的操作类
-@Dao
-public interface CacheDao {
-    // Insert 表示增加一条记录到数据库表中
-    // onConflict 表示如果添加数据时出现冲突的解决策略
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void save(@NonNull Cache cache);
-
-    // Delete 表示删除一条记录
-    @Delete
-    int delete(@NonNull Cache cache);
-
-    // Update 表示更新一条记录
-    // onConflict 表示如果更新数据时出现冲突的解决策略
-    @Update(onConflict = OnConflictStrategy.REPLACE)
-    int update(@NonNull Cache cache);
-
-    // Query 查找一条记录
-    @Query(&quot;SELECT * FROM cache WHERE `key`=:key&quot;)
-    Cache query(@NonNull String key);
-}
-</code></pre>
-<h2 id="type类型">Type类型</h2>
-<p>由于java中的泛型在编译完毕后会擦除该类型，所以我们无法在同步执行或者多级泛型嵌套的情况下拿到泛型的实际类型。目前的解决方式有两种。</p>
-<h3 id="调用者传入实际类型">调用者传入实际类型</h3>
-<p>提供可以传入实际类型的方法，调用处将明确类型传递。</p>
-<h3 id="利用子类实现的方式获取实际类型">利用子类实现的方式获取实际类型</h3>
-<p>Java代码在编译成字节码class文件时会保留子类的泛型信息。所以大部分的json数据解析都是采用的此方法，如：Gson中的TypeToken 以及fasjson中的TypeReference。</p>
-<pre><code class="language-java">public abstract class TypeToken&lt;T&gt; {
-    // 泛型T的实际类型
-    protected Type type;
-
-    public TypeToken() {
-        Type superClass = getClass().getGenericSuperclass();
-        // 获取泛型的实际类型
-        Type oriType = ((ParameterizedType) superClass).getActualTypeArguments()[0];
-
-        if (oriType instanceof Class) {
-            type = oriType;
-        } else {
-            //修复在安卓环境中问题
-            type = putCacheTypeIfAbsent(oriType);
-        }
-    }
-}
-</code></pre>
-<p>由于本次封装的返回的数据类型是<code>ApiResponse&lt;T&gt;</code>所以需要对泛型进行二次解析，所以新建了一个ApiResponseToken。</p>
-<pre><code class="language-java">public abstract class ApiResponseToken&lt;T&gt; extends TypeToken&lt;T&gt; {
-
-    public ApiResponseToken() {
-        Type superClass = getClass().getGenericSuperclass();
-
-        Type oriType = ((ParameterizedType) superClass).getActualTypeArguments()[0];
-
-        if (oriType instanceof Class) {
-            type = oriType;
-        } else {
-            // 解决ApiResponse&lt;T&gt;这种情况
-            if (oriType instanceof ParameterizedType) {
-                oriType = ((ParameterizedType) oriType).getActualTypeArguments()[0];
-            }
-            type = putCacheTypeIfAbsent(oriType);
-        }
-    }
-}
-</code></pre>
-<p>由于本次框架的数据返回使用了<code>LiveData&lt;T&gt;</code>的形式，并通过订阅的方式实现数据返回，所以又添加了一个类型，用于自行获取type。</p>
-<pre><code class="language-java">public abstract class HttpObserver&lt;T&gt; extends ApiResponseToken&lt;T&gt; 
-        implements Observer&lt;T&gt; {
-}
-</code></pre>
-<p>在使用LiveData的observe方法订阅时，在创建一个HttpObserserver实例，在构造方法中就可以解析出T的类型，就不需要我们手动传入T的真实类型了。</p>
-<pre><code class="language-java"> /**
- * 开始订阅请求网络数据
- */
-public &lt;T&gt; void observe(LifecycleOwner owner,
-                        HttpObserver&lt;ApiResponse&lt;T&gt;&gt; observer) {
-    // 由于HttpObserver是继承ApiResponseToken的，
-    // 所以可以快速的获取到泛型T的实际类型
-    Type type = observer.getType();
-    mConfig.type = type;
-    Logs.e(&quot;type: &quot; + type);
-}
-</code></pre>
-<p>使用方式：</p>
-<pre><code class="language-java">.observe(owner, 
-        // 通过new HtppObserver的方式就可以拿到具体的泛型值
-         new HttpObserver&lt;ApiResponse&lt;JSONObject&gt;&gt;() {
-             @Override
-             public void onChanged(ApiResponse&lt;JSONObject&gt; apiResponse) {
-                  .....
-              }
-        }
-);
-</code></pre>
-<h2 id="http请求入口类">Http请求入口类</h2>
-<p>LiveHttp的封装，LiveHttp主要提供了以下功能：</p>
-<ul>
-<li>
-<p>持有一个默认的http引擎</p>
-</li>
-<li>
-<p>可支持设置baseUrl和设置引擎的入口</p>
-</li>
-<li>
-<p>设置HttpConfig中的参数</p>
-</li>
-<li>
-<p>执行Http请求入口</p>
-</li>
-<li>
-<p>提供取消http请求的入口</p>
-</li>
-<li>
-<p>支持链式调用</p>
-</li>
-</ul>
-<p>以上几点都很简单，主要是来说一下执行http请求入口：</p>
-<pre><code class="language-java">/**
- * 开始订阅请求网络数据
- */
-public &lt;T&gt; void observe(LifecycleOwner owner,
-                        HttpObserver&lt;ApiResponse&lt;T&gt;&gt; observer) {
-    // 获取泛型实际类型
-    Type type = observer.getType();
-    mConfig.type = type;
-    Logs.d(&quot;type: &quot; + type);
-
-    if (TextUtils.isEmpty(mConfig.url())) {
-        throw new IllegalArgumentException(&quot;请求路径不能为空&quot;);
-    }
-
-    MutableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData = new MutableLiveData&lt;&gt;();
-    // liveData的订阅必须是要在主线程中
-    TaskExecutor.get().postToMain(() -&gt; liveData.observe(owner, observer));
-    sHttpEngine.execute(mConfig, liveData);
 }
 </code></pre>
 ]]></content>

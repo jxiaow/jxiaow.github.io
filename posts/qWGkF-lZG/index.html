@@ -1,0 +1,605 @@
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>UI布局绘制入口 | Xiaowu</title>
+
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607421166858">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+
+<body>
+    <div class="main gt-bg-theme-color-first">
+        <nav class="navbar navbar-expand-lg">
+    <a href="/">
+        <div class="navbar-brand">
+            <img class="user-avatar" src="/images/avatar.png" alt="头像">
+            <div class="site-name gt-c-content-color-first">
+                Xiaowu
+            </div>
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav " style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1607421166858" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+        <div class="post-container">
+
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
+                    <h2 class="post-title">
+                        UI布局绘制入口
+                    </h2>
+                    <div class="post-info">
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2020-12-08 ·
+                            </time>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/qWGkF-lZG/"
+                                class="leancloud_visitors" data-flag-title="UI布局绘制入口">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
+                    </div>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/03/dd54efe6dc0cf2678d09ae0aa9551b0f-Android%20UI%E7%BB%98%E5%88%B6%E6%B5%81%E7%A8%8B-d85b30.svg" alt="Android UI绘制流程" loading="lazy"></figure>
+<!--more-->
+<p>在Activity的生命周期中，系统服务AMS会调用到ActivityThread中的<code>handleResumeActivity</code>方法，在这个方法中，可以看到：</p>
+<pre><code class="language-java">@Override
+
+public void handleResumeActivity(IBinder token, boolean finalStateRequest, boolean isForward, String reason) {
+    // ...
+    // TODO Push resumeArgs into the activity for consideration
+    final ActivityClientRecord r = performResumeActivity(token, finalStateRequest, reason);
+    if (r == null) {
+        // We didn't actually resume the activity, so skipping any follow-up actions.
+        return;
+    }
+
+    // ...
+    if (r.window == null &amp;&amp; !a.mFinished &amp;&amp; willBeVisible) {
+        // 获取window
+        r.window = r.activity.getWindow();
+        // 获取decor
+        View decor = r.window.getDecorView();
+        // 先将decorView设置不可见
+        decor.setVisibility(View.INVISIBLE);
+        // 获取windowManager
+        ViewManager wm = a.getWindowManager();
+        WindowManager.LayoutParams l = r.window.getAttributes();
+        a.mDecor = decor;
+        // 设置window的层级
+        l.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+           // ...
+        if (a.mVisibleFromClient) {
+            if (!a.mWindowAdded) {
+                a.mWindowAdded = true;
+                wm.addView(decor, l);
+            }
+            // ...
+        }
+        // ...
+    }
+
+    // Get rid of anything left hanging around.
+    cleanUpPendingRemoveWindows(r, false /* force */);
+    // The window is now visible if it has been added, we are not
+    // simply finishing, and we are not starting another activity.
+    if (!r.activity.mFinished &amp;&amp; willBeVisible &amp;&amp; r.activity.mDecor != null &amp;&amp; !r.hideForNow) {
+        // ...
+        // 设置decor可见
+        if (r.activity.mVisibleFromClient) {
+            r.activity.makeVisible();
+        }
+    }
+    // ...
+}
+</code></pre>
+<ol>
+<li>获取activity中的window；</li>
+<li>获取window中的decorView并设置为不可见；</li>
+<li>获取windowManager并调用addView方法添加decorView；</li>
+<li>添加完毕后，通过activity.makeVisible()设置decorView可见。</li>
+</ol>
+<h2 id="windowmanager">WindowManager</h2>
+<p>我们知道<code>WindowManager</code>是用来管理view窗口的，它是<code>ViewManager</code>的子类，它的实现类是<code>WindowManagerImpl</code>。</p>
+<pre><code class="language-java">public interface WindowManager extends ViewManager {}
+</code></pre>
+<pre><code class="language-java">public interface ViewManager{
+    // 添加view
+    public void addView(View view, ViewGroup.LayoutParams params);
+    // 更新布局
+    public void updateViewLayout(View view, ViewGroup.LayoutParams params);
+    // 移除view
+    public void removeView(View view);
+}
+</code></pre>
+<pre><code class="language-java">public final class WindowManagerImpl implements WindowManager {
+    // windowManager中持有一个WindowManagerGlobal单例
+    private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
+}
+</code></pre>
+<h3 id="addview">addView</h3>
+<p>在上面<code>handleResumeActivity</code>中调用了<code>WindowManager</code>的<code>addView</code>方法。在 addView中：</p>
+<pre><code class="language-java">@Override
+public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
+    applyDefaultToken(params);
+    // 调用了WindowManagerGlobal中的addView方法
+    mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);
+}
+</code></pre>
+<p>在<code>WindowManagerImpl</code>的<code>addView</code>中调用了<code>WindowManagerGlobal</code>中<code>addView</code>。</p>
+<pre><code class="language-java">public void addView(View view, ViewGroup.LayoutParams params,
+                    Display display, Window parentWindow) {
+    // ...
+    final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
+    if (parentWindow != null) {
+        parentWindow.adjustLayoutParamsForSubWindow(wparams);
+    } else {
+        // If there's no parent, then hardware acceleration for this view is
+        // set from the application's hardware acceleration setting.
+        final Context context = view.getContext();
+        if (context != null
+            &amp;&amp; (context.getApplicationInfo().flags
+                &amp; ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
+            wparams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        }
+    }
+    ViewRootImpl root;
+    View panelParentView = null;
+    synchronized (mLock) {
+        // ...
+        root = new ViewRootImpl(view.getContext(), display);
+        view.setLayoutParams(wparams);
+        mViews.add(view);
+        mRoots.add(root);
+        mParams.add(wparams);
+        // do this last because it fires off messages to start doing things
+        try {
+            root.setView(view, wparams, panelParentView);
+        } catch (RuntimeException e) {
+            // BadTokenException or InvalidDisplayException, clean up.
+            if (index &gt;= 0) {
+                removeViewLocked(index, true);
+            }
+            throw e;
+        }
+    }
+}
+</code></pre>
+<p>mViews保存的是View对象，DecorView<br>
+mRoots保存和顶层View关联的ViewRootImpl对象<br>
+mParams保存的是创建顶层View的layout参数。<br>
+调用<code>root.setView</code>将参数和视图同时交给了<code>ViewRootImpl</code>。</p>
+<pre><code class="language-java">public final class ViewRootImpl implements ViewParent,
+        View.AttachInfo.Callbacks, ThreadedRenderer.DrawCallbacks {}
+</code></pre>
+<pre><code class="language-java">public interface ViewParent {}
+</code></pre>
+<h3 id="setview">setView</h3>
+<pre><code class="language-java">/**
+  * We have one child
+  */
+public void setView(View view, WindowManager.LayoutParams attrs, View panelParentView) {
+    synchronized (this) {
+        if (mView == null) {
+            mView = view;
+            // ...
+            mAdded = true;
+            int res; /* = WindowManagerImpl.ADD_OKAY; */
+            // Schedule the first layout -before- adding to the window
+            // manager, to make sure we do the relayout before receiving
+            // any other events from the system.
+            requestLayout();
+            // ...
+            try {
+                // ...
+                res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes, 
+                                                  getHostVisibility(),
+                                                  mDisplay.getDisplayId(),
+                                                  mTmpFrame,
+                                                  mAttachInfo.mContentInsets,
+                                                  mAttachInfo.mStableInsets,
+                                                  mAttachInfo.mOutsets,
+                                                  mAttachInfo.mDisplayCutout, mInputChannel,  mTempInsets);
+                setFrame(mTmpFrame);
+            } catch (RemoteException e) {
+                // ...
+                throw new RuntimeException(&quot;Adding window failed&quot;, e);
+            } finally {
+                if (restore) {
+                    attrs.restore();
+                }
+            }
+            // ...
+            view.assignParent(this);
+            // ...
+        }
+    }
+}
+</code></pre>
+<h3 id="requestlayout">requestLayout</h3>
+<pre><code class="language-java">@Override
+public void requestLayout() {
+    if (!mHandlingLayoutInLayoutRequest) {
+        checkThread();
+        mLayoutRequested = true;
+        scheduleTraversals();
+    }
+}
+</code></pre>
+<h3 id="scheduletraversals">scheduleTraversals</h3>
+<pre><code class="language-java">void scheduleTraversals() {
+    if (!mTraversalScheduled) {
+        mTraversalScheduled = true;
+        mTraversalBarrier = mHandler.getLooper().getQueue().postSyncBarrier();
+        // 利用handle回调了 mTraversalRunnable
+        mChoreographer.postCallback(
+            Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);
+        if (!mUnbufferedInputDispatch) {
+            scheduleConsumeBatchedInput();
+        }
+        notifyRendererOfFramePending();
+        pokeDrawLockIfNeeded();
+    }
+}
+</code></pre>
+<h3 id="mtraversalrunnable">mTraversalRunnable</h3>
+<pre><code class="language-java">final TraversalRunnable mTraversalRunnable = new TraversalRunnable();
+final class TraversalRunnable implements Runnable {
+    @Override
+    public void run() {
+        doTraversal();
+    }
+}
+</code></pre>
+<h3 id="dotraversal">doTraversal</h3>
+<pre><code class="language-java">void doTraversal() {
+    if (mTraversalScheduled) {
+        mTraversalScheduled = false;
+        mHandler.getLooper().getQueue().removeSyncBarrier(mTraversalBarrier);
+        if (mProfile) {
+            Debug.startMethodTracing(&quot;ViewAncestor&quot;);
+        }
+        performTraversals();
+        if (mProfile) {
+            Debug.stopMethodTracing();
+            mProfile = false;
+        }
+    }
+}
+</code></pre>
+<h3 id="performtraversals">performTraversals</h3>
+<pre><code class="language-java">private void performTraversals() {
+    // ...
+    if (mFirst || windowShouldResize || insetsChanged ||
+        viewVisibilityChanged || params != null || mForceNextWindowRelayout) {
+        mForceNextWindowRelayout = false;
+        // ...
+        if (!mStopped || mReportNextDraw) {
+            boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
+                (relayoutResult&amp;WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE) != 0);
+            if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()  || mHeight != host.getMeasuredHeight() || contentInsetsChanged ||
+                updatedConfiguration) {
+                int childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
+                int childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height);
+                // ...
+                // Ask host how big it wants to be
+                performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
+                // Implementation of weights from WindowManager.LayoutParams
+                // We just grow the dimensions as needed and re-measure if
+                // needs be
+                int width = host.getMeasuredWidth();
+                int height = host.getMeasuredHeight();
+                boolean measureAgain = false;
+                if (lp.horizontalWeight &gt; 0.0f) {
+                    width += (int) ((mWidth - width) * lp.horizontalWeight);
+                    childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(width,
+                    MeasureSpec.EXACTLY);
+                    measureAgain = true;
+                }
+                if (lp.verticalWeight &gt; 0.0f) {
+                    height += (int) ((mHeight - height) * lp.verticalWeight);
+                    childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+                    measureAgain = true;
+                }
+                if (measureAgain) {
+                    // 进行UI布局的测量
+                    performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
+                }
+                layoutRequested = true;
+            }
+        }
+    }
+    // ...
+    final boolean didLayout = layoutRequested &amp;&amp; (!mStopped || mReportNextDraw);
+    boolean triggerGlobalLayoutListener = didLayout
+        || mAttachInfo.mRecomputeGlobalAttributes;
+    if (didLayout) {
+        // 进行UI控件的摆放
+        performLayout(lp, mWidth, mHeight);
+        // ...
+    }
+    // Remember if we must report the next draw.
+    if ((relayoutResult &amp; WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
+        reportNextDraw();
+    }
+    boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;
+    if (!cancelDraw) {
+        if (mPendingTransitions != null &amp;&amp; mPendingTransitions.size() &gt; 0) {
+            for (int i = 0; i &lt; mPendingTransitions.size(); ++i) {
+                mPendingTransitions.get(i).startChangingAnimations();
+            }
+            mPendingTransitions.clear();
+        }
+        // 进行图形的绘画
+        performDraw();
+    } else {
+        if (isViewVisible) {
+            // Try again
+            scheduleTraversals();
+        } else if (mPendingTransitions != null &amp;&amp; mPendingTransitions.size() &gt; 0) {
+            for (int i = 0; i &lt; mPendingTransitions.size(); ++i) {
+                mPendingTransitions.get(i).endChangingAnimations();
+            }
+            mPendingTransitions.clear();
+        }
+    }
+    mIsInTraversal = false;
+}
+</code></pre>
+<p>在<code>performTravals()</code>中主要调用了<code>performMeasure()</code>、<code>performLayout()</code>和<code>performDraw()</code>来进行UI的测量、布局和绘制。</p>
+
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#windowmanager">WindowManager</a>
+<ul>
+<li><a href="#addview">addView</a></li>
+<li><a href="#setview">setView</a></li>
+<li><a href="#requestlayout">requestLayout</a></li>
+<li><a href="#scheduletraversals">scheduleTraversals</a></li>
+<li><a href="#mtraversalrunnable">mTraversalRunnable</a></li>
+<li><a href="#dotraversal">doTraversal</a></li>
+<li><a href="#performtraversals">performTraversals</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+                </div>
+            </article>
+            <!-- </div> -->
+
+            
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://jxiaow.gitee.io/posts/23SClUqqh/" class="post-title gt-a-link">
+                    UI整体绘制流程
+                </a>
+            </div>
+            
+
+            
+
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'monsterid',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+            
+
+            <div class="site-footer gt-c-content-color-first">
+
+  <div class="social-container">
+
+    <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
+      <i class="fab fa-github gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
+      <i class="fas fa-blog gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
+      <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
+    </a>
+
+    <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
+      <i class="fas fa-envelope gt-c-content-color-first"></i>
+    </a>
+
+  </div>
+  <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+  
+  <div>
+    Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a
+        href="https://jxiaow.gitee.io/atom.xml" target="_blank">RSS</a></a>
+  </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+            <script>
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+  
+  if (mainNavLinks == null || mainNavLinks.length == 0) {
+    let tocContainer = document.querySelector(".toc-container");
+    tocContainer.classList.remove("toc-container")
+    tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
+  } else {
+
+    // This should probably be throttled.
+    // Especially because it triggers during smooth scrolling.
+    // https://lodash.com/docs/4.17.10#throttle
+    // You could do like...
+    // window.addEventListener("scroll", () => {
+    //    _.throttle(doThatStuff, 100);
+    // });
+    // Only not doing it here to keep this Pen dependency-free.
+
+
+    window.addEventListener("scroll", event => {
+      let fromTop = window.scrollY;
+
+      mainNavLinks.forEach((link, index) => {
+        let section = document.getElementById(decodeURI(link.hash).substring(1));
+        let nextSection = null
+        if (mainNavLinks[index + 1]) {
+          nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+        }
+        if (section.offsetTop <= fromTop) {
+          if (nextSection) {
+            if (nextSection.offsetTop > fromTop) {
+              link.classList.add("current");
+            } else {
+              link.classList.remove("current");
+            }
+          } else {
+            link.classList.add("current");
+          }
+        } else {
+          link.classList.remove("current");
+        }
+      });
+    });
+  }
+
+
+
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+
+<script>
+  let images = document.querySelectorAll("figure > img");
+  //   debugger
+  //   console.log("dddd: "+ images);
+  images.forEach(image => {
+    var parent = image.parentElement;
+    parent.removeChild(image);
+    var aelem = document.createElement('a');
+    aelem.href = image.src;
+    aelem.dataset['fancybox'] = 'gallery';
+    aelem.classList.add('fancybox');
+    aelem.appendChild(image);
+    parent.appendChild(aelem);
+  })
+
+//   <a data-fancybox="gallery" href="big_1.jpg"><img src="small_1.jpg"></a>
+// <a data-fancybox="gallery" href="big_2.jpg"><img src="small_2.jpg"></a>
+</script>
+        </div>
+    </div>
+
+</body>
+
+</html>
