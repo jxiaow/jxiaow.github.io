@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2020-12-09T09:02:13.593Z</updated>
+    <updated>2020-12-09T09:11:24.609Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -555,867 +555,6 @@ public void setContentView(int layoutResID) {
 </code></pre>
 <h2 id="activity的窗口ui布局层级">Activity的窗口UI布局层级</h2>
 <figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/Activity-Activity%E8%A7%86%E5%9B%BE%E7%BB%93%E6%9E%84%E5%AE%B9%E5%99%A8.svg" alt="Activity-Activity视图结构容器" loading="lazy"></figure>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Android DataBinding 从入门到进阶]]></title>
-        <id>https://jxiaow.gitee.io/posts/3c6ea6b6/</id>
-        <link href="https://jxiaow.gitee.io/posts/3c6ea6b6/">
-        </link>
-        <updated>2020-12-04T16:19:45.000Z</updated>
-        <summary type="html"><![CDATA[<p>DataBinding 是<code>google</code>发布的一个数据绑定框架，用于降低布局和逻辑的耦合性，使代码逻辑更加清晰。大量减少 Activity 内的代码，数据能够单向或双向绑定到 layout 文件中，有助于防止内存泄漏，而且能自动进行空检测以避免空指针异常。</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>DataBinding 是<code>google</code>发布的一个数据绑定框架，用于降低布局和逻辑的耦合性，使代码逻辑更加清晰。大量减少 Activity 内的代码，数据能够单向或双向绑定到 layout 文件中，有助于防止内存泄漏，而且能自动进行空检测以避免空指针异常。</p>
-<!-- more -->
-<h2 id="环境配置">环境配置</h2>
-<ol>
-<li>
-<p>详情内容请参考：<a href="https://developer.android.com/topic/libraries/data-binding/start">https://developer.android.com/topic/libraries/data-binding/start</a></p>
-</li>
-<li>
-<p>启用 DataBinding 的方法是在对应 Model 的 <strong><code>build.gradle</code></strong> 文件里加入以下代码，同步后就能引入对 DataBinding 的支持</p>
-<pre><code class="language-groovy">android {
-    ...
-   dataBinding {
-       enabled = true
-   }
-}
-</code></pre>
-</li>
-<li>
-<p>如果<code>Android Studio</code>的版本小于<code>3.2</code>的需要在<code>gradle.properties</code>中添加：</p>
-<pre><code class="language-groovy">android.databinding.enableV2=true
-</code></pre>
-</li>
-</ol>
-<p><strong>tips:</strong>   1. 推荐使用最新的<code>Android Studio</code>版本和<code>AndroidX</code>库。</p>
-<p>​            2.<code>build.gradle</code>中添加<code>'apply plugin : 'kotlin-kapt'</code>。</p>
-<h2 id="基础入门">基础入门</h2>
-<h3 id="改变布局文件-layout">改变布局文件 <strong><code>layout</code></strong></h3>
-<p>启用 DataBinding 后，打开原有的布局文件，选中根布局的 <strong>根布局</strong>，按住 <strong>Alt + 回车键</strong>，点击 “<strong>Convert to data binding layout</strong>”，就可以生成 DataBinding 需要的布局规则。</p>
-<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/09-23-37-06-1560319999402.png" alt="1560319999402.png" loading="lazy"></figure>
-<p>转换后的内容为：</p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
-    &lt;data&gt;
-    &lt;/data&gt;
-    &lt;androidx.constraintlayout.widget.ConstraintLayout
-            android:orientation=&quot;vertical&quot;
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;match_parent&quot;&gt;
-
-    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
-&lt;/layout&gt;
-</code></pre>
-<ul>
-<li>和原始布局的区别在于多出了一个 <strong>layout</strong> 标签将原布局包裹了起来；</li>
-<li><strong>data</strong> 标签用于声明要用到的变量以及变量类型，它搭建了 View 和 Model 之间的通道。</li>
-</ul>
-<h3 id="创建model">创建<code>Model</code></h3>
-<pre><code class="language-kotlin">package com.github.ixiaow.databindingsample.model
-
-data class User(val name:String, val password: String)
-</code></pre>
-<h3 id="model-与-布局文件关联"><strong><code>Model</code></strong> 与 布局文件关联</h3>
-<p>在 <strong>data</strong> 标签里声明要使用到的变量名、类的全路径</p>
-<pre><code class="language-xml">&lt;data&gt;
-    &lt;variable 
-         name=&quot;user&quot; 
-         type=&quot;com.github.ixiaow.databindingsample.model.User&quot;/&gt;
-&lt;/data&gt;
-</code></pre>
-<p>在 相应部分使用<code>User</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;layout
-        xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-        xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;&gt;
-
-    &lt;data&gt;
-        ...
-    &lt;/data&gt;
-
-    &lt;androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;match_parent&quot;
-            android:orientation=&quot;vertical&quot;&gt;
-
-        &lt;TextView
-                  ...
-                android:text=&quot;@{user.name}&quot;/&gt;
-
-        &lt;TextView
-                   ...
-                android:text=&quot;@{user.password}&quot;/&gt;
-
-    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
-&lt;/layout&gt;
-</code></pre>
-<h3 id="给model赋值">给<code>Model</code>赋值</h3>
-<p>写好布局文件后，在 <code>Android Studio</code>中执行<code>make project</code>或者<code>make app</code>, 完成后，在<code>Activity</code>中:</p>
-<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val dataBinding: ActivityMainBinding =
-            DataBindingUtil.setContentView(this, R.layout.activity_main)
-        // 给user初始化值
-        dataBinding.user = User(&quot;zhangsan&quot;, &quot;12345&quot;)
-    }
-}
-</code></pre>
-<p>运行<code>App</code>后就可以看到结果啦。</p>
-<h3 id="补充知识">补充知识</h3>
-<ul>
-<li>
-<p><strong><code>import</code></strong></p>
-<p>我们可以像使用<code>java</code>或者<code>kotlin</code>文件一样，导入需要的类名路径即可，比如说：</p>
-<ol>
-<li>
-<p>如果 User 类型要多处用到，也可以直接将之 <strong>import</strong> 进来，这样就不用每次都指明整个包名路径了，而 <code>java.lang.*</code> 包中的类会被自动导入，所以可以直接使用：</p>
-<pre><code class="language-xml">&lt;data&gt;
-   &lt;import type=&quot;com.github.ixiaow.databindingsample.model.User&quot;/&gt;
-   &lt;variable
-       name=&quot;user&quot;
-       type=&quot;User&quot;/&gt;
-&lt;/data&gt;
-</code></pre>
-</li>
-<li>
-<p>导入<code>java</code>或<code>kotlin</code>文件中的系统类，比如 <code>import</code> 集合 <code>list</code></p>
-<pre><code class="language-xml">&lt;data&gt;
-    &lt;import type=&quot;java.util.List&quot;/&gt;
-    &lt;import type=&quot;com.github.ixiaow.sample.model.User&quot;/&gt;
-    &lt;variable name=&quot;user&quot; type=&quot;User&quot;/&gt;
-    &lt;variable name=&quot;users&quot; type=&quot;List&lt;User&gt;&quot;/&gt;
- &lt;/data&gt;
-</code></pre>
-<p><strong>❤️</strong> <code>&lt;</code>需要被替换成<code>&amp;lt;</code></p>
-</li>
-<li>
-<p>如果存在 <strong>import</strong> 的类名相同的情况，可以使用 <strong>alias</strong> 指定别名</p>
-<pre><code class="language-xml">&lt;data&gt;
-    &lt;import type=&quot;com.github.ixiaow.sample.model1.User&quot; /&gt;
-    &lt;import
-       alias=&quot;TempUser&quot;
-       type=&quot;com.github.ixiaow.sample.model2.User&quot; /&gt;
-    &lt;variable
-       name=&quot;user&quot;
-       type=&quot;User&quot; /&gt;
-    &lt;variable
-       name=&quot;tempUserInfo&quot;
-       type=&quot;TempUser&quot; /&gt;
-&lt;/data&gt;
-</code></pre>
-</li>
-</ol>
-</li>
-<li>
-<p>预览添加默认值</p>
-<p>由于 <code>@{user.name}</code>在布局文件中并没有明确的值，所以在预览视图中什么都不会显示，不便于观察文本的大小和字体颜色等属性，此时可以为之设定默认值（文本内容或者是字体大小等属性都适用），默认值将只在预览视图中显示，且默认值不能包含引号</p>
-<pre><code class="language-xml">android:text=&quot;@{userInfo.name,default=defaultValue}&quot;
-</code></pre>
-<p>此外，也可以通过 ActivityMainBinding 直接获取到指定 ID 的控件:</p>
-<pre><code class="language-java">dataBinding.mUserName.text = &quot;lisi&quot;
-</code></pre>
-</li>
-<li>
-<p>自定义生成的绑定类的类名</p>
-<p>每个数据绑定布局文件都会生成一个绑定类，<strong>ViewDataBinding</strong> 的实例名是根据布局文件名来生成，采用驼峰命名法来命名，并省略布局文件名包含的下划线。控件的获取方式类似，但首字母小写。</p>
-<p>通过如下方式自定义 ViewDataBinding 的实例名</p>
-<pre><code class="language-xml">&lt;data class=&quot;CustomBinding&quot;&gt;&lt;/data&gt;
-</code></pre>
-</li>
-<li>
-<p>在 <strong>Fragment</strong> 和 <strong>RecyclerView</strong> 中使用</p>
-<ol>
-<li>在 Fragment 中的使用</li>
-</ol>
-<pre><code class="language-kotlin">class BlankFragment : Fragment() {
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val blankFragmentBinding: BlankFragmentBinding =
-            DataBindingUtil.inflate(inflater, R.layout.blank_fragment, container, false)
-        return blankFragmentBinding.root
-    }
-}
-</code></pre>
-<ol start="2">
-<li>
-<p>在RecyclerView中使用</p>
-<p>具体使用请参考：<a href="https://blog.csdn.net/yehui928186846/article/details/78408294">DataBinding 应用于RecyclerView</a></p>
-</li>
-</ol>
-<pre><code class="language-kotlin">override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerViewHolder {
-        val itemMvvmBinding = DataBindingUtil.inflate&lt;ViewDataBinding&gt;(
-            LayoutInflater.from(parent.context),
-            R.layout.item_mvvm,
-            parent,
-            false
-        )
-        itemMvvmBinding.getRoot().setOnClickListener(this)
-        return RecyclerViewHolder(itemMvvmBinding)
- }
-
-override fun onBindViewHolder(holder: RecyclerViewHolder, position: Int) {
-        val itemMvvmBinding = holder.getBinding()
-        val userBean = data.get(position)
-        itemMvvmBinding.setUser(userBean)
-        //将position保存在itemView的Tag中，以便点击时进行获取
-        itemMvvmBinding.getRoot().setTag(position)
-        itemMvvmBinding.btnUpdate.setOnClickListener(OnBtnClickListener(1, userBean))
-        itemMvvmBinding.btnDelete.setOnClickListener(OnBtnClickListener(2, position))
-        // 立刻执行绑定
-        itemMvvmBinding.executePendingBindings()
-}
-</code></pre>
-<p><strong>以上实现数据绑定的方式，每当绑定的变量发生变化的时候，都需要重新向 ViewDataBinding 传递新的变量值才能刷新 UI 。接下来看如何实现自动刷新 UI</strong></p>
-</li>
-</ul>
-<h2 id="单向数据绑定">单向数据绑定</h2>
-<p>实现数据变化自动驱动 UI 刷新的方式有三种：<code>BaseObservable</code>、<code>ObservableField</code>、<code>ObservableCollection</code></p>
-<h3 id="baseobservable">BaseObservable</h3>
-<p>一个简单的<code>ViewModel</code> 类被更新后，并不会让 UI 自动更新。而数据绑定后，我们自然会希望数据变更后 UI 会即时刷新，<code>Observable</code> 就是为此而生的概念。</p>
-<p><strong>BaseObservable</strong> 提供了 <strong>notifyChange()</strong> 和 <strong>notifyPropertyChanged()</strong> 两个方法。</p>
-<ul>
-<li><strong>notifyChange()</strong></li>
-</ul>
-<p>它会刷新所有的值。</p>
-<ul>
-<li><strong>notifyPropertyChanged()</strong></li>
-</ul>
-<p>它只会根据对应的<code>BR</code>的<code>flag</code>更新，该 <code>BR</code> 的生成通过注释 <strong><code>@Bindable</code></strong> 生成，可以通过 <strong>BR notify</strong> 特定属性关联的视图。</p>
-<ul>
-<li>由于<code>kotlin</code>的属性默认是<code>public</code>修饰，所以可以直接在属性上<code>@Bindable</code>, 如何设置了修饰符且不为<code>public</code>的话，则可使用<code>@get BIndable</code>（表示在<code>get()</code>方法上标记<code>@Bindable</code>）</li>
-</ul>
-<pre><code class="language-kotlin">import androidx.databinding.BaseObservable
-import androidx.databinding.Bindable
-import com.github.ixiaow.sample.BR
-
-class UserInfo : BaseObservable() {
-    // 对name进行@Bindable标志，然后会生成BR.name
-    @Bindable
-    var name: String = &quot;&quot;
-        set(value) {
-            field = value
-            // 当name,发生改变时只会刷新与name相关控件的值，不会刷新其他的值
-            notifyPropertyChanged(BR.name)
-        }
-
-    @get: Bindable
-    var password: String = &quot;&quot;
-        set(value) {
-            field = value
-            // 当password 发生改变时，也会刷新其他属性相关的控件的值
-            notifyChange()
-        }
-}
-</code></pre>
-<p>布局文件：</p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
-        xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
-    &lt;data&gt;
-        &lt;variable name=&quot;userInfo&quot; type=&quot;com.github.ixiaow.sample.model.UserInfo&quot;/&gt;
-    &lt;/data&gt;
-    &lt;androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;match_parent&quot;
-            tools:context=&quot;.MainActivity&quot;&gt;
-
-        &lt;TextView
-                app:layout_constraintVertical_chainStyle=&quot;spread&quot;
-                android:id=&quot;@+id/mUserName&quot;
-                android:layout_width=&quot;wrap_content&quot;
-                android:layout_height=&quot;wrap_content&quot;
-                android:text=&quot;@{userInfo.name}&quot;
-                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
-                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
-                app:layout_constraintRight_toRightOf=&quot;parent&quot;
-                app:layout_constraintTop_toTopOf=&quot;parent&quot;/&gt;
-
-        &lt;TextView
-                android:layout_width=&quot;wrap_content&quot;
-                android:layout_height=&quot;wrap_content&quot;
-                android:text=&quot;@{userInfo.password}&quot;
-                app:layout_constraintTop_toBottomOf=&quot;@id/mUserName&quot;
-                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
-                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
-                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
-
-    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
-&lt;/layout&gt;
-</code></pre>
-<ol start="4">
-<li>
-<p><strong><code>OnPropertyChangedCallback</code></strong></p>
-<p>实现了 <strong>Observable</strong> 接口的类允许注册一个监听器<code>OnPropertyChangedCallback</code>，当可观察对象的属性更改时就会通知这个监听器。</p>
-<p>当中 <code>propertyId</code> 就用于标识特定的字段</p>
-</li>
-</ol>
-<pre><code class="language-kotlin">user.addOnPropertyChangedCallback(object : Observable.OnPropertyChangedCallback(){
-     override fun onPropertyChanged(sender: Observable, propertyId: Int) {
-
-     }
-})
-</code></pre>
-<h3 id="observablefield">ObservableField</h3>
-<p>继承于 <code>Observable</code> 类相对来说限制有点高，且也需要进行<code>notify</code> 操作，因此为了简单起见可以选择使用 <strong><code>ObservableField</code></strong>。 可以理解为官方对 <code>BaseObservable</code> 中字段的注解和刷新等操作的封装，官方原生提供了对基本数据类型的封装，例如 <strong><code>ObservableBoolean、ObservableByte、ObservableChar、ObservableShort、ObservableInt、ObservableLong、ObservableFloat、ObservableDouble</code></strong> 以及 <strong><code>ObservableParcelable</code></strong> ，也可通过 <strong><code>ObservableField</code></strong> 泛型来申明其他类型。</p>
-<pre><code class="language-kotlin">class ObservableUser {
-    val name = ObservableField&lt;String&gt;()
-    val password = ObservableField&lt;String&gt;()
-}
-</code></pre>
-<p>对 <code>ObservableUser</code>属性值的改变都会立即触发 UI 刷新，概念上与<code>Observable</code> 区别不大，具体效果可看下面提供的源代码，这里不再赘述</p>
-<h3 id="observablecollection">ObservableCollection</h3>
-<p><code>dataBinding</code> 也提供了包装类用于替代原生的 <code>List</code> 和 <code>Map</code>，分别是 <code>ObservableList</code> 和 <code>ObservableMap</code>,当其包含的数据发生变化时，绑定的视图也会随之进行刷新</p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
-        xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
-    &lt;data&gt;
-        &lt;import type=&quot;androidx.databinding.ObservableList&quot;/&gt;
-        &lt;import type=&quot;androidx.databinding.ObservableMap&quot;/&gt;
-        &lt;import type=&quot;com.github.ixiaow.sample.model.User&quot;/&gt;
-        &lt;variable name=&quot;index&quot; type=&quot;int&quot;/&gt;
-        &lt;variable name=&quot;key&quot; type=&quot;String&quot;/&gt;
-        &lt;variable name=&quot;list&quot; type=&quot;ObservableList&lt;User&gt;&quot;/&gt;
-        &lt;variable name=&quot;map&quot; type=&quot;ObservableMap&lt;String, User&gt;&quot;/&gt;
-    &lt;/data&gt;
-    &lt;androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;match_parent&quot;
-            tools:context=&quot;.MainActivity&quot;&gt;
-
-        &lt;TextView
-                app:layout_constraintVertical_chainStyle=&quot;spread&quot;
-                android:id=&quot;@+id/mUserName&quot;
-                android:layout_width=&quot;wrap_content&quot;
-                android:layout_height=&quot;wrap_content&quot;
-                android:text=&quot;@{list[index].name}&quot;
-                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
-                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
-                app:layout_constraintRight_toRightOf=&quot;parent&quot;
-                app:layout_constraintTop_toTopOf=&quot;parent&quot;/&gt;
-
-        &lt;TextView
-                android:layout_width=&quot;wrap_content&quot;
-                android:layout_height=&quot;wrap_content&quot;
-                android:text=&quot;@{map[key].password}&quot;
-                app:layout_constraintTop_toBottomOf=&quot;@id/mUserName&quot;
-                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
-                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
-                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
-
-    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
-&lt;/layout&gt;
-</code></pre>
-<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val dataBinding: ActivityMainBinding =
-            DataBindingUtil.setContentView(this, R.layout.activity_main)
-
-        dataBinding.map = ObservableArrayMap&lt;String, User&gt;().apply {
-            &quot;android&quot; to User(&quot;android&quot;, &quot;12367&quot;)
-            &quot;java&quot; to User(&quot;java&quot;, &quot;12534&quot;)
-            &quot;c&quot; to User(&quot;c&quot;, &quot;12344&quot;)
-            &quot;c++&quot; to User(&quot;c++&quot;, &quot;14423&quot;)
-            &quot;c#&quot; to User(&quot;c#&quot;, &quot;12334&quot;)
-        }
-
-        dataBinding.key = &quot;c&quot;
-
-        dataBinding.list = ObservableArrayList&lt;User&gt;().apply {
-            add(User(&quot;android&quot;, &quot;123&quot;))
-            add(User(&quot;java&quot;, &quot;1234&quot;))
-            add(User(&quot;c&quot;, &quot;1235&quot;))
-            add(User(&quot;c++&quot;, &quot;123447&quot;))
-        }
-
-        dataBinding.index = 3
-    }
-}
-</code></pre>
-<h2 id="双向数据绑定">双向数据绑定</h2>
-<p>双向绑定的意思即为当数据改变时同时使视图刷新，而视图改变时也可以同时改变数据</p>
-<p>看以下例子，当 <code>EditText</code>的输入内容改变时，会同时同步到变量 <code>user</code>,绑定变量的方式比单向绑定多了一个等号：<code>android:text=&quot;@={user.name}&quot;</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
-        xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
-    &lt;data&gt;
-        &lt;variable name=&quot;userInfo&quot; type=&quot;com.github.ixiaow.sample.model.ObservableUser&quot;/&gt;
-    &lt;/data&gt;
-    &lt;androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;match_parent&quot;
-            tools:context=&quot;.MainActivity&quot;&gt;
-
-        &lt;EditText
-                app:layout_constraintVertical_chainStyle=&quot;spread&quot;
-                android:id=&quot;@+id/mUserName&quot;
-                android:layout_width=&quot;wrap_content&quot;
-                android:layout_height=&quot;wrap_content&quot;
-                android:text=&quot;@={userInfo.name, default=`name`}&quot;
-                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
-                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
-                app:layout_constraintRight_toRightOf=&quot;parent&quot;
-                app:layout_constraintTop_toTopOf=&quot;parent&quot;/&gt;
-
-        &lt;EditText
-                android:layout_width=&quot;wrap_content&quot;
-                android:layout_height=&quot;wrap_content&quot;
-                android:text=&quot;@={userInfo.password, default=`1234`}&quot;
-                app:layout_constraintTop_toBottomOf=&quot;@id/mUserName&quot;
-                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
-                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
-                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
-
-    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
-&lt;/layout&gt;
-</code></pre>
-<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val dataBinding: ActivityMainBinding =
-            DataBindingUtil.setContentView(this, R.layout.activity_main)
-        val observableUser = ObservableUser()
-        observableUser.name.set(&quot;我是name&quot;)
-        observableUser.password.set(&quot;我是password&quot;)
-
-        dataBinding.userInfo = observableUser
-    }
-}
-</code></pre>
-<h2 id="事件绑定">事件绑定</h2>
-<p>严格意义上来说，事件绑定也是一种变量绑定，只不过设置的变量是回调接口而已。</p>
-<p>事件绑定可用于以下多种回调事件：</p>
-<ul>
-<li>android:onClick</li>
-<li>android:onLongClick</li>
-<li>android:afterTextChanged</li>
-<li>android:onTextChanged</li>
-<li>...</li>
-</ul>
-<p>新建一个 <strong>UserPresenter</strong> 类来声明 <strong>onClick()</strong> 和 <strong>afterTextChanged()</strong> 事件相应的回调方法</p>
-<pre><code class="language-kotlin">class UserPresenter {
-
-    fun onUserNameClick(user: ObservableUser) {
-
-    }
-
-    fun afterTextChanged(s: Editable) {
-    }
-
-    fun saveUser(view: View, user: ObservableUser){
-
-    }
-}
-</code></pre>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
-        xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
-    &lt;data&gt;
-        &lt;import type=&quot;com.github.ixiaow.sample.UserPresenter&quot;/&gt;
-        &lt;variable name=&quot;presenter&quot; type=&quot;UserPresenter&quot;/&gt;
-        &lt;variable name=&quot;userInfo&quot; type=&quot;com.github.ixiaow.sample.model.ObservableUser&quot;/&gt;
-    &lt;/data&gt;
-    &lt;androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;match_parent&quot;
-            tools:context=&quot;.MainActivity&quot;&gt;
-
-        &lt;EditText
-                app:layout_constraintVertical_chainStyle=&quot;spread&quot;
-                android:id=&quot;@+id/mUserName&quot;
-                android:layout_width=&quot;wrap_content&quot;
-                android:layout_height=&quot;wrap_content&quot;
-                android:onClick=&quot;@{()-&gt; presenter.onUserNameClick(userInfo)}&quot;
-                android:text=&quot;@={userInfo.name, default=`name`}&quot;
-                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
-                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
-                app:layout_constraintRight_toRightOf=&quot;parent&quot;
-                app:layout_constraintTop_toTopOf=&quot;parent&quot;/&gt;
-
-        &lt;EditText
-                android:id=&quot;@+id/mPassword&quot;
-                android:layout_width=&quot;wrap_content&quot;
-                android:layout_height=&quot;wrap_content&quot;
-                android:afterTextChanged=&quot;@{presenter::afterTextChanged}&quot;
-                android:text=&quot;@={userInfo.password, default=`1234`}&quot;
-                app:layout_constraintTop_toBottomOf=&quot;@id/mUserName&quot;
-                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
-                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
-                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
-
-        &lt;EditText
-                android:layout_width=&quot;wrap_content&quot;
-                android:layout_height=&quot;wrap_content&quot;
-                android:onClick=&quot;@{(theView)-&gt;presenter.saveUser(theView, userInfo)}&quot;
-                android:text=&quot;@={userInfo.password, default=`1234`}&quot;
-                app:layout_constraintTop_toBottomOf=&quot;@id/mPassword&quot;
-                app:layout_constraintBottom_toBottomOf=&quot;parent&quot;
-                app:layout_constraintLeft_toLeftOf=&quot;parent&quot;
-                app:layout_constraintRight_toRightOf=&quot;parent&quot;/&gt;
-
-    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;
-&lt;/layout&gt;
-</code></pre>
-<p>方法引用的方式与调用函数的方式类似，</p>
-<ol>
-<li>可以选择保持事件回调方法的签名一致：<strong><code>@{presenter.afterTextChanged}</code></strong>，此时方法名可以不一样，但方法参数和返回值必须和原始的回调函数保持一致。</li>
-<li>可以引用不遵循默认签名的函数：<strong><code>@{()-&gt;presenter.onUserNameClick(userInfo)}</code></strong>，这里用到了 Lambda 表达式，这样就可以不遵循默认的方法签名，将<code>userInfo</code>对象直接传回点击方法中。此外，也可以使用方法引用 <strong><code>::</code></strong> 的形式来进行事件绑定</li>
-</ol>
-<h2 id="使用类方法">使用类方法</h2>
-<p>首先定义一个静态方法</p>
-<pre><code class="language-kotlin">object StringUtils {
-
-   fun toUpperCase( str:String):String {
-        return str.toUpperCase();
-   }
-}
-</code></pre>
-<p>在 data 标签中导入该工具类</p>
-<pre><code class="language-xml"> &lt;import type=&quot;com.github.ixiaow.sample.StringUtils&quot; /&gt;
-</code></pre>
-<p>然后就可以像对待一般的函数一样来调用了</p>
-<pre><code class="language-xml">&lt;TextView
-   android:layout_width=&quot;match_parent&quot;
-   android:layout_height=&quot;wrap_content&quot;
-   android:onClick=&quot;@{()-&gt;userPresenter.onUserNameClick(userInfo)}&quot;
-   android:text=&quot;@{StringUtils.toUpperCase(userInfo.name)}&quot; /&gt;
-</code></pre>
-<h2 id="运算符">运算符</h2>
-<h4 id="基础运算符">基础运算符</h4>
-<p>DataBinding 支持在布局文件中使用以下运算符、表达式和关键字</p>
-<ul>
-<li>算术 <code>+ - / * %</code></li>
-<li>字符串合并<code>+</code></li>
-<li>逻辑<code>&amp;&amp; ||</code></li>
-<li>二元<code>&amp; | ^</code></li>
-<li>一元 <code>+ - ! ~</code></li>
-<li>移位<code>&gt;&gt; &gt;&gt;&gt; &lt;&lt;</code></li>
-<li>比较<code>== &gt; &lt; &gt;= &lt;=</code></li>
-<li><code>Instanceof</code></li>
-<li><code>Grouping ()</code></li>
-<li><code>character, String, numeric, null</code></li>
-<li><code>Cast</code></li>
-<li>方法调用</li>
-<li><code>Field</code> 访问</li>
-<li><code>Array</code>访问 []</li>
-<li>三元<code>?:</code></li>
-</ul>
-<p>目前不支持以下操作</p>
-<ul>
-<li><code>this</code></li>
-<li><code>super</code></li>
-<li><code>new</code></li>
-<li>显示泛型调用</li>
-</ul>
-<p>此外，DataBinding 还支持以下几种形式的调用:</p>
-<h4 id="null-coalescing">Null Coalescing</h4>
-<p>空合并运算符 <strong><code>??</code></strong> 会取第一个不为 <code>null</code> 的值作为返回值</p>
-<pre><code class="language-xml">&lt;TextView
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;wrap_content&quot;
-    android:text=&quot;@{user.name ?? user.password}&quot; /&gt;
-</code></pre>
-<p>等价于</p>
-<pre><code class="language-xml">android:text=&quot;@{user.name != null ? user.name : user.password}&quot;
-</code></pre>
-<h4 id="属性控制">属性控制</h4>
-<p>可以通过变量值来控制 View 的属性</p>
-<pre><code class="language-xml">&lt;TextView
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;wrap_content&quot;
-    android:text=&quot;可见性变化&quot;
-    android:visibility=&quot;@{user.male  ? View.VISIBLE : View.GONE}&quot; /&gt;
-</code></pre>
-<h4 id="避免空指针异常">避免空指针异常</h4>
-<p>DataBinding 也会自动帮助我们避免空指针异常<br>
-例如，如果 <strong>&quot;@{userInfo.password}&quot;</strong> 中 <strong>userInfo</strong> 为 <strong>null</strong> 的话，<strong>userInfo.password</strong> 会被赋值为默认值 <strong>null</strong>，而不会抛出空指针异常</p>
-<h2 id="include-和-viewstub">include 和 viewStub</h2>
-<h4 id="include">include</h4>
-<p>对于 include 的布局文件，一样是支持通过 dataBinding 来进行数据绑定，此时一样需要在待 include 的布局中依然使用 layout 标签，声明需要使用到的变量</p>
-<p><code>view_include.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
-    &lt;data&gt;
-        &lt;import type=&quot;com.github.ixiaow.databindingsample.model.User&quot; /&gt;
-        &lt;variable
-            name=&quot;userInfo&quot;
-            type=&quot;User&quot; /&gt;
-    &lt;/data&gt;
-    &lt;android.support.constraint.ConstraintLayout
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;wrap_content&quot;
-        android:background=&quot;#acc&quot;&gt;
-
-        &lt;TextView
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;wrap_content&quot;
-            android:gravity=&quot;center&quot;
-            android:padding=&quot;20dp&quot;
-            android:text=&quot;@{userInfo.name}&quot; /&gt;
-    &lt;/android.support.constraint.ConstraintLayout&gt;
-&lt;/layout&gt;
-</code></pre>
-<p>在主布局文件中将相应的变量传递给 include 布局，从而使两个布局文件之间共享同一个变量</p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    xmlns:bind=&quot;http://schemas.android.com/apk/res-auto&quot;
-    xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
-    &lt;data&gt;
-        &lt;import type=&quot;com.github.ixiaow.databindingsample.model.User&quot; /&gt;
-        &lt;variable
-            name=&quot;userInfo&quot;
-            type=&quot;User&quot; /&gt;
-    &lt;/data&gt;
-    &lt;LinearLayout
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;match_parent&quot;
-        android:orientation=&quot;vertical&quot;
-        tools:context=&quot;.Main6Activity&quot;&gt;
-        &lt;include
-            layout=&quot;@layout/view_include&quot;
-            bind:userInfo=&quot;@{userInfo}&quot; /&gt;
-    &lt;/LinearLayout&gt;
-&lt;/layout&gt;
-</code></pre>
-<h4 id="viewstub">viewStub</h4>
-<p>dataBinding 一样支持 ViewStub 布局</p>
-<p>在布局文件中引用 viewStub 布局</p>
-<pre><code class="language-xml">&lt;ViewStub
-    android:id=&quot;@+id/view_stub&quot;
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;wrap_content&quot;
-    android:layout=&quot;@layout/view_stub&quot;/&gt;
-</code></pre>
-<p>获取到 ViewStub 对象，由此就可以来控制 ViewStub 的可见性</p>
-<pre><code class="language-java">ActivityMain6Binding activityMain6Binding = DataBindingUtil.setContentView(this, R.layout.activity_main6);
-View view = activityMain6Binding.viewStub.getViewStub().inflate();
-</code></pre>
-<p>如果需要为 ViewStub 绑定变量值，则 ViewStub 文件一样要使用 layout 标签进行布局，主布局文件使用自定义的 bind 命名空间将变量传递给 ViewStub</p>
-<pre><code class="language-xml">&lt;ViewStub
-    android:id=&quot;@+id/view_stub&quot;
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;wrap_content&quot;
-    android:layout=&quot;@layout/view_stub&quot;
-    bind:userInfo=&quot;@{userInfo}&quot; /&gt;
-</code></pre>
-<p>如果在 xml 中没有使用 <code>bind:userInfo=&quot;@{userInf}&quot;</code>对 ViewStub 进行数据绑定，则可以等到当 ViewStub <strong>Inflate</strong> 时再绑定变量，此时需要为 ViewStub 设置 <code>setOnInflateListener</code>回调函数，在回调函数中进行数据绑定</p>
-<pre><code class="language-java">activityMain6Binding.viewStub.setOnInflateListener(new ViewStub.OnInflateListener() {
-    @Override
-    public void onInflate(ViewStub stub, View inflated) {
-        //如果在 xml 中没有使用 bind:userInfo=&quot;@{userInf}&quot; 对 viewStub 进行数据绑定
-        //那么可以在此处进行手动绑定
-        ViewStubBinding viewStubBinding = DataBindingUtil.bind(inflated);
-        viewStubBinding.setUserInfo(user);
-        Log.e(TAG, &quot;onInflate&quot;);
-    }
-});
-</code></pre>
-<h2 id="bindingadapter">BindingAdapter</h2>
-<p>dataBinding 提供了 <strong>BindingAdapter</strong> 这个注解用于支持自定义属性，或者是修改原有属性。注解值可以是已有的 xml 属性，例如 <code>android:src</code>、<code>android:text</code>等，也可以自定义属性然后在 xml 中使用</p>
-<p>例如，对于一个 ImageView ，我们希望在某个变量值发生变化时，可以动态改变显示的图片，此时就可以通过 BindingAdapter 来实现</p>
-<p>需要先定义一个静态方法，为之添加 BindingAdapter 注解，注解值是为 ImageView 控件自定义的属性名，而该静态方法的两个参数可以这样来理解：当 ImageView 控件的 url 属性值发生变化时，dataBinding 就会将 ImageView 实例以及新的 url 值传递给 loadImage() 方法，从而可以在此动态改变 ImageView 的相关属性</p>
-<pre><code class="language-java">@BindingAdapter({&quot;url&quot;})
-public static void loadImage(ImageView view, String url) {
-    Log.d(TAG, &quot;loadImage url : &quot; + url);
-}
-</code></pre>
-<p>在 xml 文件中关联变量值，当中，bind 这个名称可以自定义</p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    xmlns:bind=&quot;http://schemas.android.com/apk/res-auto&quot;
-    xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
-
-    &lt;data&gt;
-        &lt;import type=&quot;com.github.ixiaow.databindingsample.model.Image&quot; /&gt;
-        &lt;variable
-            name=&quot;image&quot;
-            type=&quot;Image&quot; /&gt;
-    &lt;/data&gt;
-
-    &lt;android.support.constraint.ConstraintLayout
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;match_parent&quot;&gt;
-
-        &lt;ImageView
-            android:id=&quot;@+id/image&quot;
-            android:layout_width=&quot;wrap_content&quot;
-            android:layout_height=&quot;wrap_content&quot;
-            android:src=&quot;@drawable/ic_launcher_background&quot;
-            bind:url=&quot;@{image.url}&quot; /&gt;
-    &lt;/android.support.constraint.ConstraintLayout&gt;
-&lt;/layout&gt;
-</code></pre>
-<p>BindingAdapter 更为强大的一点是可以覆盖 Android 原先的控件属性。例如，可以设定每一个 Button 的文本都要加上后缀：“-Button”</p>
-<pre><code class="language-java">@BindingAdapter(&quot;android:text&quot;)
-public static void setText(Button view, String text) {
-    view.setText(text + &quot;-Button&quot;);
-}
-</code></pre>
-<pre><code class="language-xml">&lt;Button
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;wrap_content&quot;
-    android:onClick=&quot;@{()-&gt;handler.onClick(image)}&quot;
-    android:text='@{&quot;改变图片Url&quot;}'/&gt;
-</code></pre>
-<p>这样，整个工程中使用到了 <strong>&quot;android:text&quot;</strong> 这个属性的控件，其显示的文本就会多出一个后缀</p>
-<h2 id="bindingconversion">BindingConversion</h2>
-<p>dataBinding 还支持对数据进行转换，或者进行类型转换</p>
-<p>与 BindingAdapter 类似，以下方法会将布局文件中所有以<code>@{String}</code>方式引用到的<code>String</code>类型变量加上后缀<code>-conversionString</code></p>
-<pre><code class="language-java">@BindingConversion
-public static String conversionString(String text) {
-    return text + &quot;-conversionString&quot;;
-}
-</code></pre>
-<p>xml 文件</p>
-<pre><code class="language-xml">&lt;TextView
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;wrap_content&quot;
-    android:text='@{&quot;xxx&quot;}'
-    android:textAllCaps=&quot;false&quot;/&gt;
-</code></pre>
-<p>可以看到，对于 Button 来说，BindingAdapter 和 BindingConversion 同时生效了，而 BindingConversion 的优先级要高些, 此外，BindingConversion 也可以用于转换属性值的类型</p>
-<p>看以下布局，此处在向 <code>background</code> 和 <code>textColor</code> 两个属性赋值时，直接就使用了字符串，按正常情况来说这自然是会报错的，但有了 BindingConversion 后就可以自动将字符串类型的值转为需要的 <code>Drawable</code> 和 <code>Color</code> 了</p>
-<pre><code class="language-xml">&lt;TextView
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;wrap_content&quot;
-    android:background='@{&quot;红色&quot;}'
-    android:padding=&quot;20dp&quot;
-    android:text=&quot;红色背景蓝色字&quot;
-    android:textColor='@{&quot;蓝色&quot;}'/&gt;
-
-&lt;TextView
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;wrap_content&quot;
-    android:layout_marginTop=&quot;20dp&quot;
-    android:background='@{&quot;蓝色&quot;}'
-    android:padding=&quot;20dp&quot;
-    android:text=&quot;蓝色背景红色字&quot;
-    android:textColor='@{&quot;红色&quot;}'/&gt;
-</code></pre>
-<pre><code class="language-java">@BindingConversion
-public static Drawable convertStringToDrawable(String str) {
-    if (str.equals(&quot;红色&quot;)) {
-        return new ColorDrawable(Color.parseColor(&quot;#FF4081&quot;));
-    }
-
-    if (str.equals(&quot;蓝色&quot;)) {
-        return new ColorDrawable(Color.parseColor(&quot;#3F51B5&quot;));
-    }
-    return new ColorDrawable(Color.parseColor(&quot;#344567&quot;));
-}
-
-@BindingConversion
-public static int convertStringToColor(String str) {
-    if (str.equals(&quot;红色&quot;)) {
-        return Color.parseColor(&quot;#FF4081&quot;);
-    }
-
-    if (str.equals(&quot;蓝色&quot;)) {
-        return Color.parseColor(&quot;#3F51B5&quot;);
-    }
-    return Color.parseColor(&quot;#344567&quot;);
-}
-</code></pre>
-<h2 id="array-list-set-map">Array、List、Set、Map ...</h2>
-<p>dataBinding 也支持在布局文件中使用 <strong>数组、Lsit、Set 和 Map</strong>，且在布局文件中都可以通过 <code>list[index]</code> 的形式来获取元素</p>
-<p>而为了和 <strong>variable</strong> 标签的尖括号区分开，在声明 <strong>Lsit&lt; String &gt;</strong> 之类的数据类型时，需要使用尖括号的转义字符</p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;
-
-    &lt;data&gt;
-        &lt;import type=&quot;java.util.List&quot; /&gt;
-        &lt;import type=&quot;java.util.Map&quot; /&gt;
-        &lt;import type=&quot;java.util.Set&quot; /&gt;
-        &lt;import type=&quot;android.util.SparseArray&quot; /&gt;
-        &lt;variable
-            name=&quot;array&quot;
-            type=&quot;String[]&quot; /&gt;
-
-        &lt;variable
-            name=&quot;list&quot;
-            type=&quot;List&lt;String&gt;&quot; /&gt;
-
-        &lt;variable
-            name=&quot;map&quot;
-            type=&quot;Map&lt;String, String&gt;&quot; /&gt;
-
-        &lt;variable
-            name=&quot;set&quot;
-            type=&quot;Set&lt;String&gt;&quot; /&gt;
-
-        &lt;variable
-            name=&quot;sparse&quot;
-            type=&quot;SparseArray&lt;String&gt;&quot; /&gt;
-
-        &lt;variable
-            name=&quot;index&quot;
-            type=&quot;int&quot; /&gt;
-
-        &lt;variable
-            name=&quot;key&quot;
-            type=&quot;String&quot; /&gt;
-    &lt;/data&gt;
-
-    &lt;LinearLayout
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;match_parent&quot;
-        android:orientation=&quot;vertical&quot;&gt;
-
-        &lt;TextView
-            ···
-            android:text=&quot;@{array[1]}&quot; /&gt;
-
-        &lt;TextView
-            ···
-            android:text=&quot;@{sparse[index]}&quot; /&gt;
-
-        &lt;TextView
-            ···
-            android:text=&quot;@{list[index]}&quot; /&gt;
-
-        &lt;TextView
-            ···
-            android:text=&quot;@{map[key]}&quot; /&gt;
-
-        &lt;TextView
-            ···
-            android:text='@{map[&quot;leavesC&quot;]}' /&gt;
-
-        &lt;TextView
-            ···
-            android:text='@{set.contains(&quot;xxx&quot;)?&quot;xxx&quot;:key}' /&gt;
-    &lt;/LinearLayout&gt;
-&lt;/layout&gt;
-</code></pre>
-<h2 id="资源引用">资源引用</h2>
-<p>dataBinding 支持对尺寸和字符串这类资源的访问</p>
-<p><code>dimens.xml</code></p>
-<pre><code class="language-xml">&lt;dimen name=&quot;paddingBig&quot;&gt;190dp&lt;/dimen&gt;
-&lt;dimen name=&quot;paddingSmall&quot;&gt;150dp&lt;/dimen&gt;
-</code></pre>
-<p><code>string.xml</code></p>
-<pre><code class="language-xml">&lt;string name=&quot;format&quot;&gt;%s is %s&lt;/string&gt;
-</code></pre>
-<p><code>layout.xml</code></p>
-<pre><code class="language-xml">&lt;data&gt;
-    &lt;variable
-       name=&quot;flag&quot;
-       type=&quot;boolean&quot; /&gt;
-&lt;/data&gt; 
-
-&lt;Button
-      android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;wrap_content&quot;
-    android:paddingLeft=&quot;@{flag ? @dimen/paddingBig:@dimen/paddingSmall}&quot;
-    android:text='@{@string/format(&quot;leavesC&quot;, &quot;Ye&quot;)}'
-    android:textAllCaps=&quot;false&quot; /&gt;
-</code></pre>
 ]]></content>
     </entry>
     <entry>
@@ -2916,6 +2055,883 @@ DaggerComponentOne.create().componentThreeBuilder()
 </code></pre>
 <h2 id="总结">总结</h2>
 <p>Component 之间共用相同依赖，可以有两种组织关系：依赖关系与继承关系。至于如何选择试具体情况而定，但在 Android 开发中，一般使用继承关系，以 AppComponent 作为 root Component，AppComponent 一般还会使用 @Singleton 作用域，而 ActivityComponent 为 SubComponent。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Dart 语言简述]]></title>
+        <id>https://jxiaow.gitee.io/posts/b8c700d2/</id>
+        <link href="https://jxiaow.gitee.io/posts/b8c700d2/">
+        </link>
+        <updated>2019-12-04T16:24:44.000Z</updated>
+        <summary type="html"><![CDATA[<p>最近开始接触Flutter相关的项目，通过源码、例子和一些资料的阅读，发现如果掌握了Dart的一些语法和一些基础对于Flutter的学习有着事半功倍的效果。下面是我在查阅一些资料和实际的开发中的一些总结。希望对今后的学习有所帮助。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>最近开始接触Flutter相关的项目，通过源码、例子和一些资料的阅读，发现如果掌握了Dart的一些语法和一些基础对于Flutter的学习有着事半功倍的效果。下面是我在查阅一些资料和实际的开发中的一些总结。希望对今后的学习有所帮助。</p>
+<!--more-->
+<blockquote>
+<p>Dart 诞生于 2011.10.10 日， 谷歌 Dart 语言项目的领导人 Lars Bak 在丹麦举行的Goto 会议上 布， Dart 种“结构化的 Web 程”语言， Dart 编程语言在所有现代浏览器和环境中提供高性能。</p>
+</blockquote>
+<p>Dart语言的特性：</p>
+<ul>
+<li>Dart 是AOT（Ahead Of Time）编译的，编译成快速、可预测本地的代码。</li>
+<li>Dart也可以JIT（Just In Time）编译，开发周期异常快，包括Flutter流行的亚秒级有状态热重载。</li>
+<li>Dart可以更轻松地创建以60fps运行的流畅动画和状态，Dart可以在没有锁的情况下进行对象分配和垃圾回收。</li>
+<li>Dart使Flutter不需要单独的声明式布局语言，或单独的可视化界面构建器，因为Dart的声明式编程布局易于阅读和可视化。</li>
+</ul>
+<p>Dart重要概念：</p>
+<ul>
+<li>
+<p>一切皆对象，无论是变量、数字、函数等都是对象，所有的对像都继自Object， 这点类似于 Java 语言。</p>
+</li>
+<li>
+<p>程序中指定数据类型使得程序合理地分配内存空间，并帮助编绎器进行语法检查，由于Dart 言是弱数据类型， 所以类型不是必须的 。</p>
+</li>
+<li>
+<p>Dart 代码在运行前解析 指定数据类型和编译时的常量， 可以提高运行速度。</p>
+</li>
+<li>
+<p>Dart 程序有统 的程序人口： main （） 这一点与 Java C 和 C＋＋ 语言很像。</p>
+</li>
+<li>
+<p>Dart 没有 <code>public</code> <code>protected</code> <code>private</code> 这些修饰符的概念，私有特性通过变量或函数加上下划线来表示。</p>
+</li>
+<li>
+<p>Dart 工具可以检查出警告信息(<code>warning</code>) 和 错误信息(<code>errors</code>)， 警告信息只是表明代码可能不工作，但是不会妨碍程序运行，错误信息可以是编译时的错误，也可能是运行时的错误， 编译时的错误将阻止程序运行，运行时的错误将会以异常（exception ）的方式呈现。</p>
+</li>
+<li>
+<p>Dart 支持 anync/await 异步处理。</p>
+</li>
+<li>
+<p>关键字（ 56 个）如下：</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-43-54-dart%E5%85%B3%E9%94%AE%E5%AD%97.png" alt="dart关键字.png" loading="lazy"></figure>
+<ul>
+<li>带有上标 <strong>1</strong> 的关键字是 <em><strong>内置关键字</strong></em>。避免把内置关键字当做标识符使用。 也不要把内置关键字 用作类名字和类型名字。</li>
+<li>带有上标 <strong>2</strong> 的关键字，是在 Dart 1.0 发布以后又新加的，用于支持异步相关的特性。</li>
+</ul>
+</li>
+</ul>
+<h2 id="变量与基本类型">变量与基本类型</h2>
+<h3 id="变量的声明">变量的声明</h3>
+<p>在Dart里，变量的声明有三种方式：</p>
+<ol>
+<li>
+<p>用<code>var</code>关键字</p>
+<p>用var声明变量时，如果未指定初始值，可以变成任意类型。如果指定了类型，则类型会被锁定。如：</p>
+<pre><code class="language-dart">void main() {
+  var v; // 初始值未指定类型
+  v = '2'; // 可以变为任意类型
+  v = 3;
+  print('v: $v');
+
+  var v1 = '111'; // 初始化时已经指定类型
+  var v1 = 222; // 此时无法赋值成功，编译时报错
+}
+</code></pre>
+</li>
+<li>
+<p>用<code>dynamic</code>关键字</p>
+<p>dynamic声明的变量，表示动态任意类型，编译时不检查类型。如：</p>
+<pre><code class="language-dart">void main() {
+  dynamic d1 = '111';
+  d1 = 222;
+  d1 = 333.0;
+  print(&quot;d1: $d1&quot;);
+  // dynamic修饰的变量，在编译时不做检查
+  d1.test(); // 这行还代码，在编译时是不会检查错误信息的，运行时会报错
+}
+</code></pre>
+</li>
+<li>
+<p>用<code>Object</code></p>
+<p>Object声明的变量，表示任意动态类型，编译时检查类型。如：</p>
+<pre><code class="language-dart">void main() {
+  Object o1 = &quot;sss&quot;;
+  o1 = 222;
+  o1.test(); // 编译时会做检查，报错
+}
+</code></pre>
+</li>
+</ol>
+<h3 id="变量的默认值">变量的默认值</h3>
+<ul>
+<li>没有初始化的变量会自动获取一个默认值null</li>
+<li>一切皆为对象，对象的默认值为null</li>
+</ul>
+<h3 id="final-和-const">final 和 const</h3>
+<p>​    final 或 const 修饰的变量为常量或固定值。</p>
+<ul>
+<li>共同点：
+<ol>
+<li>声明的类型可以省略</li>
+<li>初始化后不能再赋值</li>
+<li>不能和<code>var</code>同时使用</li>
+</ol>
+</li>
+<li>不同点：
+<ol>
+<li>类级别常量，使用 <code>static const</code></li>
+<li>const 可以使用其它const常量的值来初始化其值</li>
+<li>使用const赋值声明，const可省略</li>
+<li>可以更改非final、非const变量的值，即使曾经具有const值</li>
+<li>const 导致的不可变性是可传递的</li>
+<li>相同的const常量不会在内存中重复创建</li>
+<li>const需要编译时常量</li>
+</ol>
+</li>
+</ul>
+<h3 id="基本类型">基本类型</h3>
+<p>Dart语言常用的基本数据类型包括： <code>Number</code>，<code>String</code>，<code>Boolean</code>，<code>List和Map</code></p>
+<ul>
+<li>
+<p>Number类型</p>
+<p>Number 类型包括 int 整形，double浮点类型，他们都是<code>num</code>类型的子类</p>
+</li>
+<li>
+<p>String类型</p>
+<ul>
+<li>Dart 字符串是 utf-16 编码的字符序列，可以使用单引号或者双引号来创建字符</li>
+<li>可以使用三个单引号或者双引号创建多行字符串对象</li>
+<li>可以使用r前缀创建原始字符串，即输出原始字符，字符串里的转义等符号不会生效</li>
+<li>可以在字符串中使用表达式：<code>&quot;${expression}&quot;</code>，如果表达式是一个标识符，可以省略<code>{}</code>，如果表达式的结果为一个对象，则 Dart会调用对象的<code>toString</code>方法</li>
+</ul>
+</li>
+<li>
+<p>Boolean类型</p>
+<p>Dart是强bool类型检查，只有bool类型的值是true才被认为是true， 如果未赋初值，则为null</p>
+</li>
+<li>
+<p>List类型</p>
+<p>在Dart语言中，具有一系列相同类型的数据称为List对象。Dart中List可以直接打印出出各个元素，而java中则是地址。</p>
+</li>
+<li>
+<p>Map类型</p>
+<p>与java类似。</p>
+</li>
+<li>
+<p>Set</p>
+<ul>
+<li>set1.difference(set2): 返回 set1 集合里有但 set2 里没有的元素集合</li>
+<li>set1.intersection(set2)：返回set1和set2的交集</li>
+<li>set1.union(set2)：返回set1和set2的并集</li>
+<li>set1.retainAll()：set1只保留某些元素(要保留的元素要在原set中存在）</li>
+</ul>
+</li>
+<li>
+<p>Runs</p>
+<ul>
+<li>用在符串中表示Unicode字符</li>
+<li>使用String.fromCharCodes显示字符图形</li>
+<li>如果非4个数值，需要把编码值放到大括号中</li>
+</ul>
+</li>
+</ul>
+<h2 id="函数">函数</h2>
+<p>Dart是一个面向对象的语言,所以函数也是对象，函数属于Function对象。函数可以像参数一样传递给其他函数。</p>
+<h3 id="函数定义">函数定义</h3>
+<ol>
+<li>
+<p>定义函数时可以省略类型(不建议)</p>
+<pre><code class="language-dart">void func(a, b){} // 参数a,b都省略了类型
+</code></pre>
+</li>
+<li>
+<p>支持缩写语法<code>=&gt;</code></p>
+<pre><code class="language-dart">void main() =&gt; runApp(MyApp()); // 当函数体只有一条语句时可以使用此种写法
+</code></pre>
+</li>
+<li>
+<p>可在函数内定义函数</p>
+<p>可以在函数里定义函数，如：</p>
+<pre><code class="language-dart">int func(int a, int b) {
+  int sum(int a, int b, int c) {
+    return a + b + c;
+  }
+  return sum(a, b, 1);
+}
+</code></pre>
+<p>dart 函数支持闭包</p>
+<pre><code class="language-dart">Function addFunction(int a) {
+  return (y) =&gt; a + y;
+}
+
+void main() {
+  var addFunc = addFunction(12);
+  print(addFunc(22));
+}
+</code></pre>
+</li>
+</ol>
+<h3 id="函数返回值">函数返回值</h3>
+<ul>
+<li>所有的函数都有返回值</li>
+<li>如果没有指定函数返回值，则默认的返回值是null</li>
+<li>没有返回值的函数,系统会在最后添加隐式的return语句</li>
+</ul>
+<h3 id="可选参数">可选参数</h3>
+<ul>
+<li>
+<p>可选命名参数</p>
+<p>使用<code>{param1, param2,...}</code>的形式来指定命名参数。</p>
+<pre><code class="language-dart">main() {
+  func(a:1);
+  func(b:1);
+  func(a:1, b:1);
+}
+
+int func({int a, int b}) {
+  return a + b;
+}
+</code></pre>
+</li>
+<li>
+<p>可选位置参数</p>
+<p>将参数使用中括号[]括起来,用来表明是可选位置参数，必填参数要放在可选参数前面。</p>
+<pre><code class="language-dart">String getUserInfo(String name, String sex, [String from]) {}
+</code></pre>
+<p>其中name和sex是必须传入的参数,from参数可以不传</p>
+</li>
+<li>
+<p>参数默认值</p>
+<ul>
+<li>如果参数指定了默认值,当不传入值时，函数就会使用这个默认值。通常默认值参数为null。</li>
+</ul>
+<pre><code class="language-dart">String getUserInfo(String name, String sex, [String from = '中国']) {}
+</code></pre>
+<ul>
+<li>可选命名参数默认值(默认值必须是编译时常量)，可以使用等号<code>=</code> 或冒号<code>:</code>，Dart SDK 1.21 之前只能用冒号，冒号的支持以后会移除，所以建议使用<em>等号</em>。</li>
+<li>可选位置参数默认值(默认值必须是编译时常量)，只能使用等号<code>=</code>。</li>
+<li>可使用list或map作为默认值，但必须是const。</li>
+</ul>
+<pre><code class="language-dart">int fun([List list = const [1, 2, 3]]) {}
+</code></pre>
+</li>
+</ul>
+<h3 id="匿名函数">匿名函数</h3>
+<ul>
+<li>
+<p>可赋值给变量，通过变量调用</p>
+<pre><code class="language-dart">main() {
+  var func = (int a, int b) =&gt; a + b;
+  func(1, 2);
+}
+</code></pre>
+</li>
+<li>
+<p>可在其他函数中直接调用或传递给其他函数</p>
+</li>
+</ul>
+<h3 id="函数别名">函数别名</h3>
+<p>函数别名使用<code>typedef</code>表示，如：</p>
+<pre><code class="language-dart">typedef Fun1(int a, int b);
+typedef Fun2&lt;T, K&gt;(T a, K b);
+</code></pre>
+<ul>
+<li>typedef给函数起一个别名，使用比较方便。例如定义一个方法的回调，直接使用别名定义。</li>
+<li>没返回值，则只要参数匹配就行了，如果定义了返回值，则返回值不一样会报错。</li>
+</ul>
+<h3 id="main函数">main函数</h3>
+<p>Flutter应用程序必须要有一个main函数作为程序的入口函数。</p>
+<h2 id="运算符">运算符</h2>
+<p>Dart所有的运算符如下表所示， 与java不同的有8个，如下：</p>
+<p><code>?.</code>，条件成员访问 和 . 类似，但是左边的操作对象不能为 null，例如 foo?.bar 如果 foo 为 null 则返回 null，否则返回 bar 成员。<br>
+<code>~/</code>，除后取整。<br>
+<code>as</code>，类型转换。<br>
+<code>is</code>，如果对象是指定类型返回true。<br>
+<code>is!</code>，如果对象是指定类型返回false。<br>
+<code>??</code>，双问号左边为true返回左边结果，否则返回右边结果。<br>
+<code>..</code>，级联语法。严格来说， 两个点的级联语法不是一个操作符。 只是一个 Dart 特殊语法。<br>
+<code>??:</code>，如果左边是 null，则右边赋值给左边；如果不是 null，则左边的值保持不变。</p>
+<table>
+<thead>
+<tr>
+<th><strong>描述</strong></th>
+<th style="text-align:center"><strong>操作符</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>后缀操作</td>
+<td style="text-align:center">expr++ expr-- () [] . <code>?.</code></td>
+</tr>
+<tr>
+<td>前缀操作</td>
+<td style="text-align:center">-expr !expr ~expr ++expr --expr</td>
+</tr>
+<tr>
+<td>乘除</td>
+<td style="text-align:center">* /  % <code>~/</code></td>
+</tr>
+<tr>
+<td>加减</td>
+<td style="text-align:center">+ -</td>
+</tr>
+<tr>
+<td>位移</td>
+<td style="text-align:center">&lt;&lt; &gt;&gt;</td>
+</tr>
+<tr>
+<td>按位与</td>
+<td style="text-align:center">&amp;</td>
+</tr>
+<tr>
+<td>按位异或</td>
+<td style="text-align:center">^</td>
+</tr>
+<tr>
+<td>按位或</td>
+<td style="text-align:center">|</td>
+</tr>
+<tr>
+<td>类型操作</td>
+<td style="text-align:center">&gt;= &gt; &lt;= &lt; <code>as</code> <code>is</code> <code>is!</code></td>
+</tr>
+<tr>
+<td>相等</td>
+<td style="text-align:center">== !=</td>
+</tr>
+<tr>
+<td>逻辑与</td>
+<td style="text-align:center">&amp;&amp;</td>
+</tr>
+<tr>
+<td>逻辑或</td>
+<td style="text-align:center">||</td>
+</tr>
+<tr>
+<td>是否为空</td>
+<td style="text-align:center"><code>??</code></td>
+</tr>
+<tr>
+<td>三目运算</td>
+<td style="text-align:center">expr1 ? expr2 : expr3</td>
+</tr>
+<tr>
+<td>级联</td>
+<td style="text-align:center"><code>..</code></td>
+</tr>
+<tr>
+<td>赋值</td>
+<td style="text-align:center">= *= /= ~/= %= += -= &lt;&lt;= &gt;&gt;= &amp;= ^= |=  <code>??=</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="流程控制语句">流程控制语句</h2>
+<p>Dart中控制流程语句和Java类似。List和Set等实现了Iterable接口的类支持for-in遍历元素。</p>
+<ul>
+<li>if  else</li>
+<li>for forEach <code>for-in</code></li>
+<li>while  do-while</li>
+<li>break continue</li>
+<li>switch case</li>
+<li>assert</li>
+<li>try-catch throw</li>
+</ul>
+<h2 id="异常处理">异常处理</h2>
+<p>异常是表示发生意外错误，如果没有捕获异常，引发异常的隔离程序将被挂起，并且程序终止。</p>
+<p>Dart代码可抛出并捕获异常，但Dart的所有异常都是<strong>未检查异常</strong>，方法不声明他们可能抛出的异常,也不需要捕获任何异常。<br>
+Dart 代码可以抛出任何非 null 对象为异常，不仅仅是实现了 Exception 或者 Error 的对象。<br>
+可以使用on 或者 catch 来声明捕获语句，也可以 同时使用。使用 on 来指定异常类型，使用 catch 来 捕获异常对象。</p>
+<ol>
+<li>
+<p>抛出异常</p>
+<pre><code class="language-dart">// 抛出Exception对象
+throw FormatException('抛出一个ｆormatException')   
+// 抛出Error对象
+throw OutMemoryError();    
+//或自定义异常
+throw '数据非法'
+</code></pre>
+</li>
+<li>
+<p>捕获异常</p>
+<p><code>catch()</code> 可以指定一个或两个参数来捕获异常，第一个是抛出的异常，第二个是堆栈跟踪，如：</p>
+<pre><code class="language-dart">try {
+    ...
+} on Error catch (e) { // 捕获异常详细信息
+
+} catch　(e, s) { // 堆栈跟踪信息
+
+}
+</code></pre>
+<p><code>rethrow</code> 把捕获的异常重新抛出</p>
+</li>
+<li>
+<p>Finally</p>
+</li>
+</ol>
+<h2 id="面向对象">面向对象</h2>
+<p>Dart作为高级语言支持面向对象的很多特性并且支持基于<code>mixin</code>的继承方式。基于mixin的继承方式是值：一个类可以继承多个父类，相当于其他语言里的多继承，所有的类都有同一个基类<code>Object</code>。</p>
+<h3 id="实例化成员变量">实例化成员变量</h3>
+<p>类定义中所有的变量都会隐式的定义Setter方法，针对非空的变量会额外增加getter方法</p>
+<h3 id="构造函数">构造函数</h3>
+<p>dart的构造函数有多种形式，如下：</p>
+<ul>
+<li>
+<p>常规构造函数</p>
+<pre><code class="language-dart">class User {
+  String name;
+  int age;
+
+  User(String name, int age) {
+    this.name = name;
+    this.age = age;
+  }
+  // 或
+  User(this.name, this.age);  
+}
+</code></pre>
+</li>
+<li>
+<p>命名的构造函数</p>
+<pre><code class="language-dart">class User {
+  String name;
+  int age;
+
+  User.fromJson(Map json) {
+      name = json['name'];
+      age = json['age'];
+  }
+}
+</code></pre>
+<p>使用命名构造函数可以为一个类实现多个构造函数， 或者使用命名构造函数来更清晰的表明你的意图。</p>
+</li>
+<li>
+<p>重定向构造函数</p>
+<pre><code class="language-dart">class User {
+  String name;
+  int age;
+
+  User(this.name, this.age);
+
+  User.create(String name): this(name,12); 
+}
+</code></pre>
+<p>一个重定向构造函数是没有代码的，在构造函数声明后，使用 冒号调用其他构造函数。</p>
+</li>
+<li>
+<p>构造函数初始化列表</p>
+<pre><code class="language-dart">class User {
+  // final 修饰的成员变量，只能通过构造方法进行赋值
+  final String name;
+  final int age;
+
+  // 初始化列表
+  User(name, age)
+      : name = name,
+        age = age;
+}
+</code></pre>
+<p>在构造函数体执行之前可以初始化实例参数。 使用逗号分隔初始化表达式。初始化列表非常适合用来设置 final 变量的值。</p>
+</li>
+<li>
+<p>调用超类构造函数</p>
+<p>在构造方法处使用<code>super</code>关键字，如：</p>
+<pre><code class="language-dart">class User extends Person {
+  // final 修饰的成员变量，只能通过构造方法进行赋值
+  final String name;
+  final int age;
+
+  // 初始化列表
+  User(this.name, this.age):super(name,age);
+}
+</code></pre>
+</li>
+<li>
+<p>常量构造函数</p>
+<pre><code class="language-dart">class User {
+  // 定义const构造函数要确保所有的成员变量都是final修饰
+  final String name;
+  final int age;
+
+  static final User user = const User('111', 12);
+
+  // const 关键字放在构造函数名前，且不能有函数体
+  const User(this.name, this.age);
+}
+</code></pre>
+</li>
+<li>
+<p>工厂构造函数(单例)</p>
+<pre><code class="language-dart">class User {
+  String name;
+//工厂构造函数无法访问this，所以这里要用static
+  static User _user;
+//工厂方法构造函数，关键字factory
+  factory User([String name]) {
+    return User._user ??= User._(name);
+  }
+//定义一个命名构造函数用来生产实例
+  User._(this.name);
+}
+</code></pre>
+</li>
+</ul>
+<h3 id="读取和写入对象getter-setter">读取和写入对象（Getter、Setter）</h3>
+<ul>
+<li>get()和set()方法是专门用于读取和写入对象的属性的方法。</li>
+<li>每一个类的实例，系统都隐式地包含有get()和set()方法。</li>
+<li>final 修饰的变量没有setter方法。</li>
+<li>可以使用get 和 set 关键字定义getter和setter。</li>
+</ul>
+<pre><code class="language-dart">class User {
+  String name;
+
+  User(this.name);
+
+  String get username =&gt; 'getter ${this.name}';
+  set username(String name) =&gt; this.name = name;
+}
+</code></pre>
+<h3 id="重载操作">重载操作</h3>
+<p>采用operator修饰，如：</p>
+<pre><code class="language-dart">class Vector {
+  final int x;
+  final int y;
+
+  const Vector(this.x, this.y);
+
+  Vector operator +(Vector v) {
+    return Vector(x + v.x, y + v.y);
+  }
+}
+</code></pre>
+<h3 id="抽象类">抽象类</h3>
+<ul>
+<li>抽象类采用<code>abstract</code>关键字修饰<code>class</code>。f</li>
+<li>不能被实例化，除非定义一个工厂构造函数。</li>
+<li>抽象类通常用来定义接口， 以及部分实现。</li>
+<li>抽象类通常具有抽象方法，抽象方法不需要关键字，以分号结束即可。</li>
+<li>接口方式使用时，需要重写抽象类的成员变量和方法，包括私有的。</li>
+<li>一个类可以implement一个普通类。Dart任何一个类都是接口。</li>
+<li>一个类可以implement多个接口。</li>
+</ul>
+<h3 id="可调用类">可调用类</h3>
+<p>类实现 <code>call()</code> 方法可以让类像函数一样能够被调用。</p>
+<pre><code class="language-dart">class ClassFunction {
+  call(String a, String b, String c) =&gt; '$a, $b, $c';
+}
+
+main() {
+  var cf = ClassFunction();
+  var out = cf('a1', 'b1', 'c1');
+  print('out: $out');
+  print(cf.runtimeType);
+  print(out.runtimeType);
+  print(cf is Function);
+}
+</code></pre>
+<h3 id="枚举类">枚举类</h3>
+<p>与java一致，采用<code>enum</code>修饰。</p>
+<pre><code class="language-dart">enum Type {
+  A, B, C
+}
+</code></pre>
+<h3 id="mixins">Mixins</h3>
+<p>Mixins(混入功能)相当于多继承，使用with关键字来实现Mixins的功能</p>
+<pre><code class="language-dart">class S {
+  a() =&gt; print('S.a');
+}
+
+class A {
+  a() =&gt; print('A.a');
+  b() =&gt; print('A.b');
+}
+
+class T = A with S;
+</code></pre>
+<ol>
+<li>子类没有重写超类A方法的前提下，如果2个或多个超类拥有相同签名的A方法，那么子类会以继承的最后一个超类中的A方法为准。</li>
+<li>如果子类自己重写了A方法则以本身的A方法为准。</li>
+</ol>
+<h2 id="泛型">泛型</h2>
+<p>Dart1.21开始可以使用泛型函数。泛型函数可以在以下几个地方使用类型参数：</p>
+<ul>
+<li>函数的返回值类型。</li>
+<li>参数的类型。</li>
+<li>局部变量的类型。</li>
+</ul>
+<pre><code class="language-dart">main() {
+  K addCache&lt;K, V&gt;(K key, V value) {
+    K temp = key;
+    print('${key}: ${value}');
+    return temp;
+  }
+  var key = addCache('key', 'value');
+  print(key);
+}
+</code></pre>
+<p>要在使用构造函数时指定一个或多个类型，可将类型放在类名称后面的尖括号&lt;...&gt;中:</p>
+<pre><code class="language-dart">main() {
+  var p = Phone&lt;String&gt;('123456');
+  print(p.mobileNumber);
+}
+
+class Phone&lt;T&gt; {
+  final T mobileNumber;
+  Phone(this.mobileNumber);
+}
+</code></pre>
+<p>实现泛型类型时，您可能希望限制其参数的类型，可以在<code>&lt;&gt;</code>里面使用<code>extends</code>。</p>
+<pre><code class="language-dart">main() {
+  var man = Man();
+  var m = User&lt;Man&gt;(man);
+  m.man.doMassage();
+}
+
+class User&lt;T extends Man&gt; {
+  final T man;
+  User(this.man);
+}
+
+class Man {
+  void doMassage() {}
+}
+</code></pre>
+<p>与java一致， 唯一区别：Java泛型是编译时的，在运行时泛型信息会被擦除，Dart的泛型类型是固化的，在运行时也可以判断具体类型。</p>
+<pre><code class="language-dart">var names = List&lt;String&gt;();
+print(names is List&lt;String&gt;);//true
+print(names.runtimeType); // List&lt;String&gt; 
+</code></pre>
+<h2 id="库的使用">库的使用</h2>
+<h3 id="引用库">引用库</h3>
+<p>通过import语句在一个库中引入另一个库文件：</p>
+<ol>
+<li>在import语句后面需要接上库文件的路径</li>
+<li>对dart语言提供的库文件使用dart:xx格式</li>
+<li>第三方的库文件使用package:xx格式</li>
+</ol>
+<pre><code class="language-dart">import 'dart:io'; 
+import 'package:mylib/mylib.dart'; 
+import 'package :utils/utils.dart' ; 
+</code></pre>
+<h3 id="指定一个库的前缀">指定一个库的前缀</h3>
+<p>当引用的库拥有相互冲突的名字，可以为其中一个或几个指定不一样的前缀。</p>
+<pre><code class="language-dart">import 'package:libl/ libl.dart '; 
+import 'package:lib2 / lib2.dart ' as lib2 ;
+</code></pre>
+<h3 id="引用库的一部分">引用库的一部分</h3>
+<p>如果只需要使用库的一部分内容，可以有选择性地引用，有如下关键字：</p>
+<ul>
+<li>show 关键字：　只引用一点</li>
+<li>hide 关键字：　除此之外都引用</li>
+</ul>
+<pre><code class="language-dart">／／ 导入 foo
+import 'package:libl/libl.dart' show foo; 
+／／ 除了 foo 导入其他所有内容
+import 'package:lib2 / lib2.dart' hide foo; 
+</code></pre>
+<h3 id="库的延迟载入">库的延迟载入</h3>
+<ul>
+<li>使用<code>deferred as</code>导入</li>
+<li>使用标识符调用<code>loadLibrary()</code> 加载库</li>
+</ul>
+<pre><code class="language-dart">import 'dart:io' deferred as io;
+
+lazyLoad() async {
+  //使用 await 关键字暂停代码执行一直到库加载完成。
+  await io.loadLibrary();
+}
+
+main() {
+  lazyLoad();
+}
+</code></pre>
+<ul>
+<li>优点：
+<ul>
+<li>可提高程序启动速度。</li>
+<li>用在不常使用的功能。</li>
+<li>用在载入时间过长的包。</li>
+<li>执行 A/B 测试，例如 尝试各种算法的 不同实现。</li>
+</ul>
+</li>
+</ul>
+<h2 id="异步使用">异步使用</h2>
+<p>Dart支持异步操作，一般使用<code>async</code>函数和<code>await</code>表达式实现异步操作，Dart库提供<code>asynchronous</code>功能,该功能提供接口来消耗时间的操作，比如文件读写,网络请求。该功能返回<code>Future</code>或<code>Stream</code>对象。</p>
+<p>可以通过如下的方式来获取asynchronous功能返回的Future对象值:</p>
+<ul>
+<li>使用async函数和await表达式</li>
+<li>使用Future功能提供的API</li>
+</ul>
+<p>可以通过如下方式来获取asynchronous功能返回的Stream对象的值:</p>
+<ul>
+<li>使用async和一个异步的循环(await for)</li>
+<li>使用Stream的相关API</li>
+</ul>
+<h3 id="async-await">async / await</h3>
+<p>await关键字必须在async函数内部使用，await表达式可以使用多次</p>
+<pre><code class="language-dart">void main(){
+  getName1();
+  getName2();
+  getName3();
+}
+
+Future getName1() async {
+  await getStr1();
+  await getStr2();
+  print('getName1’);
+}
+getStr1() {
+  print('getStr1’);
+}
+getStr2() {
+  print('getStr2’);
+}
+getName2() {
+  print('getName2’);
+}
+getName3() {
+  print('getName3’);
+}
+
+/// 输出结果： getStr1 getName2  getName3  getStr2  getName1
+</code></pre>
+<h3 id="thencatcherrorwhencomplete">then,catchError,whenComplete</h3>
+<p>如果需要监听“完毕”这个状态，那么用<code>whenComplete</code>，需要监听“成功”这个状态，用<code>then</code>，需要监听“失败”这个状态，用<code>catchError</code>。<br>
+如果重写了test方法，test返回true就可以在catchError的onError方法里捕获到异常，如果test返回false，就把该异常继续抛出而不会在catchError方法里被捕获，如果不写test默认实现一个返回true的test方法</p>
+<pre><code class="language-dart">void main() {
+  Future(() =&gt; futureTask()) //异步任务的函数
+      .then((m) =&gt; &quot;result:$m&quot;) //任务执行完后的子任务
+      .then((m) =&gt; m.length) //其中m为上个任务执行完后的返回的结果
+      .then((m) =&gt; printLength(m))
+      .catchError(print) // 拦截错误，如果实现了test方法，只有return true时才会拦截，否则不会
+      .whenComplete(() =&gt; whenTaskCompelete()); //所有任务完成后的回调函数
+}
+
+whenTaskCompelete() {
+  print('task complete');
+}
+
+futureTask() async {
+  return 'future';
+}
+
+printLength(dynamic name) {
+  if (name is! String || name.length &lt; 3 || name.length &gt; 15) {
+    throw '长度错误';
+  }
+}
+</code></pre>
+<h3 id="event-looper">Event-Looper</h3>
+<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-45-02-event-loop.png" alt="event-loop.png" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-45-33-event-loop-process.png" alt="event-loop-process.png" loading="lazy"></figure>
+<ol>
+<li>一个消息循环的职责就是不断从消息队列中取出消息并处理他们直到消息队列为空。</li>
+<li>消息队列中的消息可能来自用户输入，文件I/O消息，定时器等。例如上图的消息队列就包含了定时器消息和用户输入消息。</li>
+<li>Dart中的<code>Main Isolate</code>只有一个<code>Event Looper</code>，但是存在两个Event Queue: <code>Event Queue</code>以及<code>Microtask Queue</code>。</li>
+</ol>
+<h3 id="event-queue和microtask-queue">Event Queue和Microtask Queue</h3>
+<figure data-type="image" tabindex="4"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-46-08-event-microtask.png" alt="event-microtask.png" loading="lazy"></figure>
+<ul>
+<li>优先全部执行完Microtask Queue中的Event。</li>
+<li>直到Microtask Queue为空时，才会执行Event Queue中的Event。</li>
+<li>当Event Looper正在处理Microtask Queue中的Event时候，Event Queue中的Event就停止了处理了，此时App不能绘制任何图形，不能处理任何鼠标点击，不能处理文件IO等等。</li>
+<li>绘制图形，处理鼠标点击，处理文件IO等都是在Event Queue里完成的。</li>
+</ul>
+<h3 id="任务调度">任务调度</h3>
+<ul>
+<li>使用Future类，可以将任务加入到Event Queue的队尾</li>
+<li>使用scheduleMicrotask函数，将任务加入到Microtask Queue队尾</li>
+<li>优先全部执行完Microtask Queue中的Event，直到Microtask Queue为空时，才会执行Event Queue中的Event。</li>
+</ul>
+<h3 id="future">Future</h3>
+<ul>
+<li>使用 Future（）将任务加入event队列。</li>
+<li>Future中的<code>then</code>并没有创建新的Event丢到<code>Event Queue</code>中，而只是一个普通的<code>Function Call</code>，在FutureTask执行完后，立即开始执行。</li>
+<li>如果在then()调用之前Future就已经执行完毕了，那么任务会被加入到<code>microtask</code>队列中，并且该任务会执行then()中注册的回调函数。</li>
+<li>使用Future.value构造函数的时候，就会上一条一样，创建Task丢到microtask Queue中执行then传入的函数。</li>
+<li>Future.sync构造函数执行了它传入的函数之后，也会立即创建Task丢到microtask Queue中执行。</li>
+<li>当任务需要延迟执行时，可以使用new Future.delay()来将任务延迟执行。</li>
+</ul>
+<pre><code class="language-dart">void main(){
+  testFuture();
+}
+void testFuture() {
+  Future f = new Future(() =&gt; print('f1'));
+  Future f1 = new Future(() =&gt; null);
+  //Future f1 = new Future.delayed(Duration(seconds: 1) ,() =&gt; null);
+  Future f2 = new Future(() =&gt; null);
+  Future f3 = new Future(() =&gt; null);
+  f3.then((_) =&gt; print('f2'));
+  f2.then((_) {
+    print('f3');
+    new Future(() =&gt; print('f4'));
+    f1.then((_) {
+      print('f5');
+    });
+  });
+  f1.then((m) {
+    print('f6');
+  });
+  print('f7');
+}
+</code></pre>
+<h3 id="schedulemicrotask">scheduleMicrotask()</h3>
+<ul>
+<li>如果可以，尽量将任务放入event队列中。</li>
+<li>使用Future的then方法或whenComplete方法来指定任务顺序。</li>
+<li>为了保持你app的可响应性，尽量不要将大计算量的任务放入这两个队列。</li>
+<li>大计算量的任务放入额外的isolate中。</li>
+</ul>
+<pre><code class="language-dart">import 'dart:async';
+void main(){
+  testScheduleMicrotask();
+}
+void testScheduleMicrotask(){
+  scheduleMicrotask(() =&gt; print('s1'));
+
+  new Future.delayed(new Duration(seconds: 1), () =&gt; print('s2'));
+
+  new Future(() =&gt; print('s3')).then((_) {
+    print('s4');
+    scheduleMicrotask(() =&gt; print('s5'));
+  }).then((_) =&gt; print('s6'));
+
+  new Future(() =&gt; print('s7'));
+
+  scheduleMicrotask(() =&gt; print('s8'));
+
+  print('s9');
+}
+</code></pre>
+<h2 id="隔离isolate">隔离（isolate）</h2>
+<p>所有Dart代码都在隔离区内运行，而不是线程。每个隔离区都有自己的内存堆，确保不会从任何其他隔离区访问隔离区的状态。</p>
+<p>Dart没有共享内存的并发，没有竞争的可能性所以不需要锁，也就不用担心死锁的问题。</p>
+<p>isolate之间没有共享内存，所以他们之间的通信唯一方式只能是通过Port进行，而且Dart中的消息传递总是异步的。</p>
+<p>isolate神似Thread，但实际上两者有本质的区别。操作系统内的线程之间是可以有共享内存的而isolate没有，这是最为关键的区别。</p>
+<h2 id="元数据">元数据</h2>
+<p>使用元数据给代码添加更多的信息。元数据是以＠开始的修饰符，在＠后面接着编译时的常量或者一个常量构造函数。</p>
+<ul>
+<li>@deprecated 被弃用</li>
+<li>@override　重写</li>
+<li>@proxy 代理</li>
+</ul>
+<p>元数据可以修饰 library、class、typedef、type parameter、constructor、factory、function、field、parameter、variable declaration。</p>
+<h3 id="注释">注释</h3>
+<ul>
+<li>
+<p>单行注释以//开头。Dart编译器会忽略//和行尾之间的所有内容。</p>
+<pre><code class="language-dart">// 这是单行注释
+</code></pre>
+</li>
+<li>
+<p>多行注释以/<em>开头，以</em>/结尾。介于/*和 */两者之间的内容会被编译器忽略（除非该注释是一个文档注释)。</p>
+<pre><code class="language-dart">/*
+ * 这是多行注释
+ * 这是多行注释 
+ */
+</code></pre>
+<p>多行注释可以嵌套</p>
+</li>
+<li>
+<p>文档注释以///或者/**开头。可以通过dartdoc命令导出文档。</p>
+<pre><code class="language-dart">/// 这是文档注释
+
+/**
+  * 这是文档注释
+  */
+</code></pre>
+</li>
+</ul>
 ]]></content>
     </entry>
 </feed>
