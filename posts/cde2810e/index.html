@@ -5,7 +5,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Android通过Intent简单实现分享功能 | Xiaowu</title>
+<title>Typora + PicGo-Core + Github 实现图片上传到Github | Xiaowu</title>
 
 <link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607500618283">
 
@@ -97,19 +97,31 @@
             <article style="display:flex;">
                 <div class="post-detail gt-bg-theme-color-second gt-post-content">
                     <h2 class="post-title">
-                        Android通过Intent简单实现分享功能
+                        Typora + PicGo-Core + Github 实现图片上传到Github
                     </h2>
                     <div class="post-info">
                         <div>
                             <time class="post-time gt-c-content-color-first">
-                                · 2020-12-05 ·
+                                · 2020-11-07 ·
                             </time>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/0OrIPjcs6/" class="post-tags">
+                                # Typora
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/eW38P0w-Zy/" class="post-tags">
+                                # PicGo
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/9qCsgBZE1z/" class="post-tags">
+                                # Github
+                            </a>
                             
                         </div>
                         <div>
                             
-                            <span id="/posts/73a6d0c4/"
-                                class="leancloud_visitors" data-flag-title="Android通过Intent简单实现分享功能">
+                            <span id="/posts/cde2810e/"
+                                class="leancloud_visitors" data-flag-title="Typora + PicGo-Core + Github 实现图片上传到Github">
                                 <em class="post-meta-item-text">阅读量 </em>
                                 <i class="leancloud-visitors-count">0</i>
                             </span>
@@ -119,58 +131,115 @@
 
                     <!-- <div class="post-content-wrapper"> -->
                     <div class="post-content">
-                        <p>现在大多数App的分享功能基本上使用的都是微信、QQ、微博的分享sdk或者是集成友盟分享sdk，如果想简单快速的实现分享功能，可以考虑通过<code>Intent</code>方式打开在系统中安装的具有分享功能的App的分享页面。</p>
-<!-- more -->
-<p>方法如下：</p>
-<pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
-    Intent intent = new Intent();
-    intent.setAction(Intent.ACTION_SEND);
-    intnet.setType(&quot;text/plain&quot;);
-    PackageManager packageManager = context.getPackageManager();
-    List&lt;ResolveInfo&gt; resolveInfos = packageManager.queryIntentActivities(intent, 0);
-    return resloveInfos;
+                        <p>为了解决<code>为知笔记</code>使用<code>Typora</code>编辑<code>markdown</code>文件图片丢失的问题，我采用了<code>PicGo-Core +Github</code>实现了自定图床的功能。</p>
+<!--more-->
+<h2 id="下载picgo-core">下载PicGo-Core</h2>
+<p>由于我的电脑有<code>nodejs</code>环境，所以我使用的是<code>npm</code>命令安装<code>picgo</code>, 命令如下：</p>
+<pre><code class="language-shell">npm install picgo -g
+</code></pre>
+<p>安装完成后，检查命令行输出, 记录下红色框内的路径。<br>
+<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105201730919.png" alt="image-20201105201730919" loading="lazy"></p>
+<p>输入命令查看版本，如果有输出则添加成功。</p>
+<pre><code class="language-shell">picgo -v
+</code></pre>
+<h2 id="安装github-plus">安装github-plus</h2>
+<p>官方提供的github上传图库不好用，安装一款新的上传插件<code>github-plus</code>, 命令行执行：</p>
+<pre><code class="language-shell">picgo install github-plus
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105223054898.png" alt="image-20201105223054898" loading="lazy"></figure>
+<p>安装成功后会有提示。</p>
+<h2 id="typora图像设置">Typora图像设置</h2>
+<p>在<code>Typora</code>中配置图像上传信息。</p>
+<h3 id="设置picgo的配置信息">设置PicGo的配置信息</h3>
+<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105223720354.png" alt="" loading="lazy"></figure>
+<p>如上图所示，分为2个步骤：</p>
+<ol>
+<li><strong>上传服务</strong>选择<code>PicGo-Core(command line)</code></li>
+<li>打开配置文件，在打开的配置文件，添加相关信息。</li>
+</ol>
+<pre><code class="language-json">{
+ &quot;picBed&quot;: {
+   &quot;uploader&quot;: &quot;githubPlus&quot;,
+   &quot;current&quot;: &quot;githubPlus&quot;,
+   &quot;githubPlus&quot;: {
+     &quot;branch&quot;: &quot;master&quot;,// 仓库分支
+     &quot;customUrl&quot;: &quot;https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest&quot;, // 访问的自定义url
+     &quot;origin&quot;: &quot;github&quot;, // 存放的图片类型
+     &quot;repo&quot;: &quot;jxiaow/cdn-images&quot;, // 存放图片的仓库
+     &quot;path&quot;: &quot;blog-images&quot;,// 存放图片的仓库目录下的文件夹
+     &quot;token&quot;: &quot;&quot; // 访问github的仓库的token, 不知道怎么设置的自行百度
+   }
+ },
+ &quot;picgoPlugins&quot;: {
+   &quot;picgo-plugin-github-plus&quot;: true // 启用github-plus插件
+ },
+ &quot;picgo-plugin-github-plus&quot;: {
+   &quot;lastSync&quot;: &quot;2020-11-05 07:54:47&quot;
+ }
 }
 </code></pre>
-<p>如果只需要QQ和微信分享，可以进行如下操作：</p>
-<pre><code class="language-java">public static List&lt;ResolveInfo&gt; shareIntentActivities(Context context){
-    Intent intent = new Intent();
-    intent.setAction(Intent.ACTION_SEND);
-    intnet.setType(&quot;text/plain&quot;);
-    PackageManager packageManager = context.getPackageManager();
-    List&lt;ResolveInfo&gt; resolveInfos = packageManager.queryIntentActivities(intent, 0);
-    List&lt;ResolveInfo&gt; shareItems = new ArrayList();    
-    for(ResolveInfo info: resolveInfos) {
-        String name = info.activityInfo.packageName;
-        if (TextUtils.equals(packageName, &quot;com.tencent.mm&quot;)
-                    || TextUtils.equals(packageName, &quot;com.tencent.mobileqq&quot;)) {
-                shareItems.add(resolveInfo);
-        }
-    }
-    return shareItems;
+<h3 id="测试配置">测试配置</h3>
+<p>根据上述配置完毕后我们需要进行测试链接是否成功，在测试之前还要进行如图所示的修改：<br>
+<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105224420441.png" alt="image-20201105224420441" loading="lazy"></p>
+<ol>
+<li><strong>上传服务</strong>修改为<code>Custom Command</code></li>
+<li>自定义命令 ： <code>picgo upload</code></li>
+<li>点击验证图片上传选项</li>
+<li>如果显示验证成功，则表示配置完成。<br>
+<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/image-20201105225415181.png" alt="image-20201105225415181" loading="lazy"></li>
+</ol>
+<h2 id="图片上传">图片上传</h2>
+<p>将图片拖入Typora中，然后在图片单击右键，图片上传即可。</p>
+<h2 id="安装文件重命名插件-picgo-plugin-rename-file">安装文件重命名插件 <a href="https://github.com/liuwave/picgo-plugin-rename-file">picgo-plugin-rename-file</a></h2>
+<p><code>picgo-plugin-rename-file</code> 插件可以帮我们安装一定的规则将文件进行重命名，具体设置请看github。</p>
+<p>输入一下命令安装:</p>
+<pre><code class="language-shell">picgo install rename-file
+</code></pre>
+<p>安装完成后，打开<code>picgo</code>的配置文件<code>C:\Users\xxx\.picgo\config.json</code>末尾最后一个大括号前添加一下信息即可。</p>
+<pre><code class="language-json">,
+&quot;picgo-plugin-rename-file&quot;: {
+    &quot;format&quot;: &quot;{y}/{m}/{d}/{hash}-{origin}-{rand:6}&quot;
 }
 </code></pre>
-<p>通过<code>ResolveInfo</code>获取图标<code>ICON</code>和<code>Label</code>:</p>
-<pre><code class="language-java">Drawable drawable = resloveInfo.loadIcon(packageManager);
-CharSequence label = resolveInfo.loadLabel(packageManager);
+<h2 id="添加水印">添加水印</h2>
+<p><em><strong>注意：此插件目前会导致文件上传重命名插件不生效</strong></em><br>
+插件地址: <a href="https://github.com/Dec-F/picgo-plugin-watermark">picgo-plugin-watermark</a> ，<code>watermark</code>插件可以帮我们在上传图片的时候添加水印。</p>
+<p>安装命令：</p>
+<pre><code class="language-shell">picgo install watermark
 </code></pre>
-<p>通过<code>Intent</code>发起分享：</p>
-<pre><code class="language-java">public static void share(Context context, 
-            ResolveInfo info, String shareContent){
-    Intent itnent = new Intent();
-    intnet.setAction(Intent.ACTION_SEND);
-    String pkg = resolveInfo.activityInfo.packageName;
-    String cls = resolveInfo.activityInfo.name;
-    intent.setComponent(new Component(pkg, cls));
-    intent.putExtra(Intent.EXTRA_TEXT, shareContent);
-    context.startActivity(intent);
-}
+<p>安装成功后，<code>C:\Users\xxx\.picgo\config.json</code>末尾最后一个大括号前添加一下信息即可。</p>
+<pre><code class="language-json">,
+&quot;picgo-plugin-watermark&quot;: { // 以下配置信息参考插件地址说明
+    &quot;text&quot;: &quot;jxiaow&quot;, // 水印名称
+    &quot;fontSize&quot;: 18, // 水印字体大小
+    &quot;position&quot;:&quot;rm&quot; // 水印位置
+},
 </code></pre>
+<p><strong>注意：</strong> 由于这个插件安装过程中需要下载字体，会导致下载特别慢，尽可能使用代理。</p>
+<p><strong>website:</strong> <a href="https://xiaowujiang.cn">xiaowujiang.cn</a></p>
 
                     </div>
                 </div>
                 <!-- </div> -->
                 <div class="toc-container">
-                    
+                    <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E4%B8%8B%E8%BD%BDpicgo-core">下载PicGo-Core</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85github-plus">安装github-plus</a></li>
+<li><a href="#typora%E5%9B%BE%E5%83%8F%E8%AE%BE%E7%BD%AE">Typora图像设置</a>
+<ul>
+<li><a href="#%E8%AE%BE%E7%BD%AEpicgo%E7%9A%84%E9%85%8D%E7%BD%AE%E4%BF%A1%E6%81%AF">设置PicGo的配置信息</a></li>
+<li><a href="#%E6%B5%8B%E8%AF%95%E9%85%8D%E7%BD%AE">测试配置</a></li>
+</ul>
+</li>
+<li><a href="#%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0">图片上传</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85%E6%96%87%E4%BB%B6%E9%87%8D%E5%91%BD%E5%90%8D%E6%8F%92%E4%BB%B6-picgo-plugin-rename-file">安装文件重命名插件 picgo-plugin-rename-file</a></li>
+<li><a href="#%E6%B7%BB%E5%8A%A0%E6%B0%B4%E5%8D%B0">添加水印</a></li>
+</ul>
+</li>
+</ul>
+
                 </div>
             </article>
             <!-- </div> -->
@@ -178,8 +247,8 @@ CharSequence label = resolveInfo.loadLabel(packageManager);
             
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://jxiaow.gitee.io/posts/cde2810e/" class="post-title gt-a-link">
-                    Typora + PicGo-Core + Github 实现图片上传到Github
+                <a href="https://jxiaow.gitee.io/posts/e30bee8a/" class="post-title gt-a-link">
+                    Dagger 2 Component 与 SubComponent
                 </a>
             </div>
             
