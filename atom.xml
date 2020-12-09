@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2020-12-09T06:06:12.538Z</updated>
+    <updated>2020-12-09T06:12:52.969Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -12,8 +12,8 @@
     <rights>All rights reserved 2020, Xiaowu</rights>
     <entry>
         <title type="html"><![CDATA[UI布局绘制入口]]></title>
-        <id>https://jxiaow.gitee.io/posts/qWGkF-lZG/</id>
-        <link href="https://jxiaow.gitee.io/posts/qWGkF-lZG/">
+        <id>https://jxiaow.gitee.io/posts/cd03afe4/</id>
+        <link href="https://jxiaow.gitee.io/posts/cd03afe4/">
         </link>
         <updated>2020-12-08T09:26:35.000Z</updated>
         <summary type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/03/dd54efe6dc0cf2678d09ae0aa9551b0f-Android%20UI%E7%BB%98%E5%88%B6%E6%B5%81%E7%A8%8B-d85b30.svg" alt="Android UI绘制流程" loading="lazy"></figure>
@@ -329,8 +329,8 @@ final class TraversalRunnable implements Runnable {
     </entry>
     <entry>
         <title type="html"><![CDATA[UI整体绘制流程]]></title>
-        <id>https://jxiaow.gitee.io/posts/23SClUqqh/</id>
-        <link href="https://jxiaow.gitee.io/posts/23SClUqqh/">
+        <id>https://jxiaow.gitee.io/posts/69abe299/</id>
+        <link href="https://jxiaow.gitee.io/posts/69abe299/">
         </link>
         <updated>2020-12-08T08:01:23.000Z</updated>
         <summary type="html"><![CDATA[<p>在阅读本篇文章时，要我们需要考虑以下几点：</p>

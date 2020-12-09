@@ -1,0 +1,528 @@
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>UI整体绘制流程 | Xiaowu</title>
+
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607494351354">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+
+<body>
+    <div class="main gt-bg-theme-color-first">
+        <nav class="navbar navbar-expand-lg">
+    <a href="/">
+        <div class="navbar-brand">
+            <img class="user-avatar" src="/images/avatar.png" alt="头像">
+            <div class="site-name gt-c-content-color-first">
+                Xiaowu
+            </div>
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav " style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://jxiaow.gitee.io/posts/favourite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1607494351354" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+        <div class="post-container">
+
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
+                    <h2 class="post-title">
+                        UI整体绘制流程
+                    </h2>
+                    <div class="post-info">
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2020-12-08 ·
+                            </time>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/GJLfjss5g/" class="post-tags">
+                                # UI
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/bSgjE13Dgf/" class="post-tags">
+                                # 源码解析
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/f3tbfHeq9/" class="post-tags">
+                                # Android
+                            </a>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/69abe299/"
+                                class="leancloud_visitors" data-flag-title="UI整体绘制流程">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
+                    </div>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <p>在阅读本篇文章时，要我们需要考虑以下几点：</p>
+<ol>
+<li>Android程序是如何启动的，Activity生命周期是如何被调用的？</li>
+<li>在Activity的<code>onCreate()</code>方法中<code>setContentView()</code> 是如何加载UI文件的？</li>
+<li>UI是如何绘制的？</li>
+</ol>
+<blockquote>
+<p>源码分析基于API 29</p>
+</blockquote>
+<!--more-->
+<h1 id="android-程序简单的启动流程">Android 程序简单的启动流程</h1>
+<p>在刚接触<code>Java</code>时，我们知道Java程序的运行入口是<code>main()</code>方法，然而我们在日常App的开发中并没有发现<code>main()</code> 方法的存在，那么<code>Android</code> 中的程序是如何开始运行的呢？</p>
+<p>查阅官方资料中我们会发现在<code>Android</code>的源码中有一个叫做<code>ActivityThread</code>的类，这个类就是<code>Android 中的主线程</code>，在ActivityThread中我们可以看到<code>main()</code> 方法的存在。</p>
+<h2 id="activitythreadmain">ActivityThread#main()</h2>
+<pre><code class="language-java">public static void main(String[] args) {
+    //...
+    Looper.prepareMainLooper();
+    //...
+    ActivityThread thread = new ActivityThread();
+    thread.attach(false, startSeq);
+
+    if (sMainThreadHandler == null) {
+        sMainThreadHandler = thread.getHandler();
+    }
+    // ...
+    Looper.loop();
+}
+</code></pre>
+<p>在<code>main()</code> 方法中实例化了<code>ActivityThread</code>类并调用了<code>attach()</code> 方法。</p>
+<h2 id="activitythreadattach">ActivityThread#attach()</h2>
+<pre><code class="language-java">@UnsupportedAppUsage
+private void attach(boolean system, long startSeq) {
+    sCurrentActivityThread = this;
+    mSystemThread = system;
+    if (!system) {
+        // ...
+        final IActivityManager mgr = ActivityManager.getService();
+        try {
+            mgr.attachApplication(mAppThread, startSeq);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+        // ...
+    }
+}
+</code></pre>
+<p>在<code>attach()</code> 方法中可以看到通过<code>ActivityManager.getService()</code> 获取到了<code>IActivityManager</code> ，然后调用了<code>IActivityManager.attachApplication()</code> 方法并将<code>ApplicationThread</code>实例传入。</p>
+<p><strong>注意：</strong> <code>IActivityManager</code>是一个接口，它的的实现类类是<code>ActivityManagerService</code>。</p>
+<h2 id="activitymanagergetservice">ActivityManager#getService()</h2>
+<pre><code class="language-java">@UnsupportedAppUsage
+public static IActivityManager getService() {
+    return IActivityManagerSingleton.get();
+}
+</code></pre>
+<pre><code class="language-java">@UnsupportedAppUsage
+private static final Singleton&lt;IActivityManager&gt; IActivityManagerSingleton =
+    new Singleton&lt;IActivityManager&gt;() {
+    @Override
+    protected IActivityManager create() {
+        final IBinder b = ServiceManager.getService(Context.ACTIVITY_SERVICE);
+        final IActivityManager am = IActivityManager.Stub.asInterface(b);
+        return am;
+    }
+};
+</code></pre>
+<p>通过上述两段代码可知，<code>ActivityManager.getService()</code> 是通过<code>Binder</code>机制获取了系统服务<code>ActivityManagerService</code>。</p>
+<h2 id="activitymanagerserviceattachapplication">ActivityManagerService#attachApplication()</h2>
+<p>在<code>ActivityThread#attach()</code>中调用了<code>attachApplication()</code>方法。</p>
+<pre><code class="language-java">@Override
+public final void attachApplication(IApplicationThread thread, long startSeq) {
+    synchronized (this) {
+        // ...
+        attachApplicationLocked(thread, callingPid, callingUid, startSeq);
+        // ...
+    }
+}
+</code></pre>
+<pre><code class="language-java">private final boolean attachApplicationLocked(IApplicationThread thread,
+           int pid, int callingUid, long startSeq) {
+     //....
+    thread.bindApplication(processName, appInfo, providers,
+                        instr2.mClass,
+                        profilerInfo, instr2.mArguments,
+                        instr2.mWatcher,
+                        instr2.mUiAutomationConnection, testMode,
+                        mBinderTransactionTrackingEnabled, enableTrackAllocation,
+                        isRestrictedBackupMode || !normalMode, app.isPersistent(),
+                        new Configuration(app.getWindowProcessController().getConfiguration()),
+                        app.compat, getCommonServicesLocked(app.isolated),
+                        mCoreSettingsObserver.getCoreSettingsLocked(),
+                        buildSerial, autofillOptions, contentCaptureOptions);
+    //...
+}
+</code></pre>
+<p><code>attachApplication</code> 的作用实际上是将<code>ActivityThread</code> 与<code>ApplicationThread</code>关联，<code>ApplicationThread</code>类为<code>Activity</code>的各种生命周期状态做了相对应的代理工作并进行 <code>Application</code>的初始化工作。</p>
+<h2 id="applicationthread">ApplicationThread</h2>
+<pre><code class="language-java">private class ApplicationThread extends IApplicationThread.Stub {}
+</code></pre>
+<p><code>ApplicationThread</code>的方法分析就不在此处赘述了，后面的<code>Activity的启动流程</code>会详细分析。</p>
+<h1 id="activity-视图设置">Activity 视图设置</h1>
+<p>在 <code>onCreate()</code>当中我们往往会使用<code>setContentView()</code> 去进行我们自己的布局文件或者view, 我们可以通过源码分析看看具体的流程。</p>
+<h2 id="activitysetcontentview">Activity#setContentView()</h2>
+<pre><code class="language-java">// Activity.java
+public void setContentView(@LayoutRes int layoutResID) {
+    getWindow().setContentView(layoutResID);
+    initWindowDecorActionBar();
+}
+</code></pre>
+<p><code>Activity</code> 中的<code>setContentView()</code> 通过<code>getWindow()</code> 调用了<code>setContentView()</code> ，而 <code>getWindow()</code> 返回的是<code>PhoneWindow</code>。</p>
+<h2 id="phonewindowsetcontentview">PhoneWindow#setContentView()</h2>
+<pre><code class="language-java">// PhoneWindow.java
+@Override
+public void setContentView(int layoutResID) {
+    // Note: FEATURE_CONTENT_TRANSITIONS may be set in the process of installing the window
+    // decor, when theme attributes and the like are crystalized. Do not check the feature
+    // before  this happens.
+    if (mContentParent == null) {
+        installDecor();
+    } else if (!hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+        mContentParent.removeAllViews();
+    }
+
+    if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+        final Scene newScene
+            = Scene.getSceneForLayout(mContentParent, layoutResID, getContext());
+        transitionTo(newScene);
+    } else {
+        mLayoutInflater.inflate(layoutResID, mContentParent);
+    }
+    mContentParent.requestApplyInsets();
+    // ...
+}
+</code></pre>
+<p>在<code>PhoneWindow#setCcontentView()</code>中做了两件事（<code>installDecor和 inflate</code>）。</p>
+<h2 id="phonewindowinstalldecor">PhoneWindow#installDecor()</h2>
+<p><code>installDecor</code>中主要是创建了<code>Decor</code>（顶层视图）和<code>contentParent</code>视图（我们写的布局的父视图）。</p>
+<pre><code class="language-java">private void installDecor() {
+    mForceDecorInstall = false;
+    if (mDecor == null) {
+        mDecor = generateDecor(-1);
+        mDecor.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
+        mDecor.setIsRootNamespace(true);
+        if (!mInvalidatePanelMenuPosted &amp;&amp; mInvalidatePanelMenuFeatures != 0) {
+            mDecor.postOnAnimation(mInvalidatePanelMenuRunnable);
+        }
+    } else {
+        mDecor.setWindow(this);
+    }
+    if (mContentParent == null) {
+        mContentParent = generateLayout(mDecor);
+        // ...
+    }
+    // ...
+}
+</code></pre>
+<h2 id="phonewindowgeneratedecor">PhoneWindow#generateDecor()</h2>
+<p>在<code>Window</code>中创建顶级的view。</p>
+<pre><code class="language-java">protected DecorView generateDecor(int featureId) {
+    // ...
+    return new DecorView(context, featureId, this, getAttributes());
+}
+</code></pre>
+<h2 id="phonewindowgeneratelayout">PhoneWindow#generateLayout()</h2>
+<p>根据App设置的不同主题获取不同的系统父布局文件，进行布局初始化并查找<code>id</code> 为 <code>com.android.internal.R.id.content</code> 中的<code>contentParent</code>。</p>
+<pre><code class="language-java">protected ViewGroup generateLayout(DecorView decor) {
+    // Apply data from current theme.
+    // 根据配置的不同主题，选择系统父布局文件
+    layoutResource = R.layout.screen_simple;
+    mDecor.startChanging();
+    // 加载布局文件
+    mDecor.onResourcesLoaded(mLayoutInflater, layoutResource);
+
+    // ...
+    ViewGroup contentParent = (ViewGroup)findViewById(ID_ANDROID_CONTENT);
+    // ...
+    return contentParent;
+}
+</code></pre>
+<h2 id="decorviewonresourcesloaded">DecorView#onResourcesLoaded()</h2>
+<p><code>onResourcesLoaded</code> 加载系统父布局文件，并将其添加到<code>DecorView</code>中。</p>
+<pre><code class="language-java">void onResourcesLoaded(LayoutInflater inflater, int layoutResource) {
+    //...
+    final View root = inflater.inflate(layoutResource, null);
+    // ...
+    // Put it below the color views.
+    addView(root, 0, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+    // ...
+}
+</code></pre>
+<h2 id="rlayoutscreen_simplexml">R.layout.screen_simple.xml</h2>
+<pre><code class="language-xml">&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    android:fitsSystemWindows=&quot;true&quot;
+    android:orientation=&quot;vertical&quot;&gt;
+    &lt;ViewStub android:id=&quot;@+id/action_mode_bar_stub&quot;
+              android:inflatedId=&quot;@+id/action_mode_bar&quot;
+              android:layout=&quot;@layout/action_mode_bar&quot;
+              android:layout_width=&quot;match_parent&quot;
+              android:layout_height=&quot;wrap_content&quot;
+              android:theme=&quot;?attr/actionBarTheme&quot; /&gt;
+    &lt;FrameLayout
+         android:id=&quot;@android:id/content&quot;
+         android:layout_width=&quot;match_parent&quot;
+         android:layout_height=&quot;match_parent&quot;
+         android:foregroundInsidePadding=&quot;false&quot;
+         android:foregroundGravity=&quot;fill_horizontal|top&quot;
+         android:foreground=&quot;?android:attr/windowContentOverlay&quot; /&gt;
+&lt;/LinearLayout&gt;
+</code></pre>
+<h2 id="activity的窗口ui布局层级">Activity的窗口UI布局层级</h2>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/Activity-Activity%E8%A7%86%E5%9B%BE%E7%BB%93%E6%9E%84%E5%AE%B9%E5%99%A8.svg" alt="Activity-Activity视图结构容器" loading="lazy"></figure>
+
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
+<li><a href="#android-%E7%A8%8B%E5%BA%8F%E7%AE%80%E5%8D%95%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B">Android 程序简单的启动流程</a>
+<ul>
+<li><a href="#activitythreadmain">ActivityThread#main()</a></li>
+<li><a href="#activitythreadattach">ActivityThread#attach()</a></li>
+<li><a href="#activitymanagergetservice">ActivityManager#getService()</a></li>
+<li><a href="#activitymanagerserviceattachapplication">ActivityManagerService#attachApplication()</a></li>
+<li><a href="#applicationthread">ApplicationThread</a></li>
+</ul>
+</li>
+<li><a href="#activity-%E8%A7%86%E5%9B%BE%E8%AE%BE%E7%BD%AE">Activity 视图设置</a>
+<ul>
+<li><a href="#activitysetcontentview">Activity#setContentView()</a></li>
+<li><a href="#phonewindowsetcontentview">PhoneWindow#setContentView()</a></li>
+<li><a href="#phonewindowinstalldecor">PhoneWindow#installDecor()</a></li>
+<li><a href="#phonewindowgeneratedecor">PhoneWindow#generateDecor()</a></li>
+<li><a href="#phonewindowgeneratelayout">PhoneWindow#generateLayout()</a></li>
+<li><a href="#decorviewonresourcesloaded">DecorView#onResourcesLoaded()</a></li>
+<li><a href="#rlayoutscreen_simplexml">R.layout.screen_simple.xml</a></li>
+<li><a href="#activity%E7%9A%84%E7%AA%97%E5%8F%A3ui%E5%B8%83%E5%B1%80%E5%B1%82%E7%BA%A7">Activity的窗口UI布局层级</a></li>
+</ul>
+</li>
+</ul>
+
+                </div>
+            </article>
+            <!-- </div> -->
+
+            
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://jxiaow.gitee.io/posts/e781e647/" class="post-title gt-a-link">
+                    Dagger2在Android中的使用
+                </a>
+            </div>
+            
+
+            
+
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'monsterid',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+            
+
+            <div class="site-footer gt-c-content-color-first">
+
+  <div class="social-container">
+
+    <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
+      <i class="fab fa-github gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
+      <i class="fas fa-blog gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
+      <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
+    </a>
+
+    <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
+      <i class="fas fa-envelope gt-c-content-color-first"></i>
+    </a>
+
+  </div>
+  <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+  
+  <div>
+    Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a
+        href="https://jxiaow.gitee.io/atom.xml" target="_blank">RSS</a></a>
+  </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+            <script>
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+  
+  if (mainNavLinks == null || mainNavLinks.length == 0) {
+    let tocContainer = document.querySelector(".toc-container");
+    tocContainer.classList.remove("toc-container")
+    tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
+  } else {
+
+    // This should probably be throttled.
+    // Especially because it triggers during smooth scrolling.
+    // https://lodash.com/docs/4.17.10#throttle
+    // You could do like...
+    // window.addEventListener("scroll", () => {
+    //    _.throttle(doThatStuff, 100);
+    // });
+    // Only not doing it here to keep this Pen dependency-free.
+
+
+    window.addEventListener("scroll", event => {
+      let fromTop = window.scrollY;
+
+      mainNavLinks.forEach((link, index) => {
+        let section = document.getElementById(decodeURI(link.hash).substring(1));
+        let nextSection = null
+        if (mainNavLinks[index + 1]) {
+          nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+        }
+        if (section.offsetTop <= fromTop) {
+          if (nextSection) {
+            if (nextSection.offsetTop > fromTop) {
+              link.classList.add("current");
+            } else {
+              link.classList.remove("current");
+            }
+          } else {
+            link.classList.add("current");
+          }
+        } else {
+          link.classList.remove("current");
+        }
+      });
+    });
+  }
+
+
+
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+
+<script>
+  let images = document.querySelectorAll("figure > img");
+  //   debugger
+  //   console.log("dddd: "+ images);
+  images.forEach(image => {
+    var parent = image.parentElement;
+    parent.removeChild(image);
+    var aelem = document.createElement('a');
+    aelem.href = image.src;
+    aelem.dataset['fancybox'] = 'gallery';
+    aelem.classList.add('fancybox');
+    aelem.appendChild(image);
+    parent.appendChild(aelem);
+  })
+
+//   <a data-fancybox="gallery" href="big_1.jpg"><img src="small_1.jpg"></a>
+// <a data-fancybox="gallery" href="big_2.jpg"><img src="small_2.jpg"></a>
+</script>
+        </div>
+    </div>
+
+</body>
+
+</html>
