@@ -1976,7 +1976,7 @@ code::-webkit-scrollbar-thumb:hover {
         }
         
         .post-content h2 {
-          display: inline-block;
+          display: block;
           color: #5e5e5e!important;
           position: relative!important;
           background: linear-gradient(180deg, transparent 75%, RGBA(139,149,159,0.4) 0)!important;
