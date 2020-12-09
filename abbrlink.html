@@ -1,0 +1,191 @@
+<html>
+
+	<head>
+		<style type="text/css">
+			body{
+				color: #222;
+				background-color: #F8FAFB;
+				line-height: 1.5;
+			}
+			
+			
+			.wrapper {
+				width: 1200px;
+				margin-left: auto;
+				margin-right: auto;
+				position: relative;
+				background: #fff;
+				height: 400px;
+				box-shadow: -1px 3px 5px 3px rgba(82, 148, 218, 0.1);
+				border-radius: 3px;
+			}
+
+			.CodingWrap {
+				width: 100%;
+				padding-bottom: 20px;
+				padding-top: 40px;
+				padding-left: 44px;
+				padding-right: 20px;
+			}
+		
+			.fl {
+				display: inline-block;
+			}
+			
+			.textInput {
+				width: 40%;
+				padding: 5px 10px;
+				line-height: 24px;
+				border: 1px solid #c6cede !important;
+				height: 200px;
+				position: relative;
+				overflow: auto;
+				vertical-align: top;
+				outline: none;
+				resize: none;
+			}
+			
+			
+			button, input, select, textarea {
+				font-size: 100%;
+			}
+			
+			
+			.CodingWrap .CodCBtnWrap {
+				margin-top: 80px;
+				margin-left: 10px;
+				margin-right: 10px;
+			}
+			
+			
+			.CodCBtnWrap input.GLOkBtn {
+				background-color: #55a7e3;
+				color: #fff;
+				display: inline-block;
+				font-family: 'Microsoft YaHei';
+				vertical-align: middle;
+				_width: 100px;
+			}
+			.CodCBtnWrap input.GBtn {
+				padding: 0px 12px;
+				border: none;
+				height: 35px;
+				color: #0474c8;
+				font-size: 14px;
+				line-height: 35px;
+				text-align: center;
+			}
+			
+			.CodCBtnWrap input:hover {
+				filter: alpha(opacity=80);
+				opacity: 0.8;
+			}
+			
+			.textInput::-webkit-input-placeholder{
+			  color:#b4b5bf !important;;
+			}
+			.textInput:-moz-placeholder{
+			  color:#b4b5bf !important;;
+			}
+			.textInput:-ms-input-placeholder{
+			  color:#b4b5bf !important;;
+			}
+			
+			.tips{
+			    color: gray;
+				font-size: 10px;
+				margin-bottom: 10px;
+				margin-top: 4px;
+				margin-left: 4px;
+			}
+		</style>
+
+		<script type="text/javascript">
+			function signed_crc_table() {
+				var c = 0, table = new Array(256);
+				for(var n =0; n != 256; ++n){
+					c = n;
+					c = ((c&1) ? (-306674912 ^ (c >>> 1)) : (c >>> 1));
+					c = ((c&1) ? (-306674912 ^ (c >>> 1)) : (c >>> 1));
+					c = ((c&1) ? (-306674912 ^ (c >>> 1)) : (c >>> 1));
+					c = ((c&1) ? (-306674912 ^ (c >>> 1)) : (c >>> 1));
+					c = ((c&1) ? (-306674912 ^ (c >>> 1)) : (c >>> 1));
+					c = ((c&1) ? (-306674912 ^ (c >>> 1)) : (c >>> 1));
+					c = ((c&1) ? (-306674912 ^ (c >>> 1)) : (c >>> 1));
+					c = ((c&1) ? (-306674912 ^ (c >>> 1)) : (c >>> 1));
+					table[n] = c;
+				}
+
+				return typeof Int32Array !== 'undefined' ? new Int32Array(table) : table;
+			}
+			var T = signed_crc_table();
+			function crc32_str(str) {
+				var C = -1;
+				for(var i = 0, L=str.length, c, d; i < L;) {
+					c = str.charCodeAt(i++);
+					if(c < 0x80) {
+						C = (C>>>8) ^ T[(C ^ c)&0xFF];
+					} else if(c < 0x800) {
+						C = (C>>>8) ^ T[(C ^ (192|((c>>6)&31)))&0xFF];
+						C = (C>>>8) ^ T[(C ^ (128|(c&63)))&0xFF];
+					} else if(c >= 0xD800 && c < 0xE000) {
+						c = (c&1023)+64; d = str.charCodeAt(i++)&1023;
+						C = (C>>>8) ^ T[(C ^ (240|((c>>8)&7)))&0xFF];
+						C = (C>>>8) ^ T[(C ^ (128|((c>>2)&63)))&0xFF];
+						C = (C>>>8) ^ T[(C ^ (128|((d>>6)&15)|((c&3)<<4)))&0xFF];
+						C = (C>>>8) ^ T[(C ^ (128|(d&63)))&0xFF];
+					} else {
+						C = (C>>>8) ^ T[(C ^ (224|((c>>12)&15)))&0xFF];
+						C = (C>>>8) ^ T[(C ^ (128|((c>>6)&63)))&0xFF];
+						C = (C>>>8) ^ T[(C ^ (128|(c&63)))&0xFF];
+					}
+				}
+				return C ^ -1;
+			}
+			
+			var crcRes = [];
+			let checKCrc = function(res) {
+				if (crcRes.indexOf(res) > -1) {
+					res++;
+					return checKCrc(res);
+				} else {
+					return res;
+				}
+			}
+		</script>
+		<script type="text/javascript">
+			function abbrlink() {
+				var content = document.getElementById("content")
+				console.log("content: "+ content.value)
+				var result = document.getElementById("result")
+				let res =  crc32_str(content.value)
+				console.log("res: " + res)
+				res = res >>> 0
+				let abbrlink = checKCrc(res).toString(16)
+				console.log("result: " + abbrlink)
+				result.value = abbrlink
+			}
+			function clearText() {
+				var content = document.getElementById("content")
+				var result = document.getElementById("result")
+				result.value = ""
+				content.value=""
+			}
+		</script>
+
+	</head>
+	<body>
+		<div class="wrapper">
+			<div class="CodingWrap">
+				<p style="margin: 0px; font-size: 20px;">永久链接后缀生成</p>
+				<div class="tips"> 算法参考自hexo-abbr-link</div>
+				<textarea class="textInput fl" id="content" placeholder="请把你需要加密的内容粘贴在这里"></textarea> 
+				<div class="CodCBtnWrap fl">
+					<input type="submit" value="转换" class="GBtn GLOkBtn" onclick="abbrlink()">
+					<input type="button" value="清空" class="GBtn GLOkBtn" onclick="clearText()">
+				</div>
+				<textarea class="textInput f1" id="result" placeholder="转换后的结果"></textarea>
+			</div>	
+		</div>
+	</body>
+</html>
