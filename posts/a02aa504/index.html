@@ -7,7 +7,7 @@
 
 <title>deepin日常使用 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607525041519">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607618285404">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -83,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607525041519" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607618285404" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -386,6 +386,25 @@ Exec=&quot;/opt/Mark Text/marktext&quot; --no-sandbox %F
 <p>Idea:</p>
 <pre><code class="language-shell">export IDEA_JDK= 文件解压的路径
 </code></pre>
+<h1 id="nodejs-安装">nodejs 安装</h1>
+<p>官网：<a href="https://nodejs.org/en/">https://nodejs.org/en/</a><br>
+环境变量添加参考地址：<a href="https://github.com/nodejs/help/wiki/Installation">https://github.com/nodejs/help/wiki/Installation</a><br>
+从官网下载所需要的版本后，将其解压的一定的目录下后将路径添加到环境变量中，命令如下：</p>
+<pre><code class="language-shell">sudo deepin-editor /etc/profile
+</code></pre>
+<p>添加的内容如下：</p>
+<pre><code class="language-text"># nodejs
+VERSION=v14.15.1 # nodejs的版本号
+DISTRO=linux-x64 // 平台
+export PATH=/home/jxiaow/App/node-$VERSION-$DISTRO/bin:$PATH  # nodejs 的根目录
+</code></pre>
+<p>添加完毕后保存，然后执行:</p>
+<pre><code class="language-shell">source /etc/profile
+</code></pre>
+<p>然后在命令行中输入：</p>
+<pre><code class="language-shell">node -v
+</code></pre>
+<p>如果有输出版本号，则代表添加成功。</p>
 
                     </div>
                 </div>
@@ -428,6 +447,7 @@ Exec=&quot;/opt/Mark Text/marktext&quot; --no-sandbox %F
 <li><a href="#android-studio-%E5%92%8C-idea-%E8%BE%93%E5%85%A5%E6%B3%95%E5%85%89%E6%A0%87%E6%97%A0%E6%B3%95%E8%B7%9F%E9%9A%8F"><s>Android Studio 和 IDEA 输入法光标无法跟随</s></a></li>
 </ul>
 </li>
+<li><a href="#nodejs-%E5%AE%89%E8%A3%85">nodejs 安装</a></li>
 </ul>
 
                 </div>

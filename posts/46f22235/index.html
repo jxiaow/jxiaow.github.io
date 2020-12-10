@@ -1,0 +1,606 @@
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>图形绘制-Paint | Xiaowu</title>
+
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607618285404">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+
+<body>
+    <div class="main gt-bg-theme-color-first">
+        <nav class="navbar navbar-expand-lg">
+    <a href="/">
+        <div class="navbar-brand">
+            <img class="user-avatar" src="/images/avatar.png" alt="头像">
+            <div class="site-name gt-c-content-color-first">
+                Xiaowu
+            </div>
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav " style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://jxiaow.gitee.io/posts/favourite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1607618285404" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+        <div class="post-container">
+
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
+                    <h2 class="post-title">
+                        图形绘制-Paint
+                    </h2>
+                    <div class="post-info">
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2020-12-10 ·
+                            </time>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/GJLfjss5g/" class="post-tags">
+                                # UI
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/bSgjE13Dgf/" class="post-tags">
+                                # 源码解析
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/f3tbfHeq9/" class="post-tags">
+                                # Android
+                            </a>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/46f22235/"
+                                class="leancloud_visitors" data-flag-title="图形绘制-Paint">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
+                    </div>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <h2 id="canvas和paint的关系">Canvas和Paint的关系</h2>
+<p>在对UI绘制流程的分析中，可以知道<code>performCanvas()</code>方法最终会调用到<code>View#onDraw()</code>方法，并且会传递<code>Canvas</code>，那么<code>Canvas</code>到底有什么用呢？</p>
+<p><code>Canvas</code>在UI绘制中扮演的是<code>会话角色</code>，我们通常情况下都能够知道我们能使用Canvas去调画圆型，矩形图片等，但是最终其真正的绘制并不是在我们的android 层面进行的。</p>
+<p>通过源码分析，<code>Canvas</code> 继承了<code>BaseCanvas</code></p>
+<pre><code class="language-java">public class Canvas extends BaseCanvas {}
+</code></pre>
+<p>在<code>BaseCanvas</code>中，我们可以发现有大量以<code>nDraw</code>开头的方法，比如<code>drawCircle</code>。</p>
+<pre><code class="language-java">public void drawCircle(float cx, float cy, float radius, @NonNull Paint paint) {
+    throwIfHasHwBitmapInSwMode(paint);
+    nDrawCircle(mNativeCanvasWrapper, cx, cy, radius, paint.getNativeInstance());
+}
+</code></pre>
+<pre><code class="language-java">private static native void nDrawCircle(long nativeCanvas, float cx, float cy, float radius, long nativePaint);
+</code></pre>
+<p>通过上述代码块我们可以知道，Canvas并不是具体的执行者，而是一个传达着， 在Canvas当中我们会将所有的参数信息设置好，然后交由底层去绘制。</p>
+<p>我们通过观察Canvas中的绘制方法，可以发现每一个绘制方法中都有一个<code>Paint</code>类型的参数，那么Paint的职责到底是什么呢？打开Paint的源码，可以看到:</p>
+<pre><code class="language-java">/**
+* The Paint class holds the style and color information about how to draw
+* geometries, text and bitmaps.
+*/
+public class Paint {}
+</code></pre>
+<p>注释中描述了Paint 在绘制过程中保存了色彩信息和样式信息。</p>
+<h2 id="paint基础">Paint基础</h2>
+<p>Paint方法主要可以抽象成2大类：</p>
+<h3 id="设置和获取图像绘制-路径相关数据">设置和获取图像绘制、路径相关数据</h3>
+<h4 id="设置画笔样式">设置画笔样式</h4>
+<pre><code class="language-kotlin">// 设置画笔填充样式
+paint.style = Paint.Style.STROKE
+</code></pre>
+<blockquote>
+<p>Paint.Style.FILL :填充内部<br>
+Paint.Style.FILL_AND_STROKE ：填充内部和描边<br>
+Paint.Style.STROKE ：仅描边<br>
+注意 STROKE、FILL_AND_STROKE与FILL模式相比 外轮廓的位置会扩大。</p>
+</blockquote>
+<h4 id="设置画笔宽度">设置画笔宽度</h4>
+<pre><code class="language-kotlin">// 设置画笔宽度
+paint.strokeWidth = 200.0f
+</code></pre>
+<h4 id="抗锯齿功能">抗锯齿功能</h4>
+<ul>
+<li>设置抗锯齿</li>
+</ul>
+<pre><code class="language-kotlin">// 开启抗锯齿
+paint.isAntiAlias = true
+</code></pre>
+<ul>
+<li>获取是否开启抗锯齿</li>
+</ul>
+<pre><code class="language-kotlin">val isAntiAlias = paint.isAntiAlias
+</code></pre>
+<blockquote>
+<p>开启抗锯齿功能会消耗较大资源，绘制图形速度会变慢，但开启后绘制图像会平滑一些。</p>
+</blockquote>
+<h4 id="设置线冒样式">设置线冒样式</h4>
+<pre><code class="language-kotlin">// 设置圆形线冒
+paint.strokeCap = Paint.Cap.ROUND
+</code></pre>
+<blockquote>
+<p>Cap.ROUND(圆形线冒)、 Cap.SQUARE(方形线冒) 、Paint.Cap.BUTT(无线冒)</p>
+</blockquote>
+<p>效果图：<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/964578978be8541993263fbf3950f8b1-image-20201210094248494-65db78.png" alt="image-20201210094248494" loading="lazy"></p>
+<p>代码如下：</p>
+<pre><code class="language-kotlin">val paint = Paint()
+fun init() {
+    // 设置画笔填充样式
+    paint.style = Paint.Style.STROKE
+    // 开启抗锯齿
+    paint.isAntiAlias = true
+    // 设置画笔颜色
+    paint.color = Color.RED
+    // 设置画笔宽度
+    paint.strokeWidth = 200.0f
+    // 设置圆形线冒
+    paint.strokeCap = Paint.Cap.ROUND
+}
+ 
+ 
+override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    canvas.drawLine(200f, 300f, 400f, 300f, paint)
+}
+</code></pre>
+<h4 id="设置连接处线段">设置连接处线段</h4>
+<pre><code class="language-kotlin">// 设置线段链接处的样式
+paint.strokeJoin = Paint.Join.MITER
+</code></pre>
+<blockquote>
+<p>Join.MITER（结合处为锐角）、Join.Round(结合处为圆弧)、Join.BEVEL(结合处为直线)</p>
+</blockquote>
+<p>效果图：<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/8559d0ecf86dabc0e14da1eca468675c-image-20201210094852252-2c05c2.png" alt="image-20201210094852252" loading="lazy"></p>
+<p>代码如下：</p>
+<pre><code class="language-kotlin">// 创建画笔
+private val paint: Paint = Paint()
+// 创建矩形区域
+private val rect: Rect = Rect()
+ 
+ 
+init {
+    // 设置画笔填充样式
+    paint.style = Paint.Style.STROKE
+    // 开启抗锯齿
+    paint.isAntiAlias = true
+    // 设置画笔颜色
+    paint.color = Color.RED
+    // 设置画笔宽度
+    paint.strokeWidth = 200.0f
+    // 设置线段链接处于样式
+    paint.strokeJoin = Paint.Join.ROUND
+}
+ 
+ 
+override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    rect.set(200, 300, 400, 400)
+    canvas.drawRect(rect, paint)
+}
+</code></pre>
+<h4 id="设置画笔倾斜度">设置画笔倾斜度</h4>
+<pre><code class="language-kotlin">// 设置画笔倾斜度
+paint.strokeMiter = 0.8f
+</code></pre>
+<h4 id="清空画笔复位">清空画笔复位</h4>
+<pre><code class="language-kotlin">// 画笔复位
+paint.reset()
+</code></pre>
+<h4 id="设置外来画笔">设置外来画笔</h4>
+<pre><code class="language-kotlin">// 设置一个新的画笔
+paint.set(Paint())
+</code></pre>
+<h4 id="获取与设置alpha值颜色和argb">获取与设置alpha值，颜色和ARGB</h4>
+<pre><code class="language-kotlin">// 透明度 0 -100
+// r、g、b 0-255
+paint.setARGB(80,110,234, 125)
+ 
+ 
+// 设置透明度 0（完全透明） - 100 （不透明）
+paint.alpha = 100
+// 获取透明度
+val alpha = paint.alpha
+ 
+ 
+// 设置颜色
+paint.color = Color.BLUE
+// 获取颜色
+val color = paint.color
+</code></pre>
+<h4 id="图像抖动处理">图像抖动处理</h4>
+<ul>
+<li>开启图像抖动</li>
+</ul>
+<pre><code class="language-kotlin">// 开启图像抖动
+paint.isDither = true
+</code></pre>
+<ul>
+<li>获取图像抖动是否开启</li>
+</ul>
+<pre><code class="language-kotlin">// 开启图像抖动
+val isDither = paint.isDither
+</code></pre>
+<blockquote>
+<p>会使绘制出来的图像颜色更加平滑、饱满和图像更加清晰</p>
+</blockquote>
+<h4 id="设置绘制路径效果">设置绘制路径效果</h4>
+<pre><code class="language-kotlin">// 设置虚线
+// intervals： 控制实线和实线之后空白线的宽度（数组长度必须为偶数）
+// phase： 将View向”左“偏移phase
+paint.pathEffect = DashPathEffect(intervals = floatArrayOf(20f,10f,50f,100f), phase = 15f)
+</code></pre>
+<blockquote>
+<p>CornerPathEffect  ——圆形拐角效果<br>
+paint.setPathEffect(new CornerPathEffect(100))<br>
+利用半径R=50的圆来代替原来两条直线间的夹角<br>
+DashPathEffect  ——虚线效果    画同一条线段,偏移值为15<br>
+paint.setPathEffect(new DashPathEffect(new float[]{20,10,50,100},15))<br>
+intervals[]：表示组成虚线的各个线段的长度；整条虚线就是由intervals[]中这些基本线段循环组成的。比如，我们定义new float[] {20,10}； 那这个虚线段就是由两段线段组成的，第一个可见的线段长为20，每二个线段不可见，长度为10；<br>
+phase：开始绘制的偏移值</p>
+</blockquote>
+<h4 id="设置图形重叠时的处理方式">设置图形重叠时的处理方式</h4>
+<pre><code class="language-kotlin">paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.MULTIPLY)
+</code></pre>
+<p>通过设置xfermode 可以设置许多不同的效果，如 制作橡皮擦， 具体介绍请看 Paint的高级用法</p>
+<h4 id="设置maskfilter">设置MaskFilter</h4>
+<pre><code class="language-kotlin">paint.maskFilter = MaskFilter()
+</code></pre>
+<p>可以用不同的MaskFilter实现滤镜的效果，如滤化，立体等 。</p>
+<h4 id="设置颜色过滤器">设置颜色过滤器</h4>
+<pre><code class="language-kotlin">paint.colorFilter = ColorFilter()
+</code></pre>
+<p>可以在绘制颜色时实现不用颜色的变换效果，可以用来设置图像的黑白效果。</p>
+<h4 id="设置图像效果">设置图像效果</h4>
+<pre><code class="language-kotlin">paint.shader = Shader()
+</code></pre>
+<p>使用Shader可以绘制出各种渐变效果。Shader有一些子类，如：LinearGradient。</p>
+<h4 id="在图像下设置阴影层">在图像下设置阴影层</h4>
+<pre><code class="language-kotlin">// radius 为阴影的角度
+// dx和dy为阴影在x轴和y轴上的距离
+// color为阴影的颜色
+paint.setShadowLayer(float radius ,float dx,float dy,int color)
+</code></pre>
+<h3 id="设置获取文字相关的">设置获取文字相关的</h3>
+<h4 id="获取字符的行间距">获取字符的行间距</h4>
+<pre><code class="language-kotlin">val spacing = paint.fontSpacing
+</code></pre>
+<h4 id="设置和获取字符的间距">设置和获取字符的间距</h4>
+<pre><code class="language-kotlin">// 获取字符的间距 api &gt;= 21
+val letterSpacing = paint.letterSpacing
+// 设置字符的间距 api &gt;= 21
+paint.letterSpacing = 20f
+</code></pre>
+<h4 id="是否有下划线和设置下划线">是否有下划线和设置下划线</h4>
+<pre><code class="language-kotlin">// 获取是否有下划线
+val isUnderlineText = paint.isUnderlineText
+// 设置下划线
+paint.isUnderlineText = true
+</code></pre>
+<h4 id="获取与设置是否有文本删除线">获取与设置是否有文本删除线</h4>
+<pre><code class="language-kotlin">// 设置文本删除线
+paint.isStrikeThruText = true
+// 获取文本删除线
+val isStrikeThruText = paint.isStrikeThruText
+</code></pre>
+<h4 id="获取与设置文字大小">获取与设置文字大小</h4>
+<pre><code class="language-kotlin">// 获取文字大小
+val textSize = paint.textSize
+// 设置文字大小
+paint.textSize = 14f
+</code></pre>
+<p><strong>注意：</strong> <code>Paint.setTextSize</code> 单位是<code>px</code>，<code>TextView.setTextSize</code>单位是<code>sp</code>。</p>
+<h4 id="获取与设置字体类型">获取与设置字体类型</h4>
+<pre><code class="language-kotlin">// 设置字体样式
+paint.typeface = Typeface.DEFAULT
+val typeface = paint.typeface
+</code></pre>
+<blockquote>
+<p>默认有四种字体样式：     BOLD(加粗、BOLD_ITALIC(加粗并倾斜)、ITALIC(倾斜)、NORMAL(正常)<br>
+也可通过Typeface类来自定义个性化字体。</p>
+</blockquote>
+<h4 id="获取与设置文字倾斜">获取与设置文字倾斜</h4>
+<pre><code class="language-kotlin">// 设置文字倾斜度
+paint.textSkewX = -0.25f
+val textSkewX = paint.textSkewX
+</code></pre>
+<blockquote>
+<p>参数没有具体范围, 官方推荐值为-0.25，值为负则右倾，为正则左倾，默认值为0。</p>
+</blockquote>
+<h4 id="获取与设置文本对齐方式">获取与设置文本对齐方式</h4>
+<pre><code class="language-kotlin">// 设置文本的对齐方式
+paint.textAlign = Paint.Align.CENTER
+val textAlign = paint.textAlign
+</code></pre>
+<blockquote>
+<p>取值为 CENTER、LEFT、RIGHT，即文字绘制是左边对齐、右边还是局中。</p>
+</blockquote>
+<h4 id="亚像素">亚像素</h4>
+<pre><code class="language-kotlin">// 设置亚像素
+paint.isSubpixelText = true
+</code></pre>
+<blockquote>
+<p>固定的几个范围：320<em>480，480</em>800，720<em>1280，1080</em>1920等，那么如何在同样的分辨率的显示器中增强显示清晰度呢？<br>
+亚像素的概念就油然而生了，亚像素就是把两个相邻的两个像素之间的距离再细分，再插入一些像素，这些通过程序加入的像素就是亚像素。在两个像素间插入的像素个数是通过程序计算出来的，一般是插入两个、三个或四个。 所以打开亚像素显示，是可以在增强文本显示清晰度的，但由于插入亚像素是通过程序计算而来的，所以会耗费一定的计算机性能。</p>
+</blockquote>
+<h4 id="文本折断">文本折断</h4>
+<pre><code class="language-kotlin">paint.breakText(String text, boolean measureForwards, float maxWidth, float[] measuredWidth)
+</code></pre>
+<p>如文本阅读器的翻页效果，我们需要在翻页的时候动态折断或生成一行字符串。</p>
+
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#canvas%E5%92%8Cpaint%E7%9A%84%E5%85%B3%E7%B3%BB">Canvas和Paint的关系</a></li>
+<li><a href="#paint%E5%9F%BA%E7%A1%80">Paint基础</a>
+<ul>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E5%92%8C%E8%8E%B7%E5%8F%96%E5%9B%BE%E5%83%8F%E7%BB%98%E5%88%B6-%E8%B7%AF%E5%BE%84%E7%9B%B8%E5%85%B3%E6%95%B0%E6%8D%AE">设置和获取图像绘制、路径相关数据</a>
+<ul>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E7%94%BB%E7%AC%94%E6%A0%B7%E5%BC%8F">设置画笔样式</a></li>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E7%94%BB%E7%AC%94%E5%AE%BD%E5%BA%A6">设置画笔宽度</a></li>
+<li><a href="#%E6%8A%97%E9%94%AF%E9%BD%BF%E5%8A%9F%E8%83%BD">抗锯齿功能</a></li>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E7%BA%BF%E5%86%92%E6%A0%B7%E5%BC%8F">设置线冒样式</a></li>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E8%BF%9E%E6%8E%A5%E5%A4%84%E7%BA%BF%E6%AE%B5">设置连接处线段</a></li>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E7%94%BB%E7%AC%94%E5%80%BE%E6%96%9C%E5%BA%A6">设置画笔倾斜度</a></li>
+<li><a href="#%E6%B8%85%E7%A9%BA%E7%94%BB%E7%AC%94%E5%A4%8D%E4%BD%8D">清空画笔复位</a></li>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E5%A4%96%E6%9D%A5%E7%94%BB%E7%AC%94">设置外来画笔</a></li>
+<li><a href="#%E8%8E%B7%E5%8F%96%E4%B8%8E%E8%AE%BE%E7%BD%AEalpha%E5%80%BC%E9%A2%9C%E8%89%B2%E5%92%8Cargb">获取与设置alpha值，颜色和ARGB</a></li>
+<li><a href="#%E5%9B%BE%E5%83%8F%E6%8A%96%E5%8A%A8%E5%A4%84%E7%90%86">图像抖动处理</a></li>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E7%BB%98%E5%88%B6%E8%B7%AF%E5%BE%84%E6%95%88%E6%9E%9C">设置绘制路径效果</a></li>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E5%9B%BE%E5%BD%A2%E9%87%8D%E5%8F%A0%E6%97%B6%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F">设置图形重叠时的处理方式</a></li>
+<li><a href="#%E8%AE%BE%E7%BD%AEmaskfilter">设置MaskFilter</a></li>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E9%A2%9C%E8%89%B2%E8%BF%87%E6%BB%A4%E5%99%A8">设置颜色过滤器</a></li>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E5%9B%BE%E5%83%8F%E6%95%88%E6%9E%9C">设置图像效果</a></li>
+<li><a href="#%E5%9C%A8%E5%9B%BE%E5%83%8F%E4%B8%8B%E8%AE%BE%E7%BD%AE%E9%98%B4%E5%BD%B1%E5%B1%82">在图像下设置阴影层</a></li>
+</ul>
+</li>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E8%8E%B7%E5%8F%96%E6%96%87%E5%AD%97%E7%9B%B8%E5%85%B3%E7%9A%84">设置获取文字相关的</a>
+<ul>
+<li><a href="#%E8%8E%B7%E5%8F%96%E5%AD%97%E7%AC%A6%E7%9A%84%E8%A1%8C%E9%97%B4%E8%B7%9D">获取字符的行间距</a></li>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E5%92%8C%E8%8E%B7%E5%8F%96%E5%AD%97%E7%AC%A6%E7%9A%84%E9%97%B4%E8%B7%9D">设置和获取字符的间距</a></li>
+<li><a href="#%E6%98%AF%E5%90%A6%E6%9C%89%E4%B8%8B%E5%88%92%E7%BA%BF%E5%92%8C%E8%AE%BE%E7%BD%AE%E4%B8%8B%E5%88%92%E7%BA%BF">是否有下划线和设置下划线</a></li>
+<li><a href="#%E8%8E%B7%E5%8F%96%E4%B8%8E%E8%AE%BE%E7%BD%AE%E6%98%AF%E5%90%A6%E6%9C%89%E6%96%87%E6%9C%AC%E5%88%A0%E9%99%A4%E7%BA%BF">获取与设置是否有文本删除线</a></li>
+<li><a href="#%E8%8E%B7%E5%8F%96%E4%B8%8E%E8%AE%BE%E7%BD%AE%E6%96%87%E5%AD%97%E5%A4%A7%E5%B0%8F">获取与设置文字大小</a></li>
+<li><a href="#%E8%8E%B7%E5%8F%96%E4%B8%8E%E8%AE%BE%E7%BD%AE%E5%AD%97%E4%BD%93%E7%B1%BB%E5%9E%8B">获取与设置字体类型</a></li>
+<li><a href="#%E8%8E%B7%E5%8F%96%E4%B8%8E%E8%AE%BE%E7%BD%AE%E6%96%87%E5%AD%97%E5%80%BE%E6%96%9C">获取与设置文字倾斜</a></li>
+<li><a href="#%E8%8E%B7%E5%8F%96%E4%B8%8E%E8%AE%BE%E7%BD%AE%E6%96%87%E6%9C%AC%E5%AF%B9%E9%BD%90%E6%96%B9%E5%BC%8F">获取与设置文本对齐方式</a></li>
+<li><a href="#%E4%BA%9A%E5%83%8F%E7%B4%A0">亚像素</a></li>
+<li><a href="#%E6%96%87%E6%9C%AC%E6%8A%98%E6%96%AD">文本折断</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+                </div>
+            </article>
+            <!-- </div> -->
+
+            
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://jxiaow.gitee.io/posts/cd03afe4/" class="post-title gt-a-link">
+                    UI布局绘制入口
+                </a>
+            </div>
+            
+
+            
+
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'monsterid',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+            
+
+            <div class="site-footer gt-c-content-color-first">
+
+  <div class="social-container">
+
+    <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
+      <i class="fab fa-github gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
+      <i class="fas fa-blog gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
+      <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
+    </a>
+
+    <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
+      <i class="fas fa-envelope gt-c-content-color-first"></i>
+    </a>
+
+  </div>
+  <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+  
+	<div>
+    <div>
+      Theme by <a href="https://github.com/jxiaow/gridea-theme-pure-fashion" target="_blank">jxiaow</a>, Powered by <a
+              href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://jxiaow.gitee.io/atom.xml" target="_blank">RSS</a></a>
+  </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+            <script>
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+  
+  if (mainNavLinks == null || mainNavLinks.length == 0) {
+    let tocContainer = document.querySelector(".toc-container");
+    tocContainer.classList.remove("toc-container")
+    tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
+  } else {
+
+    // This should probably be throttled.
+    // Especially because it triggers during smooth scrolling.
+    // https://lodash.com/docs/4.17.10#throttle
+    // You could do like...
+    // window.addEventListener("scroll", () => {
+    //    _.throttle(doThatStuff, 100);
+    // });
+    // Only not doing it here to keep this Pen dependency-free.
+
+
+    window.addEventListener("scroll", event => {
+      let fromTop = window.scrollY;
+
+      mainNavLinks.forEach((link, index) => {
+        let section = document.getElementById(decodeURI(link.hash).substring(1));
+        let nextSection = null
+        if (mainNavLinks[index + 1]) {
+          nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+        }
+        if (section.offsetTop <= fromTop) {
+          if (nextSection) {
+            if (nextSection.offsetTop > fromTop) {
+              link.classList.add("current");
+            } else {
+              link.classList.remove("current");
+            }
+          } else {
+            link.classList.add("current");
+          }
+        } else {
+          link.classList.remove("current");
+        }
+      });
+    });
+  }
+
+
+
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+
+<script>
+  let images = document.querySelectorAll("figure > img");
+  //   debugger
+  //   console.log("dddd: "+ images);
+  images.forEach(image => {
+    var parent = image.parentElement;
+    parent.removeChild(image);
+    var aelem = document.createElement('a');
+    aelem.href = image.src;
+    aelem.dataset['fancybox'] = 'gallery';
+    aelem.classList.add('fancybox');
+    aelem.appendChild(image);
+    parent.appendChild(aelem);
+  })
+
+//   <a data-fancybox="gallery" href="big_1.jpg"><img src="small_1.jpg"></a>
+// <a data-fancybox="gallery" href="big_2.jpg"><img src="small_2.jpg"></a>
+</script>
+        </div>
+    </div>
+
+</body>
+
+</html>

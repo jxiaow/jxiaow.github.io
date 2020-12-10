@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2020-12-09T14:56:31.269Z</updated>
+    <updated>2020-12-10T16:38:08.498Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -10,6 +10,281 @@
     <logo>https://jxiaow.gitee.io/images/avatar.png</logo>
     <icon>https://jxiaow.gitee.io/favicon.ico</icon>
     <rights>All rights reserved 2020, Xiaowu</rights>
+    <entry>
+        <title type="html"><![CDATA[图形绘制-Paint]]></title>
+        <id>https://jxiaow.gitee.io/posts/46f22235/</id>
+        <link href="https://jxiaow.gitee.io/posts/46f22235/">
+        </link>
+        <updated>2020-12-10T05:35:50.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="canvas和paint的关系">Canvas和Paint的关系</h2>
+<p>在对UI绘制流程的分析中，可以知道<code>performCanvas()</code>方法最终会调用到<code>View#onDraw()</code>方法，并且会传递<code>Canvas</code>，那么<code>Canvas</code>到底有什么用呢？</p>
+<p><code>Canvas</code>在UI绘制中扮演的是<code>会话角色</code>，我们通常情况下都能够知道我们能使用Canvas去调画圆型，矩形图片等，但是最终其真正的绘制并不是在我们的android 层面进行的。</p>
+<p>通过源码分析，<code>Canvas</code> 继承了<code>BaseCanvas</code></p>
+<pre><code class="language-java">public class Canvas extends BaseCanvas {}
+</code></pre>
+<p>在<code>BaseCanvas</code>中，我们可以发现有大量以<code>nDraw</code>开头的方法，比如<code>drawCircle</code>。</p>
+<pre><code class="language-java">public void drawCircle(float cx, float cy, float radius, @NonNull Paint paint) {
+    throwIfHasHwBitmapInSwMode(paint);
+    nDrawCircle(mNativeCanvasWrapper, cx, cy, radius, paint.getNativeInstance());
+}
+</code></pre>
+<pre><code class="language-java">private static native void nDrawCircle(long nativeCanvas, float cx, float cy, float radius, long nativePaint);
+</code></pre>
+<p>通过上述代码块我们可以知道，Canvas并不是具体的执行者，而是一个传达着， 在Canvas当中我们会将所有的参数信息设置好，然后交由底层去绘制。</p>
+<p>我们通过观察Canvas中的绘制方法，可以发现每一个绘制方法中都有一个<code>Paint</code>类型的参数，那么Paint的职责到底是什么呢？打开Paint的源码，可以看到:</p>
+<pre><code class="language-java">/**
+* The Paint class holds the style and color information about how to draw
+* geometries, text and bitmaps.
+*/
+public class Paint {}
+</code></pre>
+<p>注释中描述了Paint 在绘制过程中保存了色彩信息和样式信息。</p>
+<h2 id="paint基础">Paint基础</h2>
+<p>Paint方法主要可以抽象成2大类：</p>
+<h3 id="设置和获取图像绘制-路径相关数据">设置和获取图像绘制、路径相关数据</h3>
+<h4 id="设置画笔样式">设置画笔样式</h4>
+<pre><code class="language-kotlin">// 设置画笔填充样式
+paint.style = Paint.Style.STROKE
+</code></pre>
+<blockquote>
+<p>Paint.Style.FILL :填充内部<br>
+Paint.Style.FILL_AND_STROKE ：填充内部和描边<br>
+Paint.Style.STROKE ：仅描边<br>
+注意 STROKE、FILL_AND_STROKE与FILL模式相比 外轮廓的位置会扩大。</p>
+</blockquote>
+<h4 id="设置画笔宽度">设置画笔宽度</h4>
+<pre><code class="language-kotlin">// 设置画笔宽度
+paint.strokeWidth = 200.0f
+</code></pre>
+<h4 id="抗锯齿功能">抗锯齿功能</h4>
+<ul>
+<li>设置抗锯齿</li>
+</ul>
+<pre><code class="language-kotlin">// 开启抗锯齿
+paint.isAntiAlias = true
+</code></pre>
+<ul>
+<li>获取是否开启抗锯齿</li>
+</ul>
+<pre><code class="language-kotlin">val isAntiAlias = paint.isAntiAlias
+</code></pre>
+<blockquote>
+<p>开启抗锯齿功能会消耗较大资源，绘制图形速度会变慢，但开启后绘制图像会平滑一些。</p>
+</blockquote>
+<h4 id="设置线冒样式">设置线冒样式</h4>
+<pre><code class="language-kotlin">// 设置圆形线冒
+paint.strokeCap = Paint.Cap.ROUND
+</code></pre>
+<blockquote>
+<p>Cap.ROUND(圆形线冒)、 Cap.SQUARE(方形线冒) 、Paint.Cap.BUTT(无线冒)</p>
+</blockquote>
+<p>效果图：<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/964578978be8541993263fbf3950f8b1-image-20201210094248494-65db78.png" alt="image-20201210094248494" loading="lazy"></p>
+<p>代码如下：</p>
+<pre><code class="language-kotlin">val paint = Paint()
+fun init() {
+    // 设置画笔填充样式
+    paint.style = Paint.Style.STROKE
+    // 开启抗锯齿
+    paint.isAntiAlias = true
+    // 设置画笔颜色
+    paint.color = Color.RED
+    // 设置画笔宽度
+    paint.strokeWidth = 200.0f
+    // 设置圆形线冒
+    paint.strokeCap = Paint.Cap.ROUND
+}
+ 
+ 
+override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    canvas.drawLine(200f, 300f, 400f, 300f, paint)
+}
+</code></pre>
+<h4 id="设置连接处线段">设置连接处线段</h4>
+<pre><code class="language-kotlin">// 设置线段链接处的样式
+paint.strokeJoin = Paint.Join.MITER
+</code></pre>
+<blockquote>
+<p>Join.MITER（结合处为锐角）、Join.Round(结合处为圆弧)、Join.BEVEL(结合处为直线)</p>
+</blockquote>
+<p>效果图：<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/8559d0ecf86dabc0e14da1eca468675c-image-20201210094852252-2c05c2.png" alt="image-20201210094852252" loading="lazy"></p>
+<p>代码如下：</p>
+<pre><code class="language-kotlin">// 创建画笔
+private val paint: Paint = Paint()
+// 创建矩形区域
+private val rect: Rect = Rect()
+ 
+ 
+init {
+    // 设置画笔填充样式
+    paint.style = Paint.Style.STROKE
+    // 开启抗锯齿
+    paint.isAntiAlias = true
+    // 设置画笔颜色
+    paint.color = Color.RED
+    // 设置画笔宽度
+    paint.strokeWidth = 200.0f
+    // 设置线段链接处于样式
+    paint.strokeJoin = Paint.Join.ROUND
+}
+ 
+ 
+override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    rect.set(200, 300, 400, 400)
+    canvas.drawRect(rect, paint)
+}
+</code></pre>
+<h4 id="设置画笔倾斜度">设置画笔倾斜度</h4>
+<pre><code class="language-kotlin">// 设置画笔倾斜度
+paint.strokeMiter = 0.8f
+</code></pre>
+<h4 id="清空画笔复位">清空画笔复位</h4>
+<pre><code class="language-kotlin">// 画笔复位
+paint.reset()
+</code></pre>
+<h4 id="设置外来画笔">设置外来画笔</h4>
+<pre><code class="language-kotlin">// 设置一个新的画笔
+paint.set(Paint())
+</code></pre>
+<h4 id="获取与设置alpha值颜色和argb">获取与设置alpha值，颜色和ARGB</h4>
+<pre><code class="language-kotlin">// 透明度 0 -100
+// r、g、b 0-255
+paint.setARGB(80,110,234, 125)
+ 
+ 
+// 设置透明度 0（完全透明） - 100 （不透明）
+paint.alpha = 100
+// 获取透明度
+val alpha = paint.alpha
+ 
+ 
+// 设置颜色
+paint.color = Color.BLUE
+// 获取颜色
+val color = paint.color
+</code></pre>
+<h4 id="图像抖动处理">图像抖动处理</h4>
+<ul>
+<li>开启图像抖动</li>
+</ul>
+<pre><code class="language-kotlin">// 开启图像抖动
+paint.isDither = true
+</code></pre>
+<ul>
+<li>获取图像抖动是否开启</li>
+</ul>
+<pre><code class="language-kotlin">// 开启图像抖动
+val isDither = paint.isDither
+</code></pre>
+<blockquote>
+<p>会使绘制出来的图像颜色更加平滑、饱满和图像更加清晰</p>
+</blockquote>
+<h4 id="设置绘制路径效果">设置绘制路径效果</h4>
+<pre><code class="language-kotlin">// 设置虚线
+// intervals： 控制实线和实线之后空白线的宽度（数组长度必须为偶数）
+// phase： 将View向”左“偏移phase
+paint.pathEffect = DashPathEffect(intervals = floatArrayOf(20f,10f,50f,100f), phase = 15f)
+</code></pre>
+<blockquote>
+<p>CornerPathEffect  ——圆形拐角效果<br>
+paint.setPathEffect(new CornerPathEffect(100))<br>
+利用半径R=50的圆来代替原来两条直线间的夹角<br>
+DashPathEffect  ——虚线效果    画同一条线段,偏移值为15<br>
+paint.setPathEffect(new DashPathEffect(new float[]{20,10,50,100},15))<br>
+intervals[]：表示组成虚线的各个线段的长度；整条虚线就是由intervals[]中这些基本线段循环组成的。比如，我们定义new float[] {20,10}； 那这个虚线段就是由两段线段组成的，第一个可见的线段长为20，每二个线段不可见，长度为10；<br>
+phase：开始绘制的偏移值</p>
+</blockquote>
+<h4 id="设置图形重叠时的处理方式">设置图形重叠时的处理方式</h4>
+<pre><code class="language-kotlin">paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.MULTIPLY)
+</code></pre>
+<p>通过设置xfermode 可以设置许多不同的效果，如 制作橡皮擦， 具体介绍请看 Paint的高级用法</p>
+<h4 id="设置maskfilter">设置MaskFilter</h4>
+<pre><code class="language-kotlin">paint.maskFilter = MaskFilter()
+</code></pre>
+<p>可以用不同的MaskFilter实现滤镜的效果，如滤化，立体等 。</p>
+<h4 id="设置颜色过滤器">设置颜色过滤器</h4>
+<pre><code class="language-kotlin">paint.colorFilter = ColorFilter()
+</code></pre>
+<p>可以在绘制颜色时实现不用颜色的变换效果，可以用来设置图像的黑白效果。</p>
+<h4 id="设置图像效果">设置图像效果</h4>
+<pre><code class="language-kotlin">paint.shader = Shader()
+</code></pre>
+<p>使用Shader可以绘制出各种渐变效果。Shader有一些子类，如：LinearGradient。</p>
+<h4 id="在图像下设置阴影层">在图像下设置阴影层</h4>
+<pre><code class="language-kotlin">// radius 为阴影的角度
+// dx和dy为阴影在x轴和y轴上的距离
+// color为阴影的颜色
+paint.setShadowLayer(float radius ,float dx,float dy,int color)
+</code></pre>
+<h3 id="设置获取文字相关的">设置获取文字相关的</h3>
+<h4 id="获取字符的行间距">获取字符的行间距</h4>
+<pre><code class="language-kotlin">val spacing = paint.fontSpacing
+</code></pre>
+<h4 id="设置和获取字符的间距">设置和获取字符的间距</h4>
+<pre><code class="language-kotlin">// 获取字符的间距 api &gt;= 21
+val letterSpacing = paint.letterSpacing
+// 设置字符的间距 api &gt;= 21
+paint.letterSpacing = 20f
+</code></pre>
+<h4 id="是否有下划线和设置下划线">是否有下划线和设置下划线</h4>
+<pre><code class="language-kotlin">// 获取是否有下划线
+val isUnderlineText = paint.isUnderlineText
+// 设置下划线
+paint.isUnderlineText = true
+</code></pre>
+<h4 id="获取与设置是否有文本删除线">获取与设置是否有文本删除线</h4>
+<pre><code class="language-kotlin">// 设置文本删除线
+paint.isStrikeThruText = true
+// 获取文本删除线
+val isStrikeThruText = paint.isStrikeThruText
+</code></pre>
+<h4 id="获取与设置文字大小">获取与设置文字大小</h4>
+<pre><code class="language-kotlin">// 获取文字大小
+val textSize = paint.textSize
+// 设置文字大小
+paint.textSize = 14f
+</code></pre>
+<p><strong>注意：</strong> <code>Paint.setTextSize</code> 单位是<code>px</code>，<code>TextView.setTextSize</code>单位是<code>sp</code>。</p>
+<h4 id="获取与设置字体类型">获取与设置字体类型</h4>
+<pre><code class="language-kotlin">// 设置字体样式
+paint.typeface = Typeface.DEFAULT
+val typeface = paint.typeface
+</code></pre>
+<blockquote>
+<p>默认有四种字体样式：     BOLD(加粗、BOLD_ITALIC(加粗并倾斜)、ITALIC(倾斜)、NORMAL(正常)<br>
+也可通过Typeface类来自定义个性化字体。</p>
+</blockquote>
+<h4 id="获取与设置文字倾斜">获取与设置文字倾斜</h4>
+<pre><code class="language-kotlin">// 设置文字倾斜度
+paint.textSkewX = -0.25f
+val textSkewX = paint.textSkewX
+</code></pre>
+<blockquote>
+<p>参数没有具体范围, 官方推荐值为-0.25，值为负则右倾，为正则左倾，默认值为0。</p>
+</blockquote>
+<h4 id="获取与设置文本对齐方式">获取与设置文本对齐方式</h4>
+<pre><code class="language-kotlin">// 设置文本的对齐方式
+paint.textAlign = Paint.Align.CENTER
+val textAlign = paint.textAlign
+</code></pre>
+<blockquote>
+<p>取值为 CENTER、LEFT、RIGHT，即文字绘制是左边对齐、右边还是局中。</p>
+</blockquote>
+<h4 id="亚像素">亚像素</h4>
+<pre><code class="language-kotlin">// 设置亚像素
+paint.isSubpixelText = true
+</code></pre>
+<blockquote>
+<p>固定的几个范围：320<em>480，480</em>800，720<em>1280，1080</em>1920等，那么如何在同样的分辨率的显示器中增强显示清晰度呢？<br>
+亚像素的概念就油然而生了，亚像素就是把两个相邻的两个像素之间的距离再细分，再插入一些像素，这些通过程序加入的像素就是亚像素。在两个像素间插入的像素个数是通过程序计算出来的，一般是插入两个、三个或四个。 所以打开亚像素显示，是可以在增强文本显示清晰度的，但由于插入亚像素是通过程序计算而来的，所以会耗费一定的计算机性能。</p>
+</blockquote>
+<h4 id="文本折断">文本折断</h4>
+<pre><code class="language-kotlin">paint.breakText(String text, boolean measureForwards, float maxWidth, float[] measuredWidth)
+</code></pre>
+<p>如文本阅读器的翻页效果，我们需要在翻页的时候动态折断或生成一行字符串。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[UI布局绘制入口]]></title>
         <id>https://jxiaow.gitee.io/posts/cd03afe4/</id>
@@ -2055,883 +2330,6 @@ DaggerComponentOne.create().componentThreeBuilder()
 </code></pre>
 <h2 id="总结">总结</h2>
 <p>Component 之间共用相同依赖，可以有两种组织关系：依赖关系与继承关系。至于如何选择试具体情况而定，但在 Android 开发中，一般使用继承关系，以 AppComponent 作为 root Component，AppComponent 一般还会使用 @Singleton 作用域，而 ActivityComponent 为 SubComponent。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Dart 语言简述]]></title>
-        <id>https://jxiaow.gitee.io/posts/b8c700d2/</id>
-        <link href="https://jxiaow.gitee.io/posts/b8c700d2/">
-        </link>
-        <updated>2019-12-04T16:24:44.000Z</updated>
-        <summary type="html"><![CDATA[<p>最近开始接触Flutter相关的项目，通过源码、例子和一些资料的阅读，发现如果掌握了Dart的一些语法和一些基础对于Flutter的学习有着事半功倍的效果。下面是我在查阅一些资料和实际的开发中的一些总结。希望对今后的学习有所帮助。</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>最近开始接触Flutter相关的项目，通过源码、例子和一些资料的阅读，发现如果掌握了Dart的一些语法和一些基础对于Flutter的学习有着事半功倍的效果。下面是我在查阅一些资料和实际的开发中的一些总结。希望对今后的学习有所帮助。</p>
-<!--more-->
-<blockquote>
-<p>Dart 诞生于 2011.10.10 日， 谷歌 Dart 语言项目的领导人 Lars Bak 在丹麦举行的Goto 会议上 布， Dart 种“结构化的 Web 程”语言， Dart 编程语言在所有现代浏览器和环境中提供高性能。</p>
-</blockquote>
-<p>Dart语言的特性：</p>
-<ul>
-<li>Dart 是AOT（Ahead Of Time）编译的，编译成快速、可预测本地的代码。</li>
-<li>Dart也可以JIT（Just In Time）编译，开发周期异常快，包括Flutter流行的亚秒级有状态热重载。</li>
-<li>Dart可以更轻松地创建以60fps运行的流畅动画和状态，Dart可以在没有锁的情况下进行对象分配和垃圾回收。</li>
-<li>Dart使Flutter不需要单独的声明式布局语言，或单独的可视化界面构建器，因为Dart的声明式编程布局易于阅读和可视化。</li>
-</ul>
-<p>Dart重要概念：</p>
-<ul>
-<li>
-<p>一切皆对象，无论是变量、数字、函数等都是对象，所有的对像都继自Object， 这点类似于 Java 语言。</p>
-</li>
-<li>
-<p>程序中指定数据类型使得程序合理地分配内存空间，并帮助编绎器进行语法检查，由于Dart 言是弱数据类型， 所以类型不是必须的 。</p>
-</li>
-<li>
-<p>Dart 代码在运行前解析 指定数据类型和编译时的常量， 可以提高运行速度。</p>
-</li>
-<li>
-<p>Dart 程序有统 的程序人口： main （） 这一点与 Java C 和 C＋＋ 语言很像。</p>
-</li>
-<li>
-<p>Dart 没有 <code>public</code> <code>protected</code> <code>private</code> 这些修饰符的概念，私有特性通过变量或函数加上下划线来表示。</p>
-</li>
-<li>
-<p>Dart 工具可以检查出警告信息(<code>warning</code>) 和 错误信息(<code>errors</code>)， 警告信息只是表明代码可能不工作，但是不会妨碍程序运行，错误信息可以是编译时的错误，也可能是运行时的错误， 编译时的错误将阻止程序运行，运行时的错误将会以异常（exception ）的方式呈现。</p>
-</li>
-<li>
-<p>Dart 支持 anync/await 异步处理。</p>
-</li>
-<li>
-<p>关键字（ 56 个）如下：</p>
-<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-43-54-dart%E5%85%B3%E9%94%AE%E5%AD%97.png" alt="dart关键字.png" loading="lazy"></figure>
-<ul>
-<li>带有上标 <strong>1</strong> 的关键字是 <em><strong>内置关键字</strong></em>。避免把内置关键字当做标识符使用。 也不要把内置关键字 用作类名字和类型名字。</li>
-<li>带有上标 <strong>2</strong> 的关键字，是在 Dart 1.0 发布以后又新加的，用于支持异步相关的特性。</li>
-</ul>
-</li>
-</ul>
-<h2 id="变量与基本类型">变量与基本类型</h2>
-<h3 id="变量的声明">变量的声明</h3>
-<p>在Dart里，变量的声明有三种方式：</p>
-<ol>
-<li>
-<p>用<code>var</code>关键字</p>
-<p>用var声明变量时，如果未指定初始值，可以变成任意类型。如果指定了类型，则类型会被锁定。如：</p>
-<pre><code class="language-dart">void main() {
-  var v; // 初始值未指定类型
-  v = '2'; // 可以变为任意类型
-  v = 3;
-  print('v: $v');
-
-  var v1 = '111'; // 初始化时已经指定类型
-  var v1 = 222; // 此时无法赋值成功，编译时报错
-}
-</code></pre>
-</li>
-<li>
-<p>用<code>dynamic</code>关键字</p>
-<p>dynamic声明的变量，表示动态任意类型，编译时不检查类型。如：</p>
-<pre><code class="language-dart">void main() {
-  dynamic d1 = '111';
-  d1 = 222;
-  d1 = 333.0;
-  print(&quot;d1: $d1&quot;);
-  // dynamic修饰的变量，在编译时不做检查
-  d1.test(); // 这行还代码，在编译时是不会检查错误信息的，运行时会报错
-}
-</code></pre>
-</li>
-<li>
-<p>用<code>Object</code></p>
-<p>Object声明的变量，表示任意动态类型，编译时检查类型。如：</p>
-<pre><code class="language-dart">void main() {
-  Object o1 = &quot;sss&quot;;
-  o1 = 222;
-  o1.test(); // 编译时会做检查，报错
-}
-</code></pre>
-</li>
-</ol>
-<h3 id="变量的默认值">变量的默认值</h3>
-<ul>
-<li>没有初始化的变量会自动获取一个默认值null</li>
-<li>一切皆为对象，对象的默认值为null</li>
-</ul>
-<h3 id="final-和-const">final 和 const</h3>
-<p>​    final 或 const 修饰的变量为常量或固定值。</p>
-<ul>
-<li>共同点：
-<ol>
-<li>声明的类型可以省略</li>
-<li>初始化后不能再赋值</li>
-<li>不能和<code>var</code>同时使用</li>
-</ol>
-</li>
-<li>不同点：
-<ol>
-<li>类级别常量，使用 <code>static const</code></li>
-<li>const 可以使用其它const常量的值来初始化其值</li>
-<li>使用const赋值声明，const可省略</li>
-<li>可以更改非final、非const变量的值，即使曾经具有const值</li>
-<li>const 导致的不可变性是可传递的</li>
-<li>相同的const常量不会在内存中重复创建</li>
-<li>const需要编译时常量</li>
-</ol>
-</li>
-</ul>
-<h3 id="基本类型">基本类型</h3>
-<p>Dart语言常用的基本数据类型包括： <code>Number</code>，<code>String</code>，<code>Boolean</code>，<code>List和Map</code></p>
-<ul>
-<li>
-<p>Number类型</p>
-<p>Number 类型包括 int 整形，double浮点类型，他们都是<code>num</code>类型的子类</p>
-</li>
-<li>
-<p>String类型</p>
-<ul>
-<li>Dart 字符串是 utf-16 编码的字符序列，可以使用单引号或者双引号来创建字符</li>
-<li>可以使用三个单引号或者双引号创建多行字符串对象</li>
-<li>可以使用r前缀创建原始字符串，即输出原始字符，字符串里的转义等符号不会生效</li>
-<li>可以在字符串中使用表达式：<code>&quot;${expression}&quot;</code>，如果表达式是一个标识符，可以省略<code>{}</code>，如果表达式的结果为一个对象，则 Dart会调用对象的<code>toString</code>方法</li>
-</ul>
-</li>
-<li>
-<p>Boolean类型</p>
-<p>Dart是强bool类型检查，只有bool类型的值是true才被认为是true， 如果未赋初值，则为null</p>
-</li>
-<li>
-<p>List类型</p>
-<p>在Dart语言中，具有一系列相同类型的数据称为List对象。Dart中List可以直接打印出出各个元素，而java中则是地址。</p>
-</li>
-<li>
-<p>Map类型</p>
-<p>与java类似。</p>
-</li>
-<li>
-<p>Set</p>
-<ul>
-<li>set1.difference(set2): 返回 set1 集合里有但 set2 里没有的元素集合</li>
-<li>set1.intersection(set2)：返回set1和set2的交集</li>
-<li>set1.union(set2)：返回set1和set2的并集</li>
-<li>set1.retainAll()：set1只保留某些元素(要保留的元素要在原set中存在）</li>
-</ul>
-</li>
-<li>
-<p>Runs</p>
-<ul>
-<li>用在符串中表示Unicode字符</li>
-<li>使用String.fromCharCodes显示字符图形</li>
-<li>如果非4个数值，需要把编码值放到大括号中</li>
-</ul>
-</li>
-</ul>
-<h2 id="函数">函数</h2>
-<p>Dart是一个面向对象的语言,所以函数也是对象，函数属于Function对象。函数可以像参数一样传递给其他函数。</p>
-<h3 id="函数定义">函数定义</h3>
-<ol>
-<li>
-<p>定义函数时可以省略类型(不建议)</p>
-<pre><code class="language-dart">void func(a, b){} // 参数a,b都省略了类型
-</code></pre>
-</li>
-<li>
-<p>支持缩写语法<code>=&gt;</code></p>
-<pre><code class="language-dart">void main() =&gt; runApp(MyApp()); // 当函数体只有一条语句时可以使用此种写法
-</code></pre>
-</li>
-<li>
-<p>可在函数内定义函数</p>
-<p>可以在函数里定义函数，如：</p>
-<pre><code class="language-dart">int func(int a, int b) {
-  int sum(int a, int b, int c) {
-    return a + b + c;
-  }
-  return sum(a, b, 1);
-}
-</code></pre>
-<p>dart 函数支持闭包</p>
-<pre><code class="language-dart">Function addFunction(int a) {
-  return (y) =&gt; a + y;
-}
-
-void main() {
-  var addFunc = addFunction(12);
-  print(addFunc(22));
-}
-</code></pre>
-</li>
-</ol>
-<h3 id="函数返回值">函数返回值</h3>
-<ul>
-<li>所有的函数都有返回值</li>
-<li>如果没有指定函数返回值，则默认的返回值是null</li>
-<li>没有返回值的函数,系统会在最后添加隐式的return语句</li>
-</ul>
-<h3 id="可选参数">可选参数</h3>
-<ul>
-<li>
-<p>可选命名参数</p>
-<p>使用<code>{param1, param2,...}</code>的形式来指定命名参数。</p>
-<pre><code class="language-dart">main() {
-  func(a:1);
-  func(b:1);
-  func(a:1, b:1);
-}
-
-int func({int a, int b}) {
-  return a + b;
-}
-</code></pre>
-</li>
-<li>
-<p>可选位置参数</p>
-<p>将参数使用中括号[]括起来,用来表明是可选位置参数，必填参数要放在可选参数前面。</p>
-<pre><code class="language-dart">String getUserInfo(String name, String sex, [String from]) {}
-</code></pre>
-<p>其中name和sex是必须传入的参数,from参数可以不传</p>
-</li>
-<li>
-<p>参数默认值</p>
-<ul>
-<li>如果参数指定了默认值,当不传入值时，函数就会使用这个默认值。通常默认值参数为null。</li>
-</ul>
-<pre><code class="language-dart">String getUserInfo(String name, String sex, [String from = '中国']) {}
-</code></pre>
-<ul>
-<li>可选命名参数默认值(默认值必须是编译时常量)，可以使用等号<code>=</code> 或冒号<code>:</code>，Dart SDK 1.21 之前只能用冒号，冒号的支持以后会移除，所以建议使用<em>等号</em>。</li>
-<li>可选位置参数默认值(默认值必须是编译时常量)，只能使用等号<code>=</code>。</li>
-<li>可使用list或map作为默认值，但必须是const。</li>
-</ul>
-<pre><code class="language-dart">int fun([List list = const [1, 2, 3]]) {}
-</code></pre>
-</li>
-</ul>
-<h3 id="匿名函数">匿名函数</h3>
-<ul>
-<li>
-<p>可赋值给变量，通过变量调用</p>
-<pre><code class="language-dart">main() {
-  var func = (int a, int b) =&gt; a + b;
-  func(1, 2);
-}
-</code></pre>
-</li>
-<li>
-<p>可在其他函数中直接调用或传递给其他函数</p>
-</li>
-</ul>
-<h3 id="函数别名">函数别名</h3>
-<p>函数别名使用<code>typedef</code>表示，如：</p>
-<pre><code class="language-dart">typedef Fun1(int a, int b);
-typedef Fun2&lt;T, K&gt;(T a, K b);
-</code></pre>
-<ul>
-<li>typedef给函数起一个别名，使用比较方便。例如定义一个方法的回调，直接使用别名定义。</li>
-<li>没返回值，则只要参数匹配就行了，如果定义了返回值，则返回值不一样会报错。</li>
-</ul>
-<h3 id="main函数">main函数</h3>
-<p>Flutter应用程序必须要有一个main函数作为程序的入口函数。</p>
-<h2 id="运算符">运算符</h2>
-<p>Dart所有的运算符如下表所示， 与java不同的有8个，如下：</p>
-<p><code>?.</code>，条件成员访问 和 . 类似，但是左边的操作对象不能为 null，例如 foo?.bar 如果 foo 为 null 则返回 null，否则返回 bar 成员。<br>
-<code>~/</code>，除后取整。<br>
-<code>as</code>，类型转换。<br>
-<code>is</code>，如果对象是指定类型返回true。<br>
-<code>is!</code>，如果对象是指定类型返回false。<br>
-<code>??</code>，双问号左边为true返回左边结果，否则返回右边结果。<br>
-<code>..</code>，级联语法。严格来说， 两个点的级联语法不是一个操作符。 只是一个 Dart 特殊语法。<br>
-<code>??:</code>，如果左边是 null，则右边赋值给左边；如果不是 null，则左边的值保持不变。</p>
-<table>
-<thead>
-<tr>
-<th><strong>描述</strong></th>
-<th style="text-align:center"><strong>操作符</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>后缀操作</td>
-<td style="text-align:center">expr++ expr-- () [] . <code>?.</code></td>
-</tr>
-<tr>
-<td>前缀操作</td>
-<td style="text-align:center">-expr !expr ~expr ++expr --expr</td>
-</tr>
-<tr>
-<td>乘除</td>
-<td style="text-align:center">* /  % <code>~/</code></td>
-</tr>
-<tr>
-<td>加减</td>
-<td style="text-align:center">+ -</td>
-</tr>
-<tr>
-<td>位移</td>
-<td style="text-align:center">&lt;&lt; &gt;&gt;</td>
-</tr>
-<tr>
-<td>按位与</td>
-<td style="text-align:center">&amp;</td>
-</tr>
-<tr>
-<td>按位异或</td>
-<td style="text-align:center">^</td>
-</tr>
-<tr>
-<td>按位或</td>
-<td style="text-align:center">|</td>
-</tr>
-<tr>
-<td>类型操作</td>
-<td style="text-align:center">&gt;= &gt; &lt;= &lt; <code>as</code> <code>is</code> <code>is!</code></td>
-</tr>
-<tr>
-<td>相等</td>
-<td style="text-align:center">== !=</td>
-</tr>
-<tr>
-<td>逻辑与</td>
-<td style="text-align:center">&amp;&amp;</td>
-</tr>
-<tr>
-<td>逻辑或</td>
-<td style="text-align:center">||</td>
-</tr>
-<tr>
-<td>是否为空</td>
-<td style="text-align:center"><code>??</code></td>
-</tr>
-<tr>
-<td>三目运算</td>
-<td style="text-align:center">expr1 ? expr2 : expr3</td>
-</tr>
-<tr>
-<td>级联</td>
-<td style="text-align:center"><code>..</code></td>
-</tr>
-<tr>
-<td>赋值</td>
-<td style="text-align:center">= *= /= ~/= %= += -= &lt;&lt;= &gt;&gt;= &amp;= ^= |=  <code>??=</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="流程控制语句">流程控制语句</h2>
-<p>Dart中控制流程语句和Java类似。List和Set等实现了Iterable接口的类支持for-in遍历元素。</p>
-<ul>
-<li>if  else</li>
-<li>for forEach <code>for-in</code></li>
-<li>while  do-while</li>
-<li>break continue</li>
-<li>switch case</li>
-<li>assert</li>
-<li>try-catch throw</li>
-</ul>
-<h2 id="异常处理">异常处理</h2>
-<p>异常是表示发生意外错误，如果没有捕获异常，引发异常的隔离程序将被挂起，并且程序终止。</p>
-<p>Dart代码可抛出并捕获异常，但Dart的所有异常都是<strong>未检查异常</strong>，方法不声明他们可能抛出的异常,也不需要捕获任何异常。<br>
-Dart 代码可以抛出任何非 null 对象为异常，不仅仅是实现了 Exception 或者 Error 的对象。<br>
-可以使用on 或者 catch 来声明捕获语句，也可以 同时使用。使用 on 来指定异常类型，使用 catch 来 捕获异常对象。</p>
-<ol>
-<li>
-<p>抛出异常</p>
-<pre><code class="language-dart">// 抛出Exception对象
-throw FormatException('抛出一个ｆormatException')   
-// 抛出Error对象
-throw OutMemoryError();    
-//或自定义异常
-throw '数据非法'
-</code></pre>
-</li>
-<li>
-<p>捕获异常</p>
-<p><code>catch()</code> 可以指定一个或两个参数来捕获异常，第一个是抛出的异常，第二个是堆栈跟踪，如：</p>
-<pre><code class="language-dart">try {
-    ...
-} on Error catch (e) { // 捕获异常详细信息
-
-} catch　(e, s) { // 堆栈跟踪信息
-
-}
-</code></pre>
-<p><code>rethrow</code> 把捕获的异常重新抛出</p>
-</li>
-<li>
-<p>Finally</p>
-</li>
-</ol>
-<h2 id="面向对象">面向对象</h2>
-<p>Dart作为高级语言支持面向对象的很多特性并且支持基于<code>mixin</code>的继承方式。基于mixin的继承方式是值：一个类可以继承多个父类，相当于其他语言里的多继承，所有的类都有同一个基类<code>Object</code>。</p>
-<h3 id="实例化成员变量">实例化成员变量</h3>
-<p>类定义中所有的变量都会隐式的定义Setter方法，针对非空的变量会额外增加getter方法</p>
-<h3 id="构造函数">构造函数</h3>
-<p>dart的构造函数有多种形式，如下：</p>
-<ul>
-<li>
-<p>常规构造函数</p>
-<pre><code class="language-dart">class User {
-  String name;
-  int age;
-
-  User(String name, int age) {
-    this.name = name;
-    this.age = age;
-  }
-  // 或
-  User(this.name, this.age);  
-}
-</code></pre>
-</li>
-<li>
-<p>命名的构造函数</p>
-<pre><code class="language-dart">class User {
-  String name;
-  int age;
-
-  User.fromJson(Map json) {
-      name = json['name'];
-      age = json['age'];
-  }
-}
-</code></pre>
-<p>使用命名构造函数可以为一个类实现多个构造函数， 或者使用命名构造函数来更清晰的表明你的意图。</p>
-</li>
-<li>
-<p>重定向构造函数</p>
-<pre><code class="language-dart">class User {
-  String name;
-  int age;
-
-  User(this.name, this.age);
-
-  User.create(String name): this(name,12); 
-}
-</code></pre>
-<p>一个重定向构造函数是没有代码的，在构造函数声明后，使用 冒号调用其他构造函数。</p>
-</li>
-<li>
-<p>构造函数初始化列表</p>
-<pre><code class="language-dart">class User {
-  // final 修饰的成员变量，只能通过构造方法进行赋值
-  final String name;
-  final int age;
-
-  // 初始化列表
-  User(name, age)
-      : name = name,
-        age = age;
-}
-</code></pre>
-<p>在构造函数体执行之前可以初始化实例参数。 使用逗号分隔初始化表达式。初始化列表非常适合用来设置 final 变量的值。</p>
-</li>
-<li>
-<p>调用超类构造函数</p>
-<p>在构造方法处使用<code>super</code>关键字，如：</p>
-<pre><code class="language-dart">class User extends Person {
-  // final 修饰的成员变量，只能通过构造方法进行赋值
-  final String name;
-  final int age;
-
-  // 初始化列表
-  User(this.name, this.age):super(name,age);
-}
-</code></pre>
-</li>
-<li>
-<p>常量构造函数</p>
-<pre><code class="language-dart">class User {
-  // 定义const构造函数要确保所有的成员变量都是final修饰
-  final String name;
-  final int age;
-
-  static final User user = const User('111', 12);
-
-  // const 关键字放在构造函数名前，且不能有函数体
-  const User(this.name, this.age);
-}
-</code></pre>
-</li>
-<li>
-<p>工厂构造函数(单例)</p>
-<pre><code class="language-dart">class User {
-  String name;
-//工厂构造函数无法访问this，所以这里要用static
-  static User _user;
-//工厂方法构造函数，关键字factory
-  factory User([String name]) {
-    return User._user ??= User._(name);
-  }
-//定义一个命名构造函数用来生产实例
-  User._(this.name);
-}
-</code></pre>
-</li>
-</ul>
-<h3 id="读取和写入对象getter-setter">读取和写入对象（Getter、Setter）</h3>
-<ul>
-<li>get()和set()方法是专门用于读取和写入对象的属性的方法。</li>
-<li>每一个类的实例，系统都隐式地包含有get()和set()方法。</li>
-<li>final 修饰的变量没有setter方法。</li>
-<li>可以使用get 和 set 关键字定义getter和setter。</li>
-</ul>
-<pre><code class="language-dart">class User {
-  String name;
-
-  User(this.name);
-
-  String get username =&gt; 'getter ${this.name}';
-  set username(String name) =&gt; this.name = name;
-}
-</code></pre>
-<h3 id="重载操作">重载操作</h3>
-<p>采用operator修饰，如：</p>
-<pre><code class="language-dart">class Vector {
-  final int x;
-  final int y;
-
-  const Vector(this.x, this.y);
-
-  Vector operator +(Vector v) {
-    return Vector(x + v.x, y + v.y);
-  }
-}
-</code></pre>
-<h3 id="抽象类">抽象类</h3>
-<ul>
-<li>抽象类采用<code>abstract</code>关键字修饰<code>class</code>。f</li>
-<li>不能被实例化，除非定义一个工厂构造函数。</li>
-<li>抽象类通常用来定义接口， 以及部分实现。</li>
-<li>抽象类通常具有抽象方法，抽象方法不需要关键字，以分号结束即可。</li>
-<li>接口方式使用时，需要重写抽象类的成员变量和方法，包括私有的。</li>
-<li>一个类可以implement一个普通类。Dart任何一个类都是接口。</li>
-<li>一个类可以implement多个接口。</li>
-</ul>
-<h3 id="可调用类">可调用类</h3>
-<p>类实现 <code>call()</code> 方法可以让类像函数一样能够被调用。</p>
-<pre><code class="language-dart">class ClassFunction {
-  call(String a, String b, String c) =&gt; '$a, $b, $c';
-}
-
-main() {
-  var cf = ClassFunction();
-  var out = cf('a1', 'b1', 'c1');
-  print('out: $out');
-  print(cf.runtimeType);
-  print(out.runtimeType);
-  print(cf is Function);
-}
-</code></pre>
-<h3 id="枚举类">枚举类</h3>
-<p>与java一致，采用<code>enum</code>修饰。</p>
-<pre><code class="language-dart">enum Type {
-  A, B, C
-}
-</code></pre>
-<h3 id="mixins">Mixins</h3>
-<p>Mixins(混入功能)相当于多继承，使用with关键字来实现Mixins的功能</p>
-<pre><code class="language-dart">class S {
-  a() =&gt; print('S.a');
-}
-
-class A {
-  a() =&gt; print('A.a');
-  b() =&gt; print('A.b');
-}
-
-class T = A with S;
-</code></pre>
-<ol>
-<li>子类没有重写超类A方法的前提下，如果2个或多个超类拥有相同签名的A方法，那么子类会以继承的最后一个超类中的A方法为准。</li>
-<li>如果子类自己重写了A方法则以本身的A方法为准。</li>
-</ol>
-<h2 id="泛型">泛型</h2>
-<p>Dart1.21开始可以使用泛型函数。泛型函数可以在以下几个地方使用类型参数：</p>
-<ul>
-<li>函数的返回值类型。</li>
-<li>参数的类型。</li>
-<li>局部变量的类型。</li>
-</ul>
-<pre><code class="language-dart">main() {
-  K addCache&lt;K, V&gt;(K key, V value) {
-    K temp = key;
-    print('${key}: ${value}');
-    return temp;
-  }
-  var key = addCache('key', 'value');
-  print(key);
-}
-</code></pre>
-<p>要在使用构造函数时指定一个或多个类型，可将类型放在类名称后面的尖括号&lt;...&gt;中:</p>
-<pre><code class="language-dart">main() {
-  var p = Phone&lt;String&gt;('123456');
-  print(p.mobileNumber);
-}
-
-class Phone&lt;T&gt; {
-  final T mobileNumber;
-  Phone(this.mobileNumber);
-}
-</code></pre>
-<p>实现泛型类型时，您可能希望限制其参数的类型，可以在<code>&lt;&gt;</code>里面使用<code>extends</code>。</p>
-<pre><code class="language-dart">main() {
-  var man = Man();
-  var m = User&lt;Man&gt;(man);
-  m.man.doMassage();
-}
-
-class User&lt;T extends Man&gt; {
-  final T man;
-  User(this.man);
-}
-
-class Man {
-  void doMassage() {}
-}
-</code></pre>
-<p>与java一致， 唯一区别：Java泛型是编译时的，在运行时泛型信息会被擦除，Dart的泛型类型是固化的，在运行时也可以判断具体类型。</p>
-<pre><code class="language-dart">var names = List&lt;String&gt;();
-print(names is List&lt;String&gt;);//true
-print(names.runtimeType); // List&lt;String&gt; 
-</code></pre>
-<h2 id="库的使用">库的使用</h2>
-<h3 id="引用库">引用库</h3>
-<p>通过import语句在一个库中引入另一个库文件：</p>
-<ol>
-<li>在import语句后面需要接上库文件的路径</li>
-<li>对dart语言提供的库文件使用dart:xx格式</li>
-<li>第三方的库文件使用package:xx格式</li>
-</ol>
-<pre><code class="language-dart">import 'dart:io'; 
-import 'package:mylib/mylib.dart'; 
-import 'package :utils/utils.dart' ; 
-</code></pre>
-<h3 id="指定一个库的前缀">指定一个库的前缀</h3>
-<p>当引用的库拥有相互冲突的名字，可以为其中一个或几个指定不一样的前缀。</p>
-<pre><code class="language-dart">import 'package:libl/ libl.dart '; 
-import 'package:lib2 / lib2.dart ' as lib2 ;
-</code></pre>
-<h3 id="引用库的一部分">引用库的一部分</h3>
-<p>如果只需要使用库的一部分内容，可以有选择性地引用，有如下关键字：</p>
-<ul>
-<li>show 关键字：　只引用一点</li>
-<li>hide 关键字：　除此之外都引用</li>
-</ul>
-<pre><code class="language-dart">／／ 导入 foo
-import 'package:libl/libl.dart' show foo; 
-／／ 除了 foo 导入其他所有内容
-import 'package:lib2 / lib2.dart' hide foo; 
-</code></pre>
-<h3 id="库的延迟载入">库的延迟载入</h3>
-<ul>
-<li>使用<code>deferred as</code>导入</li>
-<li>使用标识符调用<code>loadLibrary()</code> 加载库</li>
-</ul>
-<pre><code class="language-dart">import 'dart:io' deferred as io;
-
-lazyLoad() async {
-  //使用 await 关键字暂停代码执行一直到库加载完成。
-  await io.loadLibrary();
-}
-
-main() {
-  lazyLoad();
-}
-</code></pre>
-<ul>
-<li>优点：
-<ul>
-<li>可提高程序启动速度。</li>
-<li>用在不常使用的功能。</li>
-<li>用在载入时间过长的包。</li>
-<li>执行 A/B 测试，例如 尝试各种算法的 不同实现。</li>
-</ul>
-</li>
-</ul>
-<h2 id="异步使用">异步使用</h2>
-<p>Dart支持异步操作，一般使用<code>async</code>函数和<code>await</code>表达式实现异步操作，Dart库提供<code>asynchronous</code>功能,该功能提供接口来消耗时间的操作，比如文件读写,网络请求。该功能返回<code>Future</code>或<code>Stream</code>对象。</p>
-<p>可以通过如下的方式来获取asynchronous功能返回的Future对象值:</p>
-<ul>
-<li>使用async函数和await表达式</li>
-<li>使用Future功能提供的API</li>
-</ul>
-<p>可以通过如下方式来获取asynchronous功能返回的Stream对象的值:</p>
-<ul>
-<li>使用async和一个异步的循环(await for)</li>
-<li>使用Stream的相关API</li>
-</ul>
-<h3 id="async-await">async / await</h3>
-<p>await关键字必须在async函数内部使用，await表达式可以使用多次</p>
-<pre><code class="language-dart">void main(){
-  getName1();
-  getName2();
-  getName3();
-}
-
-Future getName1() async {
-  await getStr1();
-  await getStr2();
-  print('getName1’);
-}
-getStr1() {
-  print('getStr1’);
-}
-getStr2() {
-  print('getStr2’);
-}
-getName2() {
-  print('getName2’);
-}
-getName3() {
-  print('getName3’);
-}
-
-/// 输出结果： getStr1 getName2  getName3  getStr2  getName1
-</code></pre>
-<h3 id="thencatcherrorwhencomplete">then,catchError,whenComplete</h3>
-<p>如果需要监听“完毕”这个状态，那么用<code>whenComplete</code>，需要监听“成功”这个状态，用<code>then</code>，需要监听“失败”这个状态，用<code>catchError</code>。<br>
-如果重写了test方法，test返回true就可以在catchError的onError方法里捕获到异常，如果test返回false，就把该异常继续抛出而不会在catchError方法里被捕获，如果不写test默认实现一个返回true的test方法</p>
-<pre><code class="language-dart">void main() {
-  Future(() =&gt; futureTask()) //异步任务的函数
-      .then((m) =&gt; &quot;result:$m&quot;) //任务执行完后的子任务
-      .then((m) =&gt; m.length) //其中m为上个任务执行完后的返回的结果
-      .then((m) =&gt; printLength(m))
-      .catchError(print) // 拦截错误，如果实现了test方法，只有return true时才会拦截，否则不会
-      .whenComplete(() =&gt; whenTaskCompelete()); //所有任务完成后的回调函数
-}
-
-whenTaskCompelete() {
-  print('task complete');
-}
-
-futureTask() async {
-  return 'future';
-}
-
-printLength(dynamic name) {
-  if (name is! String || name.length &lt; 3 || name.length &gt; 15) {
-    throw '长度错误';
-  }
-}
-</code></pre>
-<h3 id="event-looper">Event-Looper</h3>
-<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-45-02-event-loop.png" alt="event-loop.png" loading="lazy"></figure>
-<figure data-type="image" tabindex="3"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-45-33-event-loop-process.png" alt="event-loop-process.png" loading="lazy"></figure>
-<ol>
-<li>一个消息循环的职责就是不断从消息队列中取出消息并处理他们直到消息队列为空。</li>
-<li>消息队列中的消息可能来自用户输入，文件I/O消息，定时器等。例如上图的消息队列就包含了定时器消息和用户输入消息。</li>
-<li>Dart中的<code>Main Isolate</code>只有一个<code>Event Looper</code>，但是存在两个Event Queue: <code>Event Queue</code>以及<code>Microtask Queue</code>。</li>
-</ol>
-<h3 id="event-queue和microtask-queue">Event Queue和Microtask Queue</h3>
-<figure data-type="image" tabindex="4"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-46-08-event-microtask.png" alt="event-microtask.png" loading="lazy"></figure>
-<ul>
-<li>优先全部执行完Microtask Queue中的Event。</li>
-<li>直到Microtask Queue为空时，才会执行Event Queue中的Event。</li>
-<li>当Event Looper正在处理Microtask Queue中的Event时候，Event Queue中的Event就停止了处理了，此时App不能绘制任何图形，不能处理任何鼠标点击，不能处理文件IO等等。</li>
-<li>绘制图形，处理鼠标点击，处理文件IO等都是在Event Queue里完成的。</li>
-</ul>
-<h3 id="任务调度">任务调度</h3>
-<ul>
-<li>使用Future类，可以将任务加入到Event Queue的队尾</li>
-<li>使用scheduleMicrotask函数，将任务加入到Microtask Queue队尾</li>
-<li>优先全部执行完Microtask Queue中的Event，直到Microtask Queue为空时，才会执行Event Queue中的Event。</li>
-</ul>
-<h3 id="future">Future</h3>
-<ul>
-<li>使用 Future（）将任务加入event队列。</li>
-<li>Future中的<code>then</code>并没有创建新的Event丢到<code>Event Queue</code>中，而只是一个普通的<code>Function Call</code>，在FutureTask执行完后，立即开始执行。</li>
-<li>如果在then()调用之前Future就已经执行完毕了，那么任务会被加入到<code>microtask</code>队列中，并且该任务会执行then()中注册的回调函数。</li>
-<li>使用Future.value构造函数的时候，就会上一条一样，创建Task丢到microtask Queue中执行then传入的函数。</li>
-<li>Future.sync构造函数执行了它传入的函数之后，也会立即创建Task丢到microtask Queue中执行。</li>
-<li>当任务需要延迟执行时，可以使用new Future.delay()来将任务延迟执行。</li>
-</ul>
-<pre><code class="language-dart">void main(){
-  testFuture();
-}
-void testFuture() {
-  Future f = new Future(() =&gt; print('f1'));
-  Future f1 = new Future(() =&gt; null);
-  //Future f1 = new Future.delayed(Duration(seconds: 1) ,() =&gt; null);
-  Future f2 = new Future(() =&gt; null);
-  Future f3 = new Future(() =&gt; null);
-  f3.then((_) =&gt; print('f2'));
-  f2.then((_) {
-    print('f3');
-    new Future(() =&gt; print('f4'));
-    f1.then((_) {
-      print('f5');
-    });
-  });
-  f1.then((m) {
-    print('f6');
-  });
-  print('f7');
-}
-</code></pre>
-<h3 id="schedulemicrotask">scheduleMicrotask()</h3>
-<ul>
-<li>如果可以，尽量将任务放入event队列中。</li>
-<li>使用Future的then方法或whenComplete方法来指定任务顺序。</li>
-<li>为了保持你app的可响应性，尽量不要将大计算量的任务放入这两个队列。</li>
-<li>大计算量的任务放入额外的isolate中。</li>
-</ul>
-<pre><code class="language-dart">import 'dart:async';
-void main(){
-  testScheduleMicrotask();
-}
-void testScheduleMicrotask(){
-  scheduleMicrotask(() =&gt; print('s1'));
-
-  new Future.delayed(new Duration(seconds: 1), () =&gt; print('s2'));
-
-  new Future(() =&gt; print('s3')).then((_) {
-    print('s4');
-    scheduleMicrotask(() =&gt; print('s5'));
-  }).then((_) =&gt; print('s6'));
-
-  new Future(() =&gt; print('s7'));
-
-  scheduleMicrotask(() =&gt; print('s8'));
-
-  print('s9');
-}
-</code></pre>
-<h2 id="隔离isolate">隔离（isolate）</h2>
-<p>所有Dart代码都在隔离区内运行，而不是线程。每个隔离区都有自己的内存堆，确保不会从任何其他隔离区访问隔离区的状态。</p>
-<p>Dart没有共享内存的并发，没有竞争的可能性所以不需要锁，也就不用担心死锁的问题。</p>
-<p>isolate之间没有共享内存，所以他们之间的通信唯一方式只能是通过Port进行，而且Dart中的消息传递总是异步的。</p>
-<p>isolate神似Thread，但实际上两者有本质的区别。操作系统内的线程之间是可以有共享内存的而isolate没有，这是最为关键的区别。</p>
-<h2 id="元数据">元数据</h2>
-<p>使用元数据给代码添加更多的信息。元数据是以＠开始的修饰符，在＠后面接着编译时的常量或者一个常量构造函数。</p>
-<ul>
-<li>@deprecated 被弃用</li>
-<li>@override　重写</li>
-<li>@proxy 代理</li>
-</ul>
-<p>元数据可以修饰 library、class、typedef、type parameter、constructor、factory、function、field、parameter、variable declaration。</p>
-<h3 id="注释">注释</h3>
-<ul>
-<li>
-<p>单行注释以//开头。Dart编译器会忽略//和行尾之间的所有内容。</p>
-<pre><code class="language-dart">// 这是单行注释
-</code></pre>
-</li>
-<li>
-<p>多行注释以/<em>开头，以</em>/结尾。介于/*和 */两者之间的内容会被编译器忽略（除非该注释是一个文档注释)。</p>
-<pre><code class="language-dart">/*
- * 这是多行注释
- * 这是多行注释 
- */
-</code></pre>
-<p>多行注释可以嵌套</p>
-</li>
-<li>
-<p>文档注释以///或者/**开头。可以通过dartdoc命令导出文档。</p>
-<pre><code class="language-dart">/// 这是文档注释
-
-/**
-  * 这是文档注释
-  */
-</code></pre>
-</li>
-</ul>
 ]]></content>
     </entry>
 </feed>
