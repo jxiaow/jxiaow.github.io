@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2020-12-15T03:02:18.531Z</updated>
+    <updated>2020-12-15T03:07:34.724Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -16,11 +16,16 @@
         <link href="https://jxiaow.gitee.io/posts/36c3e87b/">
         </link>
         <updated>2020-12-15T01:40:13.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="paint高级应用篇-shader">Paint高级应用篇---Shader</h1>
-<p>Paint的高级用法主要有：<strong>渲染着色</strong>、**滤镜 ** 和 <strong>Xfermode</strong>。</p>
+        <summary type="html"><![CDATA[<p>Paint的高级用法主要有：<strong>渲染着色</strong>、<strong>滤镜</strong> 和 <strong>Xfermode</strong>。</p>
 <p><code>Canvas</code>的<code>drawXXX</code>方法画具体的形状，<code>Paint</code>的<code>Shader</code>定义图像的着色和外观。</p>
 <p>目前 <code>Shader</code>的子类有 <strong>LinearGradient(线性渲染)</strong>、<strong>SweepGradient(渐变渲染/梯度渲染)</strong>、<br>
 <strong>RadialGradient(环形渲染)</strong>、**BitmapShader(位图渲染) **   和 <strong>ComposeShader(组合渲染)</strong>。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>Paint的高级用法主要有：<strong>渲染着色</strong>、<strong>滤镜</strong> 和 <strong>Xfermode</strong>。</p>
+<p><code>Canvas</code>的<code>drawXXX</code>方法画具体的形状，<code>Paint</code>的<code>Shader</code>定义图像的着色和外观。</p>
+<p>目前 <code>Shader</code>的子类有 <strong>LinearGradient(线性渲染)</strong>、<strong>SweepGradient(渐变渲染/梯度渲染)</strong>、<br>
+<strong>RadialGradient(环形渲染)</strong>、**BitmapShader(位图渲染) **   和 <strong>ComposeShader(组合渲染)</strong>。</p>
+<!--more-->
 <h2 id="tilemode-拉伸形式">TileMode （拉伸形式）</h2>
 <p>TileMode 拉伸方式，在Shader的创建中会用到。<strong>只在图片和显示区域大小不符的情况进行扩充渲染</strong>，<code>TileMode</code>源码定义如下：</p>
 <pre><code class="language-java">public enum TileMode {
