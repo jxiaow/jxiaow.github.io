@@ -798,6 +798,42 @@ ul li {
     width: 100%;
   }
 }
+.article-end {
+  margin: 13px auto;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.015em;
+  font-feature-settings: "tnum";
+  font-variant: tabular-nums;
+  font-weight: 400;
+  line-height: 1.8;
+  word-break: break-word;
+}
+.essaySuffix-box {
+  font-family: Microsoft YaHei,微软雅黑,MicrosoftJhengHei,华文细黑,STHeiti,MingLiu;
+  font-size: 14px;
+  background: #f8f9fb !important;
+  padding: 17px;
+  border: 1px solid #edeef2 !important;
+  border-radius: 3px;
+  color: #414857;
+  text-indent: 0;
+}
+.essaySuffix-box-left {
+  width: 10%;
+  float: left;
+}
+.essaySuffix-box-left img {
+  width: 100%;
+  max-height: 50%;
+  margin: 0!important;
+}
+.essaySuffix-box-right {
+  width: 89%;
+  float: right;
+  margin-top: 10px;
+}
 .archives-container {
   padding: 32px;
   display: flex;

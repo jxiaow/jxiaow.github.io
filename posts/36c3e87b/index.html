@@ -1,0 +1,642 @@
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>Paint高级应用---Shader | Xiaowu</title>
+
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607996706755">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+
+<body>
+    <div class="main gt-bg-theme-color-first">
+        <nav class="navbar navbar-expand-lg">
+    <a href="/">
+        <div class="navbar-brand">
+            <img class="user-avatar" src="/images/avatar.png" alt="头像">
+            <div class="site-name gt-c-content-color-first">
+                Xiaowu
+            </div>
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav " style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://jxiaow.gitee.io/posts/favourite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1607996706755" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+        <div class="post-container">
+
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
+                    <h2 class="post-title">
+                        Paint高级应用---Shader
+                    </h2>
+                    <div class="post-info">
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2020-12-15 ·
+                            </time>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/d-l32TBQj/" class="post-tags">
+                                # Paint
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/GJLfjss5g/" class="post-tags">
+                                # UI
+                            </a>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/36c3e87b/"
+                                class="leancloud_visitors" data-flag-title="Paint高级应用---Shader">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
+                    </div>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <h1 id="paint高级应用篇-shader">Paint高级应用篇---Shader</h1>
+<p>Paint的高级用法主要有：<strong>渲染着色</strong>、**滤镜 ** 和 <strong>Xfermode</strong>。</p>
+<p><code>Canvas</code>的<code>drawXXX</code>方法画具体的形状，<code>Paint</code>的<code>Shader</code>定义图像的着色和外观。</p>
+<p>目前 <code>Shader</code>的子类有 <strong>LinearGradient(线性渲染)</strong>、<strong>SweepGradient(渐变渲染/梯度渲染)</strong>、<br>
+<strong>RadialGradient(环形渲染)</strong>、**BitmapShader(位图渲染) **   和 <strong>ComposeShader(组合渲染)</strong>。</p>
+<h2 id="tilemode-拉伸形式">TileMode （拉伸形式）</h2>
+<p>TileMode 拉伸方式，在Shader的创建中会用到。<strong>只在图片和显示区域大小不符的情况进行扩充渲染</strong>，<code>TileMode</code>源码定义如下：</p>
+<pre><code class="language-java">public enum TileMode {
+   /**
+    * replicate the edge color if the shader draws outside of its
+    * original bounds
+    */
+    CLAMP   (0),
+   /**
+    * repeat the shader's image horizontally and vertically
+    */
+    REPEAT  (1),
+   /**
+    * repeat the shader's image horizontally and vertically, alternating
+    * mirror images so that adjacent images always seam
+    */
+    MIRROR  (2);
+}
+</code></pre>
+<p>从源码定义上可以看到<code>TileMode</code>是一个枚举类，定义了3种类型：<code>CLAMP</code>、<code>REPEAT</code>和 <code>MIRROR</code>。</p>
+<h3 id="clamp">CLAMP</h3>
+<p><code>CLAMP</code> 拉伸最后一个像素铺满容器。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/c7780467b65c9784507b7d78720d19d3-avatar-0ace00.jpg" alt="avatar" loading="lazy"> <img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/c4921c5f1dc208da89f709bedbc7114d-image-20201210160303691-4c6ae5.png" alt="image-20201210160303691" loading="lazy"></p>
+<p>代码如下：</p>
+<pre><code class="language-kotlin">// 获取Bitmap
+private val bitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.avatar)
+private val paint = Paint()
+ 
+init {
+    // 初始化BitmapShader,并将 x,y的拉伸模式设置为CLAMP
+    paint.shader = BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+}
+ 
+override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    canvas.drawRect(100f,0f,bitmap.width.toFloat() * 2,bitmap.height * 2f,paint)
+}
+</code></pre>
+<h3 id="mirror">MIRROR</h3>
+<p>横向和纵向不足处不断翻转镜像平铺。</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/49950ca69ea172128172bf76c1309974-image-20201210161154210-bbc751.png" alt="image-20201210161154210" loading="lazy"></figure>
+<p>代码如下：</p>
+<pre><code class="language-kotlin">// 获取Bitmap
+private val bitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.avatar)
+private val paint = Paint()
+ 
+init {
+    // 初始化BitmapShader,并将 x,y的拉伸模式设置为MIRROR
+    paint.shader = BitmapShader(bitmap, Shader.TileMode.MIRROR, Shader.TileMode.MIRROR)
+}
+ 
+override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    canvas.drawRect(100f,0f,bitmap.width.toFloat() * 2,bitmap.height * 2f,paint)
+}
+</code></pre>
+<h3 id="repeat">REPEAT</h3>
+<p>横向和纵向不足时重复放置，类似于电脑壁纸。</p>
+<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/83261140255f9d0895b5ac2be7108ffd-image-20201210161732543-f37dc2.png" alt="image-20201210161732543" loading="lazy"></figure>
+<p>代码如下：</p>
+<pre><code class="language-kotlin">// 获取Bitmap
+private val bitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.avatar)
+private val paint = Paint()
+ 
+init {
+    // 初始化BitmapShader,并将 x,y的拉伸模式设置为REPEAT
+    paint.shader = BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+}
+ 
+override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    canvas.drawRect(100f,0f,bitmap.width * 2f,bitmap.height * 1.5f,paint)
+}
+</code></pre>
+<h2 id="线性渲染-lineargradient">线性渲染 LinearGradient</h2>
+<p><code>LinearGradient</code>用来实现线性渐变效果。</p>
+<pre><code class="language-java">public class LinearGradient extends Shader {}
+</code></pre>
+<p>渐变效果：</p>
+<figure data-type="image" tabindex="3"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/b21809293ec73ddd2f9f6f6fd60be59e-image-20201210174046124-491aec.png" alt="image-20201210174046124" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    val linearGradient = LinearGradient(0f, 0f, 500f, 300f, Color.RED, Color.BLUE, Shader.TileMode.CLAMP)
+    paint.shader = linearGradient
+    canvas.drawRect(0f, 0f, 800f, 800f, paint)
+}
+</code></pre>
+<p>使用效果：</p>
+<figure data-type="image" tabindex="4"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/0b9f21e195bc13c54cc2c5a5943b4382-image-20201210162543735-7d47de.png" alt="image-20201210162543735" loading="lazy"></figure>
+<pre><code class="language-kotlin">// 0x22ffffff, -0x1, 0x22ffffff
+class LinearGradientText @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : AppCompatTextView(context, attrs, defStyleAttr) {
+    // 线性渐变
+    private var linearGradient: LinearGradient? = null
+    // 平移matrix
+    private val translateMatrix: Matrix = Matrix()
+    // 平移变量默认值
+    private var defaultX: Float = 20f
+    // 平移量间隔值
+    private var translateX: Float = 0f
+ 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        // 获取文本值
+        val text = text.toString()
+        // 获取文本的测量宽度
+        val measureTextWidth = paint.measureText(text)
+        val gradientSize = measureTextWidth / text.length * 3
+        linearGradient = LinearGradient(
+            -gradientSize, 0f, 0f, 0f,
+            intArrayOf(0x22ffffff, -0x1, 0x22ffffff), null, Shader.TileMode.CLAMP
+        )
+        paint.shader = linearGradient
+    }
+ 
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        translateX += defaultX
+        val measureTextWidth = paint.measureText(text.toString())
+        val count = if (lineCount &gt; 1) lineCount - 1 else 1
+        if (translateX &gt; measureTextWidth / count || translateX &lt; 1) {
+            defaultX = -defaultX
+        }
+        translateMatrix.setTranslate(translateX, 0f)
+        linearGradient?.setLocalMatrix(translateMatrix)
+        postInvalidateDelayed(50)
+    }
+}
+</code></pre>
+<h2 id="位图渲染-bitmapshader">位图渲染 BitmapShader</h2>
+<p><code>BitmapShader</code> 位图图像渲染，用<code>Bitmap</code>对绘制的图形进行渲染着色，简单来说是用图片对图形进行贴图。</p>
+<p>在<strong>TileMode</strong>中已有基本使用，具体请看 <a href="#CLAMP">CLAMP</a>。</p>
+<p>以下使用代码公共部分：</p>
+<pre><code class="language-kotlin">class GradientView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
+ 
+    private val bitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.avatar)
+    private var bWidth: Int = 0
+    private var bHeight: Int = 0
+    private val paint = Paint()
+    private var bitmapShader: BitmapShader? = null
+    private val shapeMatrix = Matrix()
+    private val rectF = RectF()
+ 
+    init {
+        // 获取资源图片
+        bWidth = bitmap.width
+        bHeight = bitmap.height
+        /**
+         * TileMode.CLAMP 拉伸最后一个像素去铺满剩下的地方
+         * TileMode.MIRROR 通过镜像翻转铺满剩下的地方。
+         * TileMode.REPEAT 重复图片平铺整个画面（电脑设置壁纸）
+         * 在图片和显示区域大小不符的情况进行扩充渲染
+         */
+        bitmapShader = BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+        paint.shader = bitmapShader
+    }
+ 
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+}
+</code></pre>
+<ul>
+<li>圆形头像</li>
+</ul>
+<figure data-type="image" tabindex="5"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/18499d4ef9f62abaacf05392847fde4d-image-20201210164831234-e00d13.png" alt="image-20201210164831234" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    // 坐标轴移动1/4的原因是，坐标轴移动1/4的位置为原点，然后将图片缩放后，图片的顶点与原点重合
+    // 进行画园时刚好位于正中心，切换切割的图片也是图片的y中心部分
+    canvas.translate(width / 4f, height / 4f)
+    paint.shader = bitmapShader
+    paint.isAntiAlias = true
+    // 图片缩放
+    val scale = max(bWidth, bHeight) / min(bWidth, bHeight) * 1.0f
+    shapeMatrix.setScale(scale, scale)
+    shader.setLocalMatrix(shapeMatrix)
+    canvas.drawCircle(bHeight / 2f, bHeight / 2f, bHeight / 2f, paint)
+}
+</code></pre>
+<ul>
+<li>椭圆头像</li>
+</ul>
+<figure data-type="image" tabindex="6"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/4edc446d253def1781495fe8c9c67c87-image-20201210171000171-61fc7c.png" alt="image-20201210171000171" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    // 坐标轴移动1/4的原因是，坐标轴移动1/4的位置为原点，然后将图片缩放后，图片的顶点与原点重合
+    // 进行画园时刚好位于正中心，切换切割的图片也是图片的y中心部分
+    canvas.translate(width / 4f, height / 4f)
+    paint.shader = bitmapShader
+    paint.isAntiAlias = true
+    // 图片缩放
+    val scale = max(bWidth, bHeight) / min(bWidth, bHeight) * 1.0f
+    shapeMatrix.setScale(scale, scale)
+    shader.setLocalMatrix(shapeMatrix)
+    rectF.set(0f, 0f, bWidth + 100f, bHeight.toFloat())
+    canvas.drawOval(rectF, paint)
+}
+</code></pre>
+<ul>
+<li>矩形头像</li>
+</ul>
+<figure data-type="image" tabindex="7"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/b83368302c591bd70b22d537a616144e-image-20201210171452728-8823d8.png" alt="image-20201210171452728" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+       canvas.translate(width/4, height/4)
+    paint.shader = bitmapShader
+    // 抗锯齿
+    paint.isAntiAlis = true
+    val scale = max(bWidth, bHeight) / min(bWidth, bHeight)
+    shapeMatrix.setScale(scale,scale)
+    paint.shader.setLocalMatrix(shapeMatrix)
+    rectF.set(0f, 0f, bWidth.toFloat(), bHeight.toFloat())
+    canvas.drawRect(rectF,paint)
+}
+</code></pre>
+<ul>
+<li>ShapeDrawable实现头像</li>
+</ul>
+<figure data-type="image" tabindex="8"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/18499d4ef9f62abaacf05392847fde4d-image-20201210164831234-e00d13.png" alt="image-20201210164831234" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    canvas.translate(width / 4f, height / 4f)
+    paint.shader = bitmapShader
+    paint.isAntiAlias = true
+    // 图片缩放
+    val scale = max(bWidth, bHeight) / min(bWidth, bHeight)
+    shapeMatrix.setScale(scale, scale)
+    paint.shader.setLocalMatrix(shapeMatrix)
+    rectF.set(0f, 0f, bWidth.toFloat(), bHeight.toFloat())
+    val shapeDrawable = ShapeDrawable(OvalShape())
+    shapeDrawable.paint.shader = bitmapShader
+    shapeDrawable.bounds = rectF.toRect()
+    shapeDrawable.draw(canvas)
+}
+</code></pre>
+<h2 id="环形渲染-radialgradient">环形渲染 RadialGradient</h2>
+<figure data-type="image" tabindex="9"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/23c886987bc816cb4b8128b52169155e-image-20201210180214610-e2b7f3.png" alt="image-20201210180214610" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    val radialGradient = RadialGradient(
+        400f, 400f, 300f,
+        intArrayOf(
+            Color.RED,
+            Color.GREEN,
+            Color.BLUE,
+            Color.YELLOW
+        ), null, Shader.TileMode.REPEAT
+    )
+    paint.shader = radialGradient
+    canvas.drawCircle(400f,400f,400f, paint)
+}
+</code></pre>
+<h2 id="渐变渲染-sweepgradient">渐变渲染 SweepGradient</h2>
+<figure data-type="image" tabindex="10"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/37ceff71f9bc763ddc547dea5ef61570-image-20201211093531255-d05eaa.png" alt="image-20201211093531255" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    val sweepGradient = SweepGradient(
+        300f,300f,
+        intArrayOf(
+            Color.RED,
+            Color.GREEN,
+            Color.BLUE,
+            Color.YELLOW
+    ), null)
+    paint.shader = sweepGradient
+    canvas.drawCircle(300f,300f,300f,paint)
+}
+</code></pre>
+<h2 id="组合着色-composeshader">组合着色 ComposeShader</h2>
+<figure data-type="image" tabindex="11"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/741ceb198042d9e6d563121c62daf599-image-20201211093902530-e90cc5.png" alt="image-20201211093902530" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    val linearGradient = LinearGradient(0f, 0f, 300f, 300f, Color.RED, Color.WHITE,Shader.TileMode.CLAMP)
+    val sweepGradient = SweepGradient(
+        200f, 200f, intArrayOf(
+            Color.RED,
+            Color.GREEN,
+            Color.BLUE,
+            Color.YELLOW
+        ), null
+    )
+    val composeShader = ComposeShader(linearGradient,sweepGradient,PorterDuff.Mode.MULTIPLY)
+    paint.shader = composeShader
+    canvas.drawRect(100f,100f,500f,500f,paint)
+}
+</code></pre>
+<figure data-type="image" tabindex="12"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/a6490c5461077c4705972003b829ea1c-image-20201211094327261-dfbcdc.png" alt="image-20201211094327261" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.heart)
+    canvas.translate(measuredWidth/4f, measuredHeight/4f)
+    val heartBitmapShader = BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+ 
+    val linearGradient = LinearGradient(
+        0f,
+        0f,
+        bitmap.width.toFloat(),
+        bitmap.height.toFloat(),
+        Color.RED,
+        Color.GREEN,
+        Shader.TileMode.CLAMP
+    )
+    val composeShader =
+    ComposeShader(heartBitmapShader, linearGradient, PorterDuff.Mode.MULTIPLY)
+    paint.isAntiAlias = true
+    paint.shader = composeShader
+    canvas.drawRect(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat(), paint)
+}
+</code></pre>
+
+                    </div>
+                    <div class="essaySuffix-box">
+                        <div class="essaySuffix-box-left"><img
+                                src="/images/avatar.png" alt="">
+                        </div>
+                        <div class="essaySuffix-box-right"><span
+                                class="essaySuffix-right-title">本文作者</span>：<strong><span style="font-size: 12px;"><a
+                                        href="/about"
+                                        target="_blank">Xiaowu</a></span></strong> <br><span
+                                style="font-weight: bold; white-space:nowrap;">本文链接</span>：<a
+                                href="https://jxiaow.gitee.io/posts/36c3e87b/"
+                                target="_blank">https://jxiaow.gitee.io/posts/36c3e87b/</a><br><span
+                                class="essaySuffix-right-title">版权声明</span>：本博客所有文章除特别声明外，均采用 <a
+                                href="https://creativecommons.org/licenses/by-nc-nd/4.0/" alt="BY-NC-SA"
+                                title="BY-NC-SA" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</div>
+                        <div style="clear: both;"></div>
+                    </div>
+
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
+<li><a href="#paint%E9%AB%98%E7%BA%A7%E5%BA%94%E7%94%A8%E7%AF%87-shader">Paint高级应用篇---Shader</a>
+<ul>
+<li><a href="#tilemode-%E6%8B%89%E4%BC%B8%E5%BD%A2%E5%BC%8F">TileMode （拉伸形式）</a>
+<ul>
+<li><a href="#clamp">CLAMP</a></li>
+<li><a href="#mirror">MIRROR</a></li>
+<li><a href="#repeat">REPEAT</a></li>
+</ul>
+</li>
+<li><a href="#%E7%BA%BF%E6%80%A7%E6%B8%B2%E6%9F%93-lineargradient">线性渲染 LinearGradient</a></li>
+<li><a href="#%E4%BD%8D%E5%9B%BE%E6%B8%B2%E6%9F%93-bitmapshader">位图渲染 BitmapShader</a></li>
+<li><a href="#%E7%8E%AF%E5%BD%A2%E6%B8%B2%E6%9F%93-radialgradient">环形渲染 RadialGradient</a></li>
+<li><a href="#%E6%B8%90%E5%8F%98%E6%B8%B2%E6%9F%93-sweepgradient">渐变渲染 SweepGradient</a></li>
+<li><a href="#%E7%BB%84%E5%90%88%E7%9D%80%E8%89%B2-composeshader">组合着色 ComposeShader</a></li>
+</ul>
+</li>
+</ul>
+
+                </div>
+            </article>
+
+            <!-- </div> -->
+            
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://jxiaow.gitee.io/posts/46f22235/" class="post-title gt-a-link">
+                    图形绘制-Paint
+                </a>
+            </div>
+            
+
+            
+
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'monsterid',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+            
+
+            <div class="site-footer gt-c-content-color-first">
+
+  <div class="social-container">
+
+    <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
+      <i class="fab fa-github gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
+      <i class="fas fa-blog gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
+      <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
+    </a>
+
+    <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
+      <i class="fas fa-envelope gt-c-content-color-first"></i>
+    </a>
+
+  </div>
+  <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+  
+	<div>
+    <div>
+      Theme by <a href="https://github.com/jxiaow/gridea-theme-pure-fashion" target="_blank">jxiaow</a>, Powered by <a
+              href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://jxiaow.gitee.io/atom.xml" target="_blank">RSS</a></a>
+  </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+            <script>
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+  
+  if (mainNavLinks == null || mainNavLinks.length == 0) {
+    let tocContainer = document.querySelector(".toc-container");
+    tocContainer.classList.remove("toc-container")
+    tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
+  } else {
+
+    // This should probably be throttled.
+    // Especially because it triggers during smooth scrolling.
+    // https://lodash.com/docs/4.17.10#throttle
+    // You could do like...
+    // window.addEventListener("scroll", () => {
+    //    _.throttle(doThatStuff, 100);
+    // });
+    // Only not doing it here to keep this Pen dependency-free.
+
+
+    window.addEventListener("scroll", event => {
+      let fromTop = window.scrollY;
+
+      mainNavLinks.forEach((link, index) => {
+        let section = document.getElementById(decodeURI(link.hash).substring(1));
+        let nextSection = null
+        if (mainNavLinks[index + 1]) {
+          nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+        }
+        if (section.offsetTop <= fromTop) {
+          if (nextSection) {
+            if (nextSection.offsetTop > fromTop) {
+              link.classList.add("current");
+            } else {
+              link.classList.remove("current");
+            }
+          } else {
+            link.classList.add("current");
+          }
+        } else {
+          link.classList.remove("current");
+        }
+      });
+    });
+  }
+
+
+
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+
+<script>
+  let images = document.querySelectorAll("figure > img");
+  //   debugger
+  //   console.log("dddd: "+ images);
+  images.forEach(image => {
+    var parent = image.parentElement;
+    parent.removeChild(image);
+    var aelem = document.createElement('a');
+    aelem.href = image.src;
+    aelem.dataset['fancybox'] = 'gallery';
+    aelem.classList.add('fancybox');
+    aelem.appendChild(image);
+    parent.appendChild(aelem);
+  })
+
+//   <a data-fancybox="gallery" href="big_1.jpg"><img src="small_1.jpg"></a>
+// <a data-fancybox="gallery" href="big_2.jpg"><img src="small_2.jpg"></a>
+</script>
+        </div>
+    </div>
+
+</body>
+
+</html>

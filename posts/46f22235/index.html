@@ -7,7 +7,7 @@
 
 <title>图形绘制-Paint | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607618285404">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1607996706755">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -83,7 +83,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1607618285404" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1607996706755" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -133,7 +133,7 @@
                     <div class="post-content">
                         <h2 id="canvas和paint的关系">Canvas和Paint的关系</h2>
 <p>在对UI绘制流程的分析中，可以知道<code>performCanvas()</code>方法最终会调用到<code>View#onDraw()</code>方法，并且会传递<code>Canvas</code>，那么<code>Canvas</code>到底有什么用呢？</p>
-<p><code>Canvas</code>在UI绘制中扮演的是<code>会话角色</code>，我们通常情况下都能够知道我们能使用Canvas去调画圆型，矩形图片等，但是最终其真正的绘制并不是在我们的android 层面进行的。</p>
+<p><code>Canvas</code>在UI绘制中扮演的是<code>会话角色</code>，我们通常情况下都能够知道使用Canvas去 画圆型，矩形图片等，但是最终其真正的绘制并不是在我们的android 层面进行的。</p>
 <p>通过源码分析，<code>Canvas</code> 继承了<code>BaseCanvas</code></p>
 <pre><code class="language-java">public class Canvas extends BaseCanvas {}
 </code></pre>
@@ -318,6 +318,28 @@ phase：开始绘制的偏移值</p>
 <pre><code class="language-kotlin">paint.maskFilter = MaskFilter()
 </code></pre>
 <p>可以用不同的MaskFilter实现滤镜的效果，如滤化，立体等 。</p>
+<pre><code class="language-java">/**
+* Create a blur maskfilter.
+*
+* @param radius 阴影的半径
+ * @param style  NORMOL -- 整个图像都被模糊掉
+ *               SOLID -- 图像边界外产生一层与Paint颜色一致阴影效果，不影响图像的本身
+ *               OUTER -- 图像边界外产生一层阴影，并且将图像变成透明效果
+ *               INNER -- 在图像内部边沿产生模糊效果
+* @return
+*/
+paint.setMaskFilter(new BlurMaskFilter(50, BlurMaskFilter.Blur.NORMAL));
+</code></pre>
+<pre><code class="language-java">/**
+* Create an emboss maskfilter
+*
+ * @param direction  指定光源的位置，长度为xxx的数组标量[x,y,z]
+ * @param ambient    环境光的因子 （0~1），越接近0，环境光越暗
+ * @param specular   镜面反射系数 越接近0，镜面反射越强
+* @param blurRadius 模糊半径 值越大，模糊效果越明显
+*/
+paint.setMaskFilter(new EmbossMaskFilter(new float[]{1,1,1},0.2f,60,80));
+</code></pre>
 <h4 id="设置颜色过滤器">设置颜色过滤器</h4>
 <pre><code class="language-kotlin">paint.colorFilter = ColorFilter()
 </code></pre>
@@ -400,6 +422,23 @@ paint.isSubpixelText = true
 <p>如文本阅读器的翻页效果，我们需要在翻页的时候动态折断或生成一行字符串。</p>
 
                     </div>
+                    <div class="essaySuffix-box">
+                        <div class="essaySuffix-box-left"><img
+                                src="/images/avatar.png" alt="">
+                        </div>
+                        <div class="essaySuffix-box-right"><span
+                                class="essaySuffix-right-title">本文作者</span>：<strong><span style="font-size: 12px;"><a
+                                        href="/about"
+                                        target="_blank">Xiaowu</a></span></strong> <br><span
+                                style="font-weight: bold; white-space:nowrap;">本文链接</span>：<a
+                                href="https://jxiaow.gitee.io/posts/46f22235/"
+                                target="_blank">https://jxiaow.gitee.io/posts/46f22235/</a><br><span
+                                class="essaySuffix-right-title">版权声明</span>：本博客所有文章除特别声明外，均采用 <a
+                                href="https://creativecommons.org/licenses/by-nc-nd/4.0/" alt="BY-NC-SA"
+                                title="BY-NC-SA" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</div>
+                        <div style="clear: both;"></div>
+                    </div>
+
                 </div>
                 <!-- </div> -->
                 <div class="toc-container">
@@ -451,8 +490,8 @@ paint.isSubpixelText = true
 
                 </div>
             </article>
-            <!-- </div> -->
 
+            <!-- </div> -->
             
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2020-12-10T16:38:08.498Z</updated>
+    <updated>2020-12-15T02:38:23.751Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -11,6 +11,331 @@
     <icon>https://jxiaow.gitee.io/favicon.ico</icon>
     <rights>All rights reserved 2020, Xiaowu</rights>
     <entry>
+        <title type="html"><![CDATA[Paint高级应用---Shader]]></title>
+        <id>https://jxiaow.gitee.io/posts/36c3e87b/</id>
+        <link href="https://jxiaow.gitee.io/posts/36c3e87b/">
+        </link>
+        <updated>2020-12-15T01:40:13.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="paint高级应用篇-shader">Paint高级应用篇---Shader</h1>
+<p>Paint的高级用法主要有：<strong>渲染着色</strong>、**滤镜 ** 和 <strong>Xfermode</strong>。</p>
+<p><code>Canvas</code>的<code>drawXXX</code>方法画具体的形状，<code>Paint</code>的<code>Shader</code>定义图像的着色和外观。</p>
+<p>目前 <code>Shader</code>的子类有 <strong>LinearGradient(线性渲染)</strong>、<strong>SweepGradient(渐变渲染/梯度渲染)</strong>、<br>
+<strong>RadialGradient(环形渲染)</strong>、**BitmapShader(位图渲染) **   和 <strong>ComposeShader(组合渲染)</strong>。</p>
+<h2 id="tilemode-拉伸形式">TileMode （拉伸形式）</h2>
+<p>TileMode 拉伸方式，在Shader的创建中会用到。<strong>只在图片和显示区域大小不符的情况进行扩充渲染</strong>，<code>TileMode</code>源码定义如下：</p>
+<pre><code class="language-java">public enum TileMode {
+   /**
+    * replicate the edge color if the shader draws outside of its
+    * original bounds
+    */
+    CLAMP   (0),
+   /**
+    * repeat the shader's image horizontally and vertically
+    */
+    REPEAT  (1),
+   /**
+    * repeat the shader's image horizontally and vertically, alternating
+    * mirror images so that adjacent images always seam
+    */
+    MIRROR  (2);
+}
+</code></pre>
+<p>从源码定义上可以看到<code>TileMode</code>是一个枚举类，定义了3种类型：<code>CLAMP</code>、<code>REPEAT</code>和 <code>MIRROR</code>。</p>
+<h3 id="clamp">CLAMP</h3>
+<p><code>CLAMP</code> 拉伸最后一个像素铺满容器。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/c7780467b65c9784507b7d78720d19d3-avatar-0ace00.jpg" alt="avatar" loading="lazy"> <img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/c4921c5f1dc208da89f709bedbc7114d-image-20201210160303691-4c6ae5.png" alt="image-20201210160303691" loading="lazy"></p>
+<p>代码如下：</p>
+<pre><code class="language-kotlin">// 获取Bitmap
+private val bitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.avatar)
+private val paint = Paint()
+ 
+init {
+    // 初始化BitmapShader,并将 x,y的拉伸模式设置为CLAMP
+    paint.shader = BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+}
+ 
+override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    canvas.drawRect(100f,0f,bitmap.width.toFloat() * 2,bitmap.height * 2f,paint)
+}
+</code></pre>
+<h3 id="mirror">MIRROR</h3>
+<p>横向和纵向不足处不断翻转镜像平铺。</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/49950ca69ea172128172bf76c1309974-image-20201210161154210-bbc751.png" alt="image-20201210161154210" loading="lazy"></figure>
+<p>代码如下：</p>
+<pre><code class="language-kotlin">// 获取Bitmap
+private val bitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.avatar)
+private val paint = Paint()
+ 
+init {
+    // 初始化BitmapShader,并将 x,y的拉伸模式设置为MIRROR
+    paint.shader = BitmapShader(bitmap, Shader.TileMode.MIRROR, Shader.TileMode.MIRROR)
+}
+ 
+override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    canvas.drawRect(100f,0f,bitmap.width.toFloat() * 2,bitmap.height * 2f,paint)
+}
+</code></pre>
+<h3 id="repeat">REPEAT</h3>
+<p>横向和纵向不足时重复放置，类似于电脑壁纸。</p>
+<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/83261140255f9d0895b5ac2be7108ffd-image-20201210161732543-f37dc2.png" alt="image-20201210161732543" loading="lazy"></figure>
+<p>代码如下：</p>
+<pre><code class="language-kotlin">// 获取Bitmap
+private val bitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.avatar)
+private val paint = Paint()
+ 
+init {
+    // 初始化BitmapShader,并将 x,y的拉伸模式设置为REPEAT
+    paint.shader = BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+}
+ 
+override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    canvas.drawRect(100f,0f,bitmap.width * 2f,bitmap.height * 1.5f,paint)
+}
+</code></pre>
+<h2 id="线性渲染-lineargradient">线性渲染 LinearGradient</h2>
+<p><code>LinearGradient</code>用来实现线性渐变效果。</p>
+<pre><code class="language-java">public class LinearGradient extends Shader {}
+</code></pre>
+<p>渐变效果：</p>
+<figure data-type="image" tabindex="3"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/b21809293ec73ddd2f9f6f6fd60be59e-image-20201210174046124-491aec.png" alt="image-20201210174046124" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    val linearGradient = LinearGradient(0f, 0f, 500f, 300f, Color.RED, Color.BLUE, Shader.TileMode.CLAMP)
+    paint.shader = linearGradient
+    canvas.drawRect(0f, 0f, 800f, 800f, paint)
+}
+</code></pre>
+<p>使用效果：</p>
+<figure data-type="image" tabindex="4"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/0b9f21e195bc13c54cc2c5a5943b4382-image-20201210162543735-7d47de.png" alt="image-20201210162543735" loading="lazy"></figure>
+<pre><code class="language-kotlin">// 0x22ffffff, -0x1, 0x22ffffff
+class LinearGradientText @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : AppCompatTextView(context, attrs, defStyleAttr) {
+    // 线性渐变
+    private var linearGradient: LinearGradient? = null
+    // 平移matrix
+    private val translateMatrix: Matrix = Matrix()
+    // 平移变量默认值
+    private var defaultX: Float = 20f
+    // 平移量间隔值
+    private var translateX: Float = 0f
+ 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        // 获取文本值
+        val text = text.toString()
+        // 获取文本的测量宽度
+        val measureTextWidth = paint.measureText(text)
+        val gradientSize = measureTextWidth / text.length * 3
+        linearGradient = LinearGradient(
+            -gradientSize, 0f, 0f, 0f,
+            intArrayOf(0x22ffffff, -0x1, 0x22ffffff), null, Shader.TileMode.CLAMP
+        )
+        paint.shader = linearGradient
+    }
+ 
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        translateX += defaultX
+        val measureTextWidth = paint.measureText(text.toString())
+        val count = if (lineCount &gt; 1) lineCount - 1 else 1
+        if (translateX &gt; measureTextWidth / count || translateX &lt; 1) {
+            defaultX = -defaultX
+        }
+        translateMatrix.setTranslate(translateX, 0f)
+        linearGradient?.setLocalMatrix(translateMatrix)
+        postInvalidateDelayed(50)
+    }
+}
+</code></pre>
+<h2 id="位图渲染-bitmapshader">位图渲染 BitmapShader</h2>
+<p><code>BitmapShader</code> 位图图像渲染，用<code>Bitmap</code>对绘制的图形进行渲染着色，简单来说是用图片对图形进行贴图。</p>
+<p>在<strong>TileMode</strong>中已有基本使用，具体请看 <a href="#CLAMP">CLAMP</a>。</p>
+<p>以下使用代码公共部分：</p>
+<pre><code class="language-kotlin">class GradientView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
+ 
+    private val bitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.avatar)
+    private var bWidth: Int = 0
+    private var bHeight: Int = 0
+    private val paint = Paint()
+    private var bitmapShader: BitmapShader? = null
+    private val shapeMatrix = Matrix()
+    private val rectF = RectF()
+ 
+    init {
+        // 获取资源图片
+        bWidth = bitmap.width
+        bHeight = bitmap.height
+        /**
+         * TileMode.CLAMP 拉伸最后一个像素去铺满剩下的地方
+         * TileMode.MIRROR 通过镜像翻转铺满剩下的地方。
+         * TileMode.REPEAT 重复图片平铺整个画面（电脑设置壁纸）
+         * 在图片和显示区域大小不符的情况进行扩充渲染
+         */
+        bitmapShader = BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+        paint.shader = bitmapShader
+    }
+ 
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+}
+</code></pre>
+<ul>
+<li>圆形头像</li>
+</ul>
+<figure data-type="image" tabindex="5"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/18499d4ef9f62abaacf05392847fde4d-image-20201210164831234-e00d13.png" alt="image-20201210164831234" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    // 坐标轴移动1/4的原因是，坐标轴移动1/4的位置为原点，然后将图片缩放后，图片的顶点与原点重合
+    // 进行画园时刚好位于正中心，切换切割的图片也是图片的y中心部分
+    canvas.translate(width / 4f, height / 4f)
+    paint.shader = bitmapShader
+    paint.isAntiAlias = true
+    // 图片缩放
+    val scale = max(bWidth, bHeight) / min(bWidth, bHeight) * 1.0f
+    shapeMatrix.setScale(scale, scale)
+    shader.setLocalMatrix(shapeMatrix)
+    canvas.drawCircle(bHeight / 2f, bHeight / 2f, bHeight / 2f, paint)
+}
+</code></pre>
+<ul>
+<li>椭圆头像</li>
+</ul>
+<figure data-type="image" tabindex="6"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/4edc446d253def1781495fe8c9c67c87-image-20201210171000171-61fc7c.png" alt="image-20201210171000171" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    // 坐标轴移动1/4的原因是，坐标轴移动1/4的位置为原点，然后将图片缩放后，图片的顶点与原点重合
+    // 进行画园时刚好位于正中心，切换切割的图片也是图片的y中心部分
+    canvas.translate(width / 4f, height / 4f)
+    paint.shader = bitmapShader
+    paint.isAntiAlias = true
+    // 图片缩放
+    val scale = max(bWidth, bHeight) / min(bWidth, bHeight) * 1.0f
+    shapeMatrix.setScale(scale, scale)
+    shader.setLocalMatrix(shapeMatrix)
+    rectF.set(0f, 0f, bWidth + 100f, bHeight.toFloat())
+    canvas.drawOval(rectF, paint)
+}
+</code></pre>
+<ul>
+<li>矩形头像</li>
+</ul>
+<figure data-type="image" tabindex="7"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/b83368302c591bd70b22d537a616144e-image-20201210171452728-8823d8.png" alt="image-20201210171452728" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+       canvas.translate(width/4, height/4)
+    paint.shader = bitmapShader
+    // 抗锯齿
+    paint.isAntiAlis = true
+    val scale = max(bWidth, bHeight) / min(bWidth, bHeight)
+    shapeMatrix.setScale(scale,scale)
+    paint.shader.setLocalMatrix(shapeMatrix)
+    rectF.set(0f, 0f, bWidth.toFloat(), bHeight.toFloat())
+    canvas.drawRect(rectF,paint)
+}
+</code></pre>
+<ul>
+<li>ShapeDrawable实现头像</li>
+</ul>
+<figure data-type="image" tabindex="8"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/18499d4ef9f62abaacf05392847fde4d-image-20201210164831234-e00d13.png" alt="image-20201210164831234" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    canvas.translate(width / 4f, height / 4f)
+    paint.shader = bitmapShader
+    paint.isAntiAlias = true
+    // 图片缩放
+    val scale = max(bWidth, bHeight) / min(bWidth, bHeight)
+    shapeMatrix.setScale(scale, scale)
+    paint.shader.setLocalMatrix(shapeMatrix)
+    rectF.set(0f, 0f, bWidth.toFloat(), bHeight.toFloat())
+    val shapeDrawable = ShapeDrawable(OvalShape())
+    shapeDrawable.paint.shader = bitmapShader
+    shapeDrawable.bounds = rectF.toRect()
+    shapeDrawable.draw(canvas)
+}
+</code></pre>
+<h2 id="环形渲染-radialgradient">环形渲染 RadialGradient</h2>
+<figure data-type="image" tabindex="9"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/10/23c886987bc816cb4b8128b52169155e-image-20201210180214610-e2b7f3.png" alt="image-20201210180214610" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    val radialGradient = RadialGradient(
+        400f, 400f, 300f,
+        intArrayOf(
+            Color.RED,
+            Color.GREEN,
+            Color.BLUE,
+            Color.YELLOW
+        ), null, Shader.TileMode.REPEAT
+    )
+    paint.shader = radialGradient
+    canvas.drawCircle(400f,400f,400f, paint)
+}
+</code></pre>
+<h2 id="渐变渲染-sweepgradient">渐变渲染 SweepGradient</h2>
+<figure data-type="image" tabindex="10"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/37ceff71f9bc763ddc547dea5ef61570-image-20201211093531255-d05eaa.png" alt="image-20201211093531255" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    val sweepGradient = SweepGradient(
+        300f,300f,
+        intArrayOf(
+            Color.RED,
+            Color.GREEN,
+            Color.BLUE,
+            Color.YELLOW
+    ), null)
+    paint.shader = sweepGradient
+    canvas.drawCircle(300f,300f,300f,paint)
+}
+</code></pre>
+<h2 id="组合着色-composeshader">组合着色 ComposeShader</h2>
+<figure data-type="image" tabindex="11"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/741ceb198042d9e6d563121c62daf599-image-20201211093902530-e90cc5.png" alt="image-20201211093902530" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    val linearGradient = LinearGradient(0f, 0f, 300f, 300f, Color.RED, Color.WHITE,Shader.TileMode.CLAMP)
+    val sweepGradient = SweepGradient(
+        200f, 200f, intArrayOf(
+            Color.RED,
+            Color.GREEN,
+            Color.BLUE,
+            Color.YELLOW
+        ), null
+    )
+    val composeShader = ComposeShader(linearGradient,sweepGradient,PorterDuff.Mode.MULTIPLY)
+    paint.shader = composeShader
+    canvas.drawRect(100f,100f,500f,500f,paint)
+}
+</code></pre>
+<figure data-type="image" tabindex="12"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/a6490c5461077c4705972003b829ea1c-image-20201211094327261-dfbcdc.png" alt="image-20201211094327261" loading="lazy"></figure>
+<pre><code class="language-kotlin">override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.heart)
+    canvas.translate(measuredWidth/4f, measuredHeight/4f)
+    val heartBitmapShader = BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+ 
+    val linearGradient = LinearGradient(
+        0f,
+        0f,
+        bitmap.width.toFloat(),
+        bitmap.height.toFloat(),
+        Color.RED,
+        Color.GREEN,
+        Shader.TileMode.CLAMP
+    )
+    val composeShader =
+    ComposeShader(heartBitmapShader, linearGradient, PorterDuff.Mode.MULTIPLY)
+    paint.isAntiAlias = true
+    paint.shader = composeShader
+    canvas.drawRect(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat(), paint)
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[图形绘制-Paint]]></title>
         <id>https://jxiaow.gitee.io/posts/46f22235/</id>
         <link href="https://jxiaow.gitee.io/posts/46f22235/">
@@ -18,7 +343,7 @@
         <updated>2020-12-10T05:35:50.000Z</updated>
         <content type="html"><![CDATA[<h2 id="canvas和paint的关系">Canvas和Paint的关系</h2>
 <p>在对UI绘制流程的分析中，可以知道<code>performCanvas()</code>方法最终会调用到<code>View#onDraw()</code>方法，并且会传递<code>Canvas</code>，那么<code>Canvas</code>到底有什么用呢？</p>
-<p><code>Canvas</code>在UI绘制中扮演的是<code>会话角色</code>，我们通常情况下都能够知道我们能使用Canvas去调画圆型，矩形图片等，但是最终其真正的绘制并不是在我们的android 层面进行的。</p>
+<p><code>Canvas</code>在UI绘制中扮演的是<code>会话角色</code>，我们通常情况下都能够知道使用Canvas去 画圆型，矩形图片等，但是最终其真正的绘制并不是在我们的android 层面进行的。</p>
 <p>通过源码分析，<code>Canvas</code> 继承了<code>BaseCanvas</code></p>
 <pre><code class="language-java">public class Canvas extends BaseCanvas {}
 </code></pre>
@@ -203,6 +528,28 @@ phase：开始绘制的偏移值</p>
 <pre><code class="language-kotlin">paint.maskFilter = MaskFilter()
 </code></pre>
 <p>可以用不同的MaskFilter实现滤镜的效果，如滤化，立体等 。</p>
+<pre><code class="language-java">/**
+* Create a blur maskfilter.
+*
+* @param radius 阴影的半径
+ * @param style  NORMOL -- 整个图像都被模糊掉
+ *               SOLID -- 图像边界外产生一层与Paint颜色一致阴影效果，不影响图像的本身
+ *               OUTER -- 图像边界外产生一层阴影，并且将图像变成透明效果
+ *               INNER -- 在图像内部边沿产生模糊效果
+* @return
+*/
+paint.setMaskFilter(new BlurMaskFilter(50, BlurMaskFilter.Blur.NORMAL));
+</code></pre>
+<pre><code class="language-java">/**
+* Create an emboss maskfilter
+*
+ * @param direction  指定光源的位置，长度为xxx的数组标量[x,y,z]
+ * @param ambient    环境光的因子 （0~1），越接近0，环境光越暗
+ * @param specular   镜面反射系数 越接近0，镜面反射越强
+* @param blurRadius 模糊半径 值越大，模糊效果越明显
+*/
+paint.setMaskFilter(new EmbossMaskFilter(new float[]{1,1,1},0.2f,60,80));
+</code></pre>
 <h4 id="设置颜色过滤器">设置颜色过滤器</h4>
 <pre><code class="language-kotlin">paint.colorFilter = ColorFilter()
 </code></pre>
@@ -2022,314 +2369,6 @@ class MainActivityProvidesModule {
 <li>使用它，我们就可以不用写那么多的模版代码，相对于<code>Dagger2</code>方便了许多；</li>
 <li>Dagger2-Android 比Dagger2更强大，我们使用<code>@Binds</code>绑定抽象方法来注入一些提供初始化的类等。</li>
 </ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Dagger 2 Component 与 SubComponent]]></title>
-        <id>https://jxiaow.gitee.io/posts/e30bee8a/</id>
-        <link href="https://jxiaow.gitee.io/posts/e30bee8a/">
-        </link>
-        <updated>2019-12-05T16:23:48.000Z</updated>
-        <summary type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
-<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
-<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
-<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
-]]></summary>
-        <content type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
-<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
-<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
-<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
-<!-- more -->
-<blockquote>
-<p>本系列文章是基于 Google Dagger 2.23.2 版本， Kotlin 1.3.21版本</p>
-</blockquote>
-<p>理解前面两篇文章后，可以使用 <code>Dagger 2</code>框架完成一个对象的依赖注入。但是在实战中会存在多个需要注入依赖的对象，也就是说会有多个 <code>Component</code>，它们之间会有相同的依赖，那么该如何处理它们之间的关系呢？</p>
-<p>我们先来看一个简单的例子：</p>
-<p>假如有三个类：<code>A</code>、<code>B</code>和<code>C</code>, <code>A</code>和<code>B</code>都各自持有<code>C</code>的实例，并且通过<code>Dagger2</code>进行注入</p>
-<pre><code class="language-kotlin">class A {
-    @Inject
-    lateinit var c: C
-}
-
-class B {
-    @Inject
-    lateinit var c: C
-}
-
-class C @Inject constructor()
-</code></pre>
-<p>Component:</p>
-<pre><code class="language-kotlin">@Component
-interface AComponent {
-    fun injectA(a: A)
-}
-
-@Component
-interface BComponent {
-    fun injectA(b: B)
-}
-</code></pre>
-<p>如果要让<code>A</code>、<code>B</code>持有的实例<code>C</code>相同的话，我们该如何处理？</p>
-<p>很多人第一时间会想到下面这种设计：</p>
-<pre><code class="language-kotlin">@Singleton
-@Component(modules = [CModule::class])
-interface AComponent {
-    fun injectA(a: A)
-}
-
-@Singleton
-@Component(modules = [CModule::class])
-interface BComponent {
-    fun injectA(b: B)
-}
-
-@Module
-class CModule {
-
-    companion object {
-        private var c: C? = null
-    }
-
-    @Singleton
-    @Provides
-    fun provideC(): C {
-        if (c == null) {
-            c = C()
-        }
-        return c!!
-    }
-}
-</code></pre>
-<p>把 Component 需要的依赖都在<code>modules</code>属性中声明，但是这样有两个问题：</p>
-<p>（1）有时依赖实例需要共享，例如上面场景中，<code>A</code>和<code>C</code>都持有<code>C</code>的实例，并且根据<code>Module</code>里的实现，会存在谁先创建<code>C</code>实例的问题。</p>
-<p>（2）Scope 作用域容易失效，例如 <code>CModule</code> 的<code>provideCar()</code>使用 <code>@Singleton</code> 作用域，<code>AComponent</code>和<code>BComponent</code>也要用 <code>Singleton</code> 标注，但它们都会持有一个<code>C</code>实例。</p>
-<p>假如<code>A</code>先创建了<code>C</code>那么，<code>BComponent</code>需要依赖 <code>AComponent</code>提供的 <code>C</code>实例，这就是 <code>Component</code> 组织关系中的一种。</p>
-<h2 id="component-的组织关系">Component 的组织关系</h2>
-<p>Component 管理着依赖实例，根据依赖实例之间的关系就能确定 Component 的关系。这些关系可以用<code>object graph</code>描述，我称之为依赖关系图。在 Dagger 2 中 Component 的组织关系分为两种：</p>
-<ul>
-<li>依赖关系，一个 Component 依赖其他 Compoent<code>公开</code>的依赖实例，用 Component 中的<code>dependencies</code>声明。</li>
-<li>继承关系，一个 Component 继承（也可以叫扩展）某 Component 提供更多的依赖，SubComponent 就是继承关系的体现。</li>
-</ul>
-<p>所以前文中<code>AComponent</code>和<code>BComponent</code>是依赖关系。</p>
-<h3 id="依赖关系">依赖关系</h3>
-<p>具体的实现代码：</p>
-<pre><code class="language-kotlin">@Component(modules = [CModule::class])
-interface AComponent {
-    fun injectA(a: A)
-
-    fun c(): C
-}
-
-@Component(dependencies = [AComponent::class])
-interface BComponent {
-    fun injectA(b: B)
-}
-
-@Module
-class CModule {
-    @Provides
-    fun provideC(): C = C()
-}
-</code></pre>
-<p><strong>注</strong>：<strong>因为 BComponent和 AComponent是依赖关系，如果<code>AComponent</code>声明了作用域的话，那么<code>BComponent</code>也必须声明（反之可以），而且它们的 Scope 不能相同，并且两个都有作用域的情况下 @Singleton 修饰的 Component （BComponent）不能依赖其他的 Component。</strong></p>
-<pre><code class="language-java">public final class DaggerBComponent implements BComponent {
-  private final AComponent aComponent;
-
-  private DaggerBComponent(AComponent aComponentParam) {
-    this.aComponent = aComponentParam;
-  }
- ....
-
-  @Override
-  public void injectA(B b) {
-    injectB(b);}
-
-  private B injectB(B instance) {
-      // 注入时，使用了aComponent.c()
-    B_MembersInjector.injectC(instance, Preconditions.checkNotNull(aComponent.c(), &quot;Cannot return null from a non-@Nullable component method&quot;));
-    return instance;
-  }
-...
-}
-</code></pre>
-<p>编译时生成的代码 DaggerBComponent 中会调用<code>aComponent.c()</code>，如果 AComponent 没有向外提供C 实例的接口的话，DaggerBComponent 就会注入失败。</p>
-<p>依赖注入：</p>
-<pre><code>val aComponent = DaggerAComponent.builder().build()
-DaggerBComponent.builder().aComponent(aComponent).build().inject(b)
-</code></pre>
-<p>依赖关系就跟生活中的朋友关系相当，注意事项如下：</p>
-<ol>
-<li>被依赖的 Component 需要把暴露的依赖实例用显式的接口声明。</li>
-<li>依赖关系中的 Component 的 Scope 不能相同，因为它们的生命周期不同。</li>
-</ol>
-<h3 id="继承关系">继承关系</h3>
-<p>继承关系跟面向对象中的继承的概念有点像，<code>SubComponent</code>称为<code>子 Component</code>，类似于平常说的子类。下面先看看下面这个场景：</p>
-<pre><code class="language-kotlin">class Parent {
-    @Inject
-    lateinit var car: Car
-}
-
-class Child {
-    @Inject
-    lateinit var car: Car
-    @Inject
-    lateinit var bike: Bike
-}
-
-class Car @Inject constructor()
-class Bike @Inject constructor()
-</code></pre>
-<p>Child 可以开Parent的车 car，也可以骑自己的自行车 bike。依赖关系图：</p>
-<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-48-48-1561371949435.png" alt="1561371949435.png" loading="lazy"></figure>
-<p>上图中 ChildComponent 在 ParentComponent之中，ChildComponent子承父业，可以访问 ParentComponent 的依赖，而 ParentComponent只知道 ChildComponent 是它的子类，可以访问 SubComponent.Builder，却无法访问 SubComponent 中的依赖。</p>
-<pre><code class="language-kotlin">@Component(modules = [CarModule::class])
-interface ParentComponent {
-    fun inject(parent: Parent)
-}
-
-@Subcomponent(modules = [BikeModule::class])
-interface ChildComponent {
-    fun inject(child: Child)
-
-    // SubComponent 必须显式地声明 Subcomponent.Builder，parentComponent 需要用 Builder 来创建 ChildComponent
-    @Subcomponent.Builder
-    interface Builder {
-        fun build(): ChildComponent
-    }
-}
-</code></pre>
-<p><code>@SubComponent</code>的写法与<code>@Component</code>一样，只能标注接口或抽象类，与依赖关系一样，SubComponent 与 parent Component 的 Scope 不能相同，只是 SubComponent 表明它是继承扩展某 Component 的。怎么表明一个 SubComponent 是属于哪个 parent Component 的呢？只需要在 parent Component 依赖的 Module 中的<code>subcomponents</code>加上 SubComponent 的 class，然后就可以在 parent Component 中请求 SubComponent.Builder。</p>
-<pre><code class="language-kotlin">@Component(modules = [CarModule::class])
-interface ParentComponent {
-    ...
-    // 用来创建childComponent
-    fun childComponent(): ChildComponent.Builder
-}
-
-@Subcomponent(modules = [BikeModule::class])
-interface ChildComponent {
-    ...
-    // SubComponent 必须显式地声明 Subcomponent.Builder，parentComponent 需要用 Builder 来创建 ChildComponent
-    @Subcomponent.Builder
-    interface Builder {
-        fun build(): ChildComponent
-    }
-}
-// 在CarModule上添加subComponents
-@Module(subcomponents = [ChildComponent::class])
-class CarModule {
-    @Provides
-    fun provideCar() = Car()
-}
-
-@Module
-class BikeModule {
-    @Provides
-    fun provideBike() = Bike()
-}
-</code></pre>
-<p>上面的代码经过<code>make project</code>后，dagger2生成的代码：</p>
-<pre><code class="language-java">public final class DaggerParentComponent implements ParentComponent {
-  ...
-  @Override
-  public ChildComponent.Builder childComponent() {
-    return new ChildComponentBuilder();}
-  ...
-  private final class ChildComponentBuilder implements ChildComponent.Builder {
-    @Override
-    public ChildComponent build() {
-      return new ChildComponentImpl(new BikeModule());
-    }
-  }
-
-  private final class ChildComponentImpl implements ChildComponent {
-    private final BikeModule bikeModule;
-
-    private ChildComponentImpl(BikeModule bikeModuleParam) {
-      this.bikeModule = bikeModuleParam;
-    }
-   ...
-    private Child injectChild(Child instance) {
-      // 注入car时，调用的parentComponent的carModule提供
-      Child_MembersInjector.injectCar(instance, CarModule_ProvideCarFactory.provideCar(DaggerParentComponent.this.carModule));
-      Child_MembersInjector.injectBike(instance, BikeModule_ProvideBikeFactory.provideBike(bikeModule));
-      return instance;
-    }
-  }
-}
-</code></pre>
-<p>SubComponent 编译时不会生成 DaggerChildComponent，需要通过 parentComponent 的获取 SubComponent.Builder 方法获取 ChildComponent 实例。</p>
-<pre><code class="language-kotlin">val parentComponent = DaggerParentComponent.builder().build()
-parentComponent.childComponent().build().inject(child)
-</code></pre>
-<p><strong>继承关系和依赖关系最大的区别就是：继承关系中不用显式地提供依赖实例的接口，SubComponent 继承 parent Component 的所有依赖。</strong></p>
-<h3 id="依赖关系-vs-继承关系">依赖关系 vs 继承关系</h3>
-<p>相同点：</p>
-<ul>
-<li>两者都能复用其他 Component 的依赖</li>
-<li>有依赖关系和继承关系的 Component 不能有相同的 Scope</li>
-</ul>
-<p>区别：</p>
-<ul>
-<li>依赖关系中被依赖的 Component 必须显式地提供公开依赖实例的接口，而 SubComponent 默认继承 parent Component 的依赖。</li>
-<li>依赖关系会生成两个独立的 DaggerXXComponent 类，而 SubComponent 不会生成 独立的 DaggerXXComponent 类。</li>
-</ul>
-<p>在 Android 开发中，Activity 是 App 运行中组件，Fragment 又是 Activity 一部分，这种组件化思想适合继承关系，所以在 Android 中一般使用 SubComponent。</p>
-<h2 id="subcomponent-的其他问题">SubComponent 的其他问题</h2>
-<h3 id="抽象工厂方法定义继承关系">抽象工厂方法定义继承关系</h3>
-<p>除了使用 Module 的<code>subcomponents</code>属性定义继承关系，还可以在 parent Component 中声明返回 SubComponent 的抽象工厂方法来定义：</p>
-<pre><code class="language-kotlin">@Component(modules = [CarModule::class])
-interface ParentComponent {
-    ...
-    // 用来创建childComponent
-    //// 这个抽象工厂方法表明 ChildComponent 继承 ParentComponent
-    fun childComponent(): ChildComponent
-}
-
-@Subcomponent(modules = [BikeModule::class])
-interface ChildComponent {
-    ...
-}
-
-@Module
-class CarModule {
-    @Provides
-    fun provideCar() = Car()
-}
-
-@Module
-class BikeModule {
-    @Provides
-    fun provideBike() = Bike()
-}
-</code></pre>
-<p>这种定义方式不能很明显地表明继承关系，一般推荐使用 Module 的<code>subcomponents</code>属性定义。</p>
-<h3 id="重复的-module">重复的 Module</h3>
-<p>当相同的 Module 注入到 parent Component 和它的 SubComponent 中时，则每个 Component 都将自动使用这个 Module 的同一实例。也就是如果在 SubComponent.Builder 中调用相同的 Module 或者在返回 SubComponent 的抽象工厂方法中以重复 Module 作为参数时，会出现错误。（前者在编译时不能检测出，是运行时错误）</p>
-<pre><code class="language-java">@Component(modules = {RepeatedModule.class, ...})
-interface ComponentOne {
-  ComponentTwo componentTwo(RepeatedModule repeatedModule); // 编译时报错
-  ComponentThree.Builder componentThreeBuilder();
-}
-
-@Subcomponent(modules = {RepeatedModule.class, ...})
-interface ComponentTwo { ... }
-
-@Subcomponent(modules = {RepeatedModule.class, ...})
-interface ComponentThree {
-  @Subcomponent.Builder
-  interface Builder {
-    Builder repeatedModule(RepeatedModule repeatedModule);
-    ComponentThree build();
-  }
-}
-
-DaggerComponentOne.create().componentThreeBuilder()
-    .repeatedModule(new RepeatedModule()) // 运行时报错 UnsupportedOperationException!
-    .build();
-</code></pre>
-<h2 id="总结">总结</h2>
-<p>Component 之间共用相同依赖，可以有两种组织关系：依赖关系与继承关系。至于如何选择试具体情况而定，但在 Android 开发中，一般使用继承关系，以 AppComponent 作为 root Component，AppComponent 一般还会使用 @Singleton 作用域，而 ActivityComponent 为 SubComponent。</p>
 ]]></content>
     </entry>
 </feed>
