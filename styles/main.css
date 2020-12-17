@@ -1988,9 +1988,9 @@ code::-webkit-scrollbar-thumb:hover {
           color: #5e5e5e!important;
         }
         
-        a {
-          color: #8b959f!important;
-        }
+        // a {
+        //   color: #8b959f!important;
+        // }
         
         .post-content h1 {
           display: inline-block;
@@ -2012,9 +2012,9 @@ code::-webkit-scrollbar-thumb:hover {
           background: linear-gradient(180deg, transparent 75%, RGBA(139,149,159,0.4) 0)!important;
         }
         
-        .gt-post-content a {
-          color: #8b959f!important;
-        }
+        // .gt-post-content a {
+        //   color: #8b959f!important;
+        // }
         
         .gt-post-content blockquote {
           background: RGBA(139,149,159,0.14)!important;

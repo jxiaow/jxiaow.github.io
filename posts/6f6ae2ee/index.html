@@ -1,0 +1,489 @@
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>UI布局流程 | Xiaowu</title>
+
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1608211783236">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.8.0/mermaid.min.js"></script>
+<script>
+    var config = {
+        startOnLoad:true,
+        flowchart:{
+            useMaxWidth:false,
+            htmlLabels:true
+        }
+    };
+    mermaid.initialize(config);
+    $(function(){
+        var elements = document.getElementsByClassName("language-mermaid");
+        for (var i = elements.length; i--;) {
+            element = elements[i];
+            var graphDefinition = element.innerText;
+            if (graphDefinition) {
+                var svg = mermaid.render('ha_mermaid_' + i, graphDefinition, function(svg){});
+                if (svg) {
+                    var svgElement = document.createElement('div');
+                    preNode = element.parentNode;
+                    svgElement.innerHTML = svg;
+                    svgElement.setAttribute('class', 'mermaid');
+                    svgElement.setAttribute('data-processed', 'true');
+                    preNode.parentNode.replaceChild(svgElement, preNode);
+                }
+            }
+        }
+    });
+</script>
+</head>
+
+<body>
+    <div class="main gt-bg-theme-color-first">
+        <nav class="navbar navbar-expand-lg">
+    <a href="/">
+        <div class="navbar-brand">
+            <img class="user-avatar" src="/images/avatar.png" alt="头像">
+            <div class="site-name gt-c-content-color-first">
+                Xiaowu
+            </div>
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav " style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://jxiaow.gitee.io/posts/favourite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1608211783236" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+        <div class="post-container">
+
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
+                    <h2 class="post-title">
+                        UI布局流程
+                    </h2>
+                    <div class="post-info">
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2020-12-17 ·
+                            </time>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/_Gc0DRecZ/" class="post-tags">
+                                # Layout
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/GJLfjss5g/" class="post-tags">
+                                # UI
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/f3tbfHeq9/" class="post-tags">
+                                # Android
+                            </a>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/6f6ae2ee/"
+                                class="leancloud_visitors" data-flag-title="UI布局流程">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
+                    </div>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <p>在<code>绘制流程入口</code>源码分析中知道了 <code>performTraversals()</code>中通过调用 <code>performLayout()</code>， 然后进行了 UI控件的布局 。</p>
+<h2 id="view布局摆放">View布局摆放</h2>
+<p>在<code>performTraversals</code>的测量被调用之后，会再次调用<code>performLayout</code>开始具体布局的摆放。</p>
+<pre><code class="language-java">private void performLayout(WindowManager.LayoutParams lp, int desiredWindowWidth,
+                           int desiredWindowHeight) {
+    // ...
+    // host 就是decorView
+    final View host = mView;
+    if (host == null) {
+        return;
+    }
+    // ..
+    Trace.traceBegin(Trace.TRACE_TAG_VIEW, &quot;layout&quot;);
+    try {
+        // 调用view的layout
+        host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
+        // ...
+    } finally {
+        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+    }
+    mInLayout = false;
+}
+</code></pre>
+<h3 id="viewlayout">View#layout</h3>
+<pre><code class="language-java">public void layout(int l, int t, int r, int b) {
+    //如果不是第一次，跳过否则会在此进行测量，
+    // 意思是第一次进来会进行一次测量用于保存宽高，意义在于优化
+    if ((mPrivateFlags3 &amp; PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT) != 0) {
+        onMeasure(mOldWidthMeasureSpec, mOldHeightMeasureSpec);
+        mPrivateFlags3 &amp;= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
+    }
+ 
+    // 初次进行上下左右点的初始化
+    int oldL = mLeft;
+    int oldT = mTop;
+    int oldB = mBottom;
+    int oldR = mRight;
+    //这里调用了setFrame进行初始化mLeft,mRight,mTop,mBottom这四个值
+    boolean changed = isLayoutModeOptical(mParent) ?
+        setOpticalFrame(l, t, r, b) : setFrame(l, t, r, b);
+ 
+    if (changed || (mPrivateFlags &amp; PFLAG_LAYOUT_REQUIRED) == PFLAG_LAYOUT_REQUIRED) {
+        onLayout(changed, l, t, r, b);
+ 
+        // ...
+    }
+    // ...
+}
+</code></pre>
+<p><code>layout</code>最主要做的一件事情就是对我们的上下左右四个点进行初始化。</p>
+<h3 id="viewsetframe">View#setFrame</h3>
+<pre><code class="language-java">protected boolean setFrame(int left, int top, int right, int bottom) {
+    boolean changed = false;
+ 
+    // ...
+ 
+    if (mLeft != left || mRight != right || mTop != top || mBottom != bottom) {
+        changed = true;
+ 
+        // Remember our drawn bit
+        int drawn = mPrivateFlags &amp; PFLAG_DRAWN;
+ 
+        int oldWidth = mRight - mLeft;
+        int oldHeight = mBottom - mTop;
+        int newWidth = right - left;
+        int newHeight = bottom - top;
+        boolean sizeChanged = (newWidth != oldWidth) || (newHeight != oldHeight);
+ 
+        // Invalidate our old position（使我们旧的信息无效化）
+        invalidate(sizeChanged);
+        //重新初始化定位
+        mLeft = left;
+        mTop = top;
+        mRight = right;
+        mBottom = bottom;
+        mRenderNode.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
+ 
+        mPrivateFlags |= PFLAG_HAS_BOUNDS;
+ 
+ 
+        if (sizeChanged) {
+            sizeChange(newWidth, newHeight, oldWidth, oldHeight);
+        }
+ 
+        if ((mViewFlags &amp; VISIBILITY_MASK) == VISIBLE || mGhostView != null) {
+            // If we are visible, force the DRAWN bit to on so that
+            // this invalidate will go through (at least to our parent).
+            // This is because someone may have invalidated this view
+            // before this call to setFrame came in, thereby clearing
+            // the DRAWN bit.
+            mPrivateFlags |= PFLAG_DRAWN;
+            invalidate(sizeChanged);
+            // parent display list may need to be recreated based on a change in the bounds
+            // of any child
+            invalidateParentCaches();
+        }
+ 
+        // Reset drawn bit to original value (invalidate turns it off)
+        mPrivateFlags |= drawn;
+ 
+        mBackgroundSizeChanged = true;
+        mDefaultFocusHighlightSizeChanged = true;
+        if (mForegroundInfo != null) {
+            mForegroundInfo.mBoundsChanged = true;
+        }
+ 
+        notifySubtreeAccessibilityStateChangedIfNeeded();
+    }
+    return changed;
+}
+</code></pre>
+<p><code>setFrame</code>在进行初始化的时候会对比上一次是否一致，若一致则不会在此进行，若是一致，则会使我们旧的信息直接失效<code>invalidate(sizeChanged)</code>。</p>
+<h3 id="viewonlayout">View#onLayout</h3>
+<pre><code class="language-dart">  /**
+* Called from layout when this view should
+* assign a size and position to each of its children.
+*
+* Derived classes with children should override
+* this method and call layout on each of
+* their children.
+* @param changed This is a new size or position for this view
+* @param left Left position, relative to parent
+* @param top Top position, relative to parent
+* @param right Right position, relative to parent
+* @param bottom Bottom position, relative to parent
+*/
+protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+}
+</code></pre>
+<p>发现View的onLayout()并没有做任何的事儿，从上述的分析中知道我们是调用的DecorView的layout方法。</p>
+<h3 id="decorviewlayout">DecorView#layout</h3>
+<pre><code class="language-java">protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+    super.onLayout(changed, left, top, right, bottom);
+    ...
+}
+</code></pre>
+<p>这时发现他调用了<code>parent(FrameLayout)</code>的<code>onLayout</code>。</p>
+<pre><code class="language-java">protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+    layoutChildren(left, top, right, bottom, false /* no force left gravity */);
+}
+</code></pre>
+<p>所以布局流程与测量流程一样，每个布局的实现方式都是不一样的，都是根据自定义view时的业务流程进行布局摆放。布局摆放流程实际上是，先得到顶层， 顶层自己先开始layout进行布局定位，然后调用onLayout调用子view让子view调用自己的layout对自己进行定位以达到定位的所有目的。</p>
+
+                    </div>
+                    <div class="essaySuffix-box">
+                        <div class="essaySuffix-box-left"><img
+                                src="/images/avatar.png" alt="">
+                        </div>
+                        <div class="essaySuffix-box-right"><span
+                                class="essaySuffix-right-title">本文作者</span>：<strong><span style="font-size: 12px;"><a
+                                        href="/about"
+                                        target="_blank">Xiaowu</a></span></strong> <br><span
+                                style="font-weight: bold; white-space:nowrap;">本文链接</span>：<a
+                                href="https://jxiaow.gitee.io/posts/6f6ae2ee/"
+                                target="_blank">https://jxiaow.gitee.io/posts/6f6ae2ee/</a><br><span
+                                class="essaySuffix-right-title">版权声明</span>：本博客所有文章除特别声明外，均采用 <a
+                                href="https://creativecommons.org/licenses/by-nc-nd/4.0/" alt="BY-NC-SA"
+                                title="BY-NC-SA" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</div>
+                        <div style="clear: both;"></div>
+                    </div>
+
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#view%E5%B8%83%E5%B1%80%E6%91%86%E6%94%BE">View布局摆放</a>
+<ul>
+<li><a href="#viewlayout">View#layout</a></li>
+<li><a href="#viewsetframe">View#setFrame</a></li>
+<li><a href="#viewonlayout">View#onLayout</a></li>
+<li><a href="#decorviewlayout">DecorView#layout</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+                </div>
+            </article>
+
+            <!-- </div> -->
+            
+
+            
+
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'monsterid',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+            
+
+            <div class="site-footer gt-c-content-color-first">
+
+  <div class="social-container">
+
+    <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
+      <i class="fab fa-github gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
+      <i class="fas fa-blog gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
+      <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
+    </a>
+
+    <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
+      <i class="fas fa-envelope gt-c-content-color-first"></i>
+    </a>
+
+  </div>
+  <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+  
+	<div>
+    <div>
+      Theme by <a href="https://github.com/jxiaow/gridea-theme-pure-fashion" target="_blank">jxiaow</a>, Powered by <a
+              href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://jxiaow.gitee.io/atom.xml" target="_blank">RSS</a></a>
+  </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+            <script>
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+  
+  if (mainNavLinks == null || mainNavLinks.length == 0) {
+    let tocContainer = document.querySelector(".toc-container");
+    tocContainer.classList.remove("toc-container")
+    // tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
+  } else {
+
+    // This should probably be throttled.
+    // Especially because it triggers during smooth scrolling.
+    // https://lodash.com/docs/4.17.10#throttle
+    // You could do like...
+    // window.addEventListener("scroll", () => {
+    //    _.throttle(doThatStuff, 100);
+    // });
+    // Only not doing it here to keep this Pen dependency-free.
+
+
+    window.addEventListener("scroll", event => {
+      let fromTop = window.scrollY;
+
+      mainNavLinks.forEach((link, index) => {
+        let section = document.getElementById(decodeURI(link.hash).substring(1));
+        let nextSection = null
+        if (mainNavLinks[index + 1]) {
+          nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+        }
+        if (section.offsetTop <= fromTop) {
+          if (nextSection) {
+            if (nextSection.offsetTop > fromTop) {
+              link.classList.add("current");
+            } else {
+              link.classList.remove("current");
+            }
+          } else {
+            link.classList.add("current");
+          }
+        } else {
+          link.classList.remove("current");
+        }
+      });
+    });
+  }
+
+
+
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+
+<script>
+  let images = document.querySelectorAll("figure > img");
+  //   debugger
+  //   console.log("dddd: "+ images);
+  images.forEach(image => {
+    var parent = image.parentElement;
+    parent.removeChild(image);
+    var aelem = document.createElement('a');
+    aelem.href = image.src;
+    aelem.dataset['fancybox'] = 'gallery';
+    aelem.classList.add('fancybox');
+    aelem.appendChild(image);
+    parent.appendChild(aelem);
+  })
+
+//   <a data-fancybox="gallery" href="big_1.jpg"><img src="small_1.jpg"></a>
+// <a data-fancybox="gallery" href="big_2.jpg"><img src="small_2.jpg"></a>
+</script>
+        </div>
+    </div>
+
+</body>
+
+</html>
