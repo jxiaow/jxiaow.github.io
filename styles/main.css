@@ -705,7 +705,6 @@ ul li {
 .post-container .toc-container {
   width: 20%;
   padding: 10px;
-  background: white;
   margin-left: 20px;
 }
 .post-container .toc-container .markdownIt-TOC {
@@ -715,6 +714,7 @@ ul li {
   list-style: none;
   padding-left: 0;
   padding: 16px 8px;
+  background: white;
 }
 .post-container .toc-container .markdownIt-TOC:before {
   position: absolute;
