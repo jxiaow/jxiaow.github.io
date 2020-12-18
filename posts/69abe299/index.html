@@ -7,7 +7,7 @@
 
 <title>UI整体绘制流程 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1608263490288">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1608278410629">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -112,7 +112,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1608263490288" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1608278410629" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -260,7 +260,7 @@ public final void attachApplication(IApplicationThread thread, long startSeq) {
 </code></pre>
 <p><code>ApplicationThread</code>的方法分析就不在此处赘述了，后面的<code>Activity的启动流程</code>会详细分析。</p>
 <h1 id="activity-视图设置">Activity 视图设置</h1>
-<p>在 <code>onCreate()</code>当中我们往往会使用<code>setContentView()</code> 去进行我们自己的布局文件或者view, 我们可以通过源码分析看看具体的流程。</p>
+<p>在 <code>onCreate()</code>当中我们往往会使用<code>setContentView()</code> 去设置我们自己的布局文件或者view, 我们可以通过源码分析看看具体的流程。</p>
 <h2 id="activitysetcontentview">Activity#setContentView()</h2>
 <pre><code class="language-java">// Activity.java
 public void setContentView(@LayoutRes int layoutResID) {
@@ -293,7 +293,7 @@ public void setContentView(int layoutResID) {
     // ...
 }
 </code></pre>
-<p>在<code>PhoneWindow#setCcontentView()</code>中做了两件事（<code>installDecor和 inflate</code>）。</p>
+<p>在<code>PhoneWindow#setContentView()</code>中做了两件事（<code>installDecor和 inflate</code>）。</p>
 <h2 id="phonewindowinstalldecor">PhoneWindow#installDecor()</h2>
 <p><code>installDecor</code>中主要是创建了<code>Decor</code>（顶层视图）和<code>contentParent</code>视图（我们写的布局的父视图）。</p>
 <pre><code class="language-java">private void installDecor() {
