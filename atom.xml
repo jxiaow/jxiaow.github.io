@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2020-12-17T13:53:27.982Z</updated>
+    <updated>2020-12-18T03:51:38.457Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -17,16 +17,14 @@
         </link>
         <updated>2020-12-17T09:33:22.000Z</updated>
         <summary type="html"><![CDATA[<p>最近正在整理以前总结的关于 <strong>Android高级UI</strong> 相关的知识，本篇文章只是一个目录，用于进行文章归档。</p>
+<h2 id="ui-思维导图">UI 思维导图</h2>
 ]]></summary>
         <content type="html"><![CDATA[<p>最近正在整理以前总结的关于 <strong>Android高级UI</strong> 相关的知识，本篇文章只是一个目录，用于进行文章归档。</p>
+<h2 id="ui-思维导图">UI 思维导图</h2>
 <!--more-->
-<ul>
-<li><a href="https://jxiaow.gitee.io/posts/69abe299/">UI整体绘制</a></li>
-<li><a href="https://jxiaow.gitee.io/posts/cd03afe4/">UI布局绘制入口</a></li>
-<li><a href="https://jxiaow.gitee.io/posts/a920adc7">UI测量流程</a></li>
-<li><a href="https://jxiaow.gitee.io/posts/6f6ae2ee">UI布局流程</a></li>
-<li><a href="https://jxiaow.gitee.io/posts/94ccb851">UI绘制流程</a></li>
-</ul>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/18/a2ef4c3408499946f29c077badbe5130-Android%20UI%20-08a2ed.png" alt="Android UI " loading="lazy"></figure>
+<h2 id="ui-测量布局绘制流程">UI 测量布局绘制流程</h2>
+<p><a href="https://jxiaow.gitee.io/posts/69abe299/">整体绘制流程</a> <a href="https://jxiaow.gitee.io/posts/cd03afe4/">布局绘制入口</a> <a href="https://jxiaow.gitee.io/posts/a920adc7">测量流程</a>  <a href="https://jxiaow.gitee.io/posts/6f6ae2ee">布局流程</a>  <a href="https://jxiaow.gitee.io/posts/94ccb851">绘制流程 </a></p>
 ]]></content>
     </entry>
     <entry>
