@@ -7,7 +7,7 @@
 
 <title>UI整体绘制流程 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1608284867639">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1608360280901">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -112,7 +112,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1608284867639" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1608360280901" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -172,7 +172,8 @@
 <!--more-->
 <h1 id="android-程序简单的启动流程">Android 程序简单的启动流程</h1>
 <p>在刚接触<code>Java</code>时，我们知道Java程序的运行入口是<code>main()</code>方法，然而我们在日常App的开发中并没有发现<code>main()</code> 方法的存在，那么<code>Android</code> 中的程序是如何开始运行的呢？</p>
-<p>查阅官方资料中我们会发现在<code>Android</code>的源码中有一个叫做<code>ActivityThread</code>的类，这个类就是<code>Android 中的主线程</code>，在ActivityThread中我们可以看到<code>main()</code> 方法的存在。</p>
+<p>查阅官方资料中我们会发现在<code>Android</code>的源码中有一个叫做<code>ActivityThread</code>的类，这个类就是<code>Android 中的主线程</code>，在ActivityThread中我们可以看到<code>main()</code> 方法的存在。调用时序图如下：</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/UI%E6%95%B4%E4%BD%93%E7%BB%98%E5%88%B6%E6%B5%81%E7%A8%8B.svg" alt="UI整体绘制流程" loading="lazy"></figure>
 <h2 id="activitythreadmain">ActivityThread#main()</h2>
 <pre><code class="language-java">public static void main(String[] args) {
     //...
@@ -254,7 +255,7 @@ public final void attachApplication(IApplicationThread thread, long startSeq) {
     //...
 }
 </code></pre>
-<p><code>attachApplication</code> 的作用实际上是将<code>ActivityThread</code> 与<code>ApplicationThread</code>关联，<code>ApplicationThread</code>类为<code>Activity</code>的各种生命周期状态做了相对应的代理工作并进行 <code>Application</code>的初始化工作。</p>
+<p><code>attachApplication</code> 的作用实际上是将<code>Application</code> 与<code>ApplicationThread</code>关联并进行初始化工作，并且<code>ApplicationThread</code>类为<code>Activity</code>的各种生命周期状态做了相对应的代理工作。</p>
 <h2 id="applicationthread">ApplicationThread</h2>
 <pre><code class="language-java">private class ApplicationThread extends IApplicationThread.Stub {}
 </code></pre>
@@ -371,7 +372,7 @@ public void setContentView(int layoutResID) {
 &lt;/LinearLayout&gt;
 </code></pre>
 <h2 id="activity的窗口ui布局层级">Activity的窗口UI布局层级</h2>
-<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/Activity-Activity%E8%A7%86%E5%9B%BE%E7%BB%93%E6%9E%84%E5%AE%B9%E5%99%A8.svg" alt="Activity-Activity视图结构容器" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/Activity-Activity%E8%A7%86%E5%9B%BE%E7%BB%93%E6%9E%84%E5%AE%B9%E5%99%A8.svg" alt="Activity-Activity视图结构容器" loading="lazy"></figure>
 
                     </div>
                     <div class="essaySuffix-box">
@@ -446,7 +447,7 @@ public void setContentView(int layoutResID) {
 		el: '#vcomments',
 		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
 		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
-		avatar: '',
+		avatar: 'mp',
 		pageSize: 5,
 		recordIp: true,
 		placeholder: '快来吐槽吧~',
