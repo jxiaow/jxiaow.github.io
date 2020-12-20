@@ -7,7 +7,7 @@
 
 <title>图形绘制-Paint基本使用 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1608391026440">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1608474683242">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -112,7 +112,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1608391026440" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1608474683242" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -161,7 +161,7 @@
                     <!-- <div class="post-content-wrapper"> -->
                     <div class="post-content">
                         <h2 id="canvas和paint的关系">Canvas和Paint的关系</h2>
-<p>在对UI绘制流程的分析中，可以知道<code>performCanvas()</code>方法最终会调用到<code>View#onDraw()</code>方法，并且会传递<code>Canvas</code>，那么<code>Canvas</code>到底有什么用呢？</p>
+<p>在对UI绘制流程的分析中，可以知道<code>performDraw()</code>方法最终会调用到<code>View#onDraw()</code>方法，并且会传递<code>Canvas</code>，那么<code>Canvas</code>到底有什么用呢？</p>
 <p><code>Canvas</code>在UI绘制中扮演的是<code>会话角色</code>，我们通常情况下都能够知道使用Canvas去 画圆型，矩形图片等，但是最终其真正的绘制并不是在我们的android 层面进行的。</p>
 <p>通过源码分析，<code>Canvas</code> 继承了<code>BaseCanvas</code></p>
 <pre><code class="language-java">public class Canvas extends BaseCanvas {}
@@ -182,7 +182,7 @@
 */
 public class Paint {}
 </code></pre>
-<p>注释中描述了Paint 在绘制过程中保存了色彩信息和样式信息。</p>
+<p>注释中描述了Paint 在绘制过程中保存了<strong>色彩信息</strong>和<strong>样式信息</strong>。</p>
 <h2 id="paint基础">Paint基础</h2>
 <p>Paint方法主要可以抽象成2大类：</p>
 <h3 id="设置和获取图像绘制-路径相关数据">设置和获取图像绘制、路径相关数据</h3>

@@ -7,7 +7,7 @@
 
 <title>Paint高级应用---Shader | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1608391026440">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1608474683242">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -112,7 +112,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1608391026440" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1608474683242" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -157,12 +157,12 @@
                     <!-- <div class="post-content-wrapper"> -->
                     <div class="post-content">
                         <p>Paint的高级用法主要有：<strong>渲染着色</strong>、<strong>滤镜</strong> 和 <strong>Xfermode</strong>。</p>
-<p><code>Canvas</code>的<code>drawXXX</code>方法画具体的形状，<code>Paint</code>的<code>Shader</code>定义图像的着色和外观。</p>
+<p><code>Canvas</code>的<code>drawXXX</code>方法画具体的形状，<code>Paint</code>的<code>Shader</code>定义图像的<strong>着色</strong>和<strong>外观</strong>。</p>
 <p>目前 <code>Shader</code>的子类有 <strong>LinearGradient(线性渲染)</strong>、<strong>SweepGradient(渐变渲染/梯度渲染)</strong>、<br>
-<strong>RadialGradient(环形渲染)</strong>、**BitmapShader(位图渲染) **   和 <strong>ComposeShader(组合渲染)</strong>。</p>
+<strong>RadialGradient(环形渲染)</strong>、<strong>BitmapShader(位图渲染)</strong>   和 <strong>ComposeShader(组合渲染)</strong>。</p>
 <!--more-->
 <h2 id="tilemode-拉伸形式">TileMode （拉伸形式）</h2>
-<p>TileMode 拉伸方式，在Shader的创建中会用到。<strong>只在图片和显示区域大小不符的情况进行扩充渲染</strong>，<code>TileMode</code>源码定义如下：</p>
+<p>TileMode 拉伸方式，在Shader的创建中会用到。<strong>只在图片和显示区域大小不符的情况下进行扩充渲染</strong>，<code>TileMode</code>源码定义如下：</p>
 <pre><code class="language-java">public enum TileMode {
    /**
     * replicate the edge color if the shader draws outside of its
@@ -395,6 +395,7 @@ class LinearGradientText @JvmOverloads constructor(
     rectF.set(0f, 0f, bWidth.toFloat(), bHeight.toFloat())
     val shapeDrawable = ShapeDrawable(OvalShape())
     shapeDrawable.paint.shader = bitmapShader
+    // 一定要设置bounds,不然可能不显示
     shapeDrawable.bounds = rectF.toRect()
     shapeDrawable.draw(canvas)
 }
@@ -473,6 +474,11 @@ class LinearGradientText @JvmOverloads constructor(
     canvas.drawRect(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat(), paint)
 }
 </code></pre>
+<p>备注：<br>
+在进行各种渲染操作时，或多或少会用到矩阵<code>Matrix</code>的相关操作，那么<code>pre</code>、<code>post</code> 和<code>set</code>的区别如下：</p>
+<blockquote>
+<p>pre是在队列最前面插入，post是在队列最后面追加，而set先清空队列在添加。</p>
+</blockquote>
 
                     </div>
                     <div class="essaySuffix-box">
