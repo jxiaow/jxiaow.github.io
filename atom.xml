@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2020-12-21T08:48:38.487Z</updated>
+    <updated>2020-12-22T07:05:59.558Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -10,206 +10,6 @@
     <logo>https://jxiaow.gitee.io/images/avatar.png</logo>
     <icon>https://jxiaow.gitee.io/favicon.ico</icon>
     <rights>All rights reserved 2020, Xiaowu</rights>
-    <entry>
-        <title type="html"><![CDATA[Paint高级应用---滤镜]]></title>
-        <id>https://jxiaow.gitee.io/posts/CdQTz2Dgj/</id>
-        <link href="https://jxiaow.gitee.io/posts/CdQTz2Dgj/">
-        </link>
-        <updated>2020-12-21T07:52:55.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="滤镜">滤镜</h1>
-<p>滤镜其实是对原本的图像颜色进行调整。</p>
-<h2 id="图像构成">图像构成</h2>
-<p>在一个图像文件中，它保存的数据主要分为两块：<strong>图像的信息</strong>和<strong>图像的数据</strong>。</p>
-<p>图像的信息：它是一组让CPU和GPU在显示图像的时候基于这组信息显示的信息。</p>
-<p>图像的数据：图像具体显示的像素点数据。</p>
-<h3 id="jpg的文件结构">JPG的文件结构</h3>
-<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/9886e90f014d462b560dcec9c327bdb7-images-4677e1.jpg" alt="images" loading="lazy"></figure>
-<p>如上图所示，它的部分16进制如下：</p>
-<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/57cb6692a312934e96276423baf6e7b7-image-20201211104548456-d59a09.png" alt="image-20201211104548456" loading="lazy"></figure>
-<blockquote>
-<p>对于一个JPG 文件来说，其文件头总是由位固定的字节来描述的：<br>
-十六进制数   FF D8 FF E0 00 10 4A 46 00 01</p>
-</blockquote>
-<p>具体的格式信息，就不说啦。</p>
-<h2 id="颜色通道和颜色模式">颜色通道和颜色模式</h2>
-<p><strong>颜色通道：</strong> 保存图像颜色信息的通道称为颜色通道。可以理解为记录色彩信息的那一段数据， 每个图像都有一个或者多个颜色通道，图像中默认的颜色通道信息取决于颜色模式。</p>
-<p><strong>颜色模式：</strong> 颜色模式可以理解为是一种将某种颜色表现为数字形式的模型，或者说是一种记录图像颜色的方式。分为：RGB模式、CMYK模式、HSB模式、Lab颜色模式、位图模式、灰度模式、索引颜色模式、双色调模式和多通道模式等。<br>
-实际上我们就认为，我要显示的色彩是用数字表示的，最经典的RGB模式我们可以理解为R(255) G(0) B(0) 当前这个像素显示，在识别的时候为红色，他由红 绿 蓝 三种色彩进行混合，显示出我们要的颜色其程度数值是0-255的范围</p>
-<p><strong>总结：</strong> 也就是说，其实图像的显示，每个点都是由模式所决定的色彩数值混合形成我们想要的颜色，那么我们的滤镜效果实现，其实实际上就是去对于颜色通道进行过滤操作，在其原本的模式数值上面进行操作，达到更改图像色彩效果的目的，这就是我们所为的滤镜。</p>
-<h2 id="颜色矩阵">颜色矩阵</h2>
-<p>在Android当中，他所采用的颜色模式是<strong>RGBA模式</strong>，也就是在<strong>红绿蓝</strong>的基础上加入了<strong>Alpha透明度</strong>的概念，那么也就是他现在是一个<strong>四通道的模式</strong>。<br>
-在Android当中将图像信息获取出来时候，当前图像的颜色通道信息他用的是一个矩阵在进行保存。</p>
-<figure data-type="image" tabindex="3"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/12625345-aa867504e3102a19.png" alt="img" loading="lazy"></figure>
-<p>上面这里看到的是一个四通道形式的表示方式，我门会发现在1-1、2-2、3-3、4-4 的位置都是一个1的数值，那么几个数值我们把他理解为颜色的系数，1为原本数值不动，若0.5那么当前对应的<code>rgba</code>四个选项按比例处理。<br>
-如果想要更改为半透明的，那么，当前a的值改为0.5。</p>
-<p>但是如果在这种情况下：</p>
-<ol>
-<li>红色 分量值更改为原来的2倍；</li>
-<li>绿色分量增加100；</li>
-</ol>
-<p>则用4阶矩阵的乘法无法实现，所以应该在四阶色彩变换矩阵上增加一个<strong>亚元坐标</strong>，来实现所列的矩阵运算:</p>
-<p>在android当中真正的表现方式他应用了一个4*5的矩阵<br>
-<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/4b8c057fe782d2a8707ca5ea34ce29d2-image-20201211125055945-fce20d.png" alt="image-20201211125055945" loading="lazy"></p>
-<p>最后方加入一列，作为所为的<strong>亚元坐标</strong>，其实也就是分量值。</p>
-<h2 id="滤镜实现">滤镜实现</h2>
-<p>对于矩阵的操作运算，在android中可以依赖一个API就行。</p>
-<pre><code class="language-java">// 颜色通道过滤
-ColorMatrix colorMartrix = new ColorMatrix(new float[]{
-            1, 0,0,0,0,
-            0,0,0,0,0,
-            0,0,0,0,0,
-            0,0,0,1,0,
-    });
-  paint.setColorFilter(new ColorMatrixColorFilter(colorMartrix));
-</code></pre>
-<h2 id="滤镜效果">滤镜效果</h2>
-<p>下面各个效果，公共代码部分：</p>
-<pre><code class="language-kotlin">class FilterView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : View(context, attrs, defStyleAttr) {
- 
-    private val bitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.images)
-    private val rectF: RectF = RectF(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat())
-    private val paint: Paint = Paint()
- 
-    init {
-        setLayerType(LAYER_TYPE_HARDWARE, null) // 开启硬件加速
-    }
- 
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        canvas.translate(width / 4f, 0f)
-        paint.reset()
-        paint.color = Color.RED
-        canvas.drawBitmap(bitmap, null, rectF, paint)
-    }
-}
-</code></pre>
-<p>原图：<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/17e63d86140a396e8fcea1781ca5f1ef-image-20201211144215697-28cedc.png" alt="image-20201211144215697" loading="lazy"></p>
-<h3 id="红色">红色</h3>
-<figure data-type="image" tabindex="4"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/2b45d51e3ef3b1c727bd83be3ed652d5-image-20201211144322349-d38cc7.png" alt="image-20201211144322349" loading="lazy"></figure>
-<pre><code class="language-kotlin">// onDraw()：
-// 红色系数为1，其余2种系数为0，alpha 系数为1
-val colorMartrix = ColorMatrix(
-    floatArrayOf(
-        1f, 0f, 0f, 0f, 0f,
-        0f, 0f, 0f, 0f, 0f,
-        0f, 0f, 0f, 0f, 0f,
-        0f, 0f, 0f, 1f, 0f,
-    )
-)
-canvas.translate(0f, bitmap.height.toFloat())
-paint.colorFilter = ColorMatrixColorFilter(colorMartrix)
-canvas.drawBitmap(bitmap, null, rectF, paint)
-</code></pre>
-<h3 id="绿色加100">绿色加100</h3>
-<figure data-type="image" tabindex="5"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/246639062180c2b0557e3489a07ef89f-image-20201211144812074-d5c917.png" alt="image-20201211144812074" loading="lazy"></figure>
-<pre><code class="language-kotlin">// onDraw()：
-// 红、绿、蓝系数为1，绿色分量加100，alpha 系数为1
-val colorMartrix = ColorMatrix(
-    floatArrayOf(
-        1f, 0f, 0f, 0f, 0f,
-        0f, 1f, 0f, 0f, 100f,
-        0f, 0f, 1f, 0f, 0f,
-        0f, 0f, 0f, 1f, 0f,
-    )
-)
-canvas.translate(0f, bitmap.height.toFloat())
-paint.colorFilter = ColorMatrixColorFilter(colorMartrix)
-canvas.drawBitmap(bitmap, null, rectF, paint)
-</code></pre>
-<h3 id="底片效果">底片效果</h3>
-<figure data-type="image" tabindex="6"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/4c99d58a808b2c2a3ad50b327445741d-image-20201211145402759-9aaf00.png" alt="image-20201211145402759" loading="lazy"></figure>
-<pre><code class="language-kotlin">// onDraw()：
-// 红、绿、蓝系数为-1，分量加255，alpha 系数为1
-val colorMartrix = ColorMatrix(
-    floatArrayOf(
-        -1f, 0f, 0f,  0f, 255f,
-        0f, -1f, 0f,  0f, 255f,
-        0f, 0f, -1f, 0f,  255f,
-        0f, 0f, 0f,  1f, 0f,
-    )
-)
-canvas.translate(0f, bitmap.height.toFloat())
-paint.colorFilter = ColorMatrixColorFilter(colorMartrix)
-canvas.drawBitmap(bitmap, null, rectF, paint)
-</code></pre>
-<h3 id="缩放运算-颜色增强">缩放运算-- 颜色增强</h3>
-<figure data-type="image" tabindex="7"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/4575208b33e9e98ec4dfff3556260dd5-image-20201211150121040-ec7cb3.png" alt="image-20201211150121040" loading="lazy"></figure>
-<pre><code class="language-kotlin">// onDraw()：
-val colorMartrix = ColorMatrix(
-    floatArrayOf(
-        1.2f, 0f, 0f, 0f, 0f,
-        0f, 1.2f, 0f, 0f, 0f,
-        0f, 0f, 1.2f, 0f, 0f,
-        0f, 0f, 0f, 1.2f, 0f,
-    )
-)
-canvas.translate(0f, bitmap.height.toFloat())
-paint.colorFilter = ColorMatrixColorFilter(colorMartrix)
-canvas.drawBitmap(bitmap, null, rectF, paint)
-</code></pre>
-<h3 id="灰色照片">灰色照片</h3>
-<p>去色原理：只要把R G B 三通道的色彩信息设置成一样，那么图像就会变成灰色，同时为了保证图像亮度不变，同一个通道里的R+G+B =1。</p>
-<figure data-type="image" tabindex="8"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/577782a96dd5ddc8c3af35e015ec93ff-image-20201211153735131-e0d3c4.png" alt="image-20201211153735131" loading="lazy"></figure>
-<pre><code class="language-kotlin">// onDraw()：
-val colorMartrix =  ColorMatrix(
-    floatArrayOf(
-        0.213f, 0.715f,0.072f,0f,0f,
-        0.213f, 0.715f,0.072f,0f,0f,
-        0.213f, 0.715f,0.072f,0f,0f,
-        0f,0f,0f,1f,0f,
-    ))
-canvas.translate(0f, bitmap.height.toFloat())
-paint.colorFilter = ColorMatrixColorFilter(colorMartrix)
-canvas.drawBitmap(bitmap, null, rectF, paint)
-</code></pre>
-<h3 id="发色效果">发色效果</h3>
-<p>红绿色交换</p>
-<figure data-type="image" tabindex="9"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/85d0353c94946e4096931c6d1a4fdb13-image-20201211155717814-ede6ee.png" alt="image-20201211155717814" loading="lazy"></figure>
-<pre><code class="language-kotlin">// onDraw()：
-val colorMartrix = ColorMatrix(
-    floatArrayOf(
-        0f,1f,0f,0f,0f,
-        1f, 0f,0f,0f,0f,
-        0f,0f,1f,0f,0f,
-        0f,0f,0f,1f,0f,
-    ));
-canvas.translate(0f, bitmap.height.toFloat())
-paint.colorFilter = ColorMatrixColorFilter(colorMartrix)
-canvas.drawBitmap(bitmap, null, rectF, paint)
-</code></pre>
-<h3 id="复古效果">复古效果</h3>
-<figure data-type="image" tabindex="10"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/11/fb517bb4dfa14a795a32cc0cff2fefc9-image-20201211160133715-a6f5e8.png" alt="image-20201211160133715" loading="lazy"></figure>
-<pre><code class="language-kotlin">// onDraw()：
-val colorMartrix = ColorMatrix(
-    floatArrayOf(
-        1 / 2f, 1 / 2f, 1 / 2f, 0f, 0f,
-        1 / 3f, 1 / 3f, 1 / 3f, 0f, 0f,
-        1 / 4f, 1 / 4f, 1 / 4f, 0f, 0f,
-        0f, 0f, 0f, 1f, 0f,
-    )
-)
-canvas.translate(0f, bitmap.height.toFloat())
-paint.colorFilter = ColorMatrixColorFilter(colorMartrix)
-canvas.drawBitmap(bitmap, null, rectF, paint)
-</code></pre>
-<h3 id="颜色通道过滤">颜色通道过滤</h3>
-<pre><code class="language-kotlin">// onDraw()：
-val colorMartrix = ColorMatrix(
-    floatArrayOf(
-        1.3F,0,0,0,0,
-        0,1.3F,0,0,0,
-        0,0,1.3F,0,0,
-        0,0,0,1,0,
-    )
-)
-canvas.translate(0f, bitmap.height.toFloat())
-paint.colorFilter = ColorMatrixColorFilter(colorMartrix)
-canvas.drawBitmap(bitmap, null, rectF, paint)
-</code></pre>
-]]></content>
-    </entry>
     <entry>
         <title type="html"><![CDATA[高级UI]]></title>
         <id>https://jxiaow.gitee.io/posts/b1e45c68/</id>
@@ -233,6 +33,7 @@ canvas.drawBitmap(bitmap, null, rectF, paint)
 <h3 id="paint的基本使用"><a href="https://jxiaow.gitee.io/posts/46f22235">Paint的基本使用</a></h3>
 <h3 id="paint的高级使用-shader"><a href="https://jxiaow.gitee.io/posts/36c3e87b">Paint的高级使用-Shader</a></h3>
 <h3 id="paint的高级使用-滤镜"><a href="https://jxiaow.gitee.io/posts/49e1d711">Paint的高级使用-滤镜</a></h3>
+<h3 id="paint的高级使用-xfermode"><a href="https://jxiaow.gitee.io/posts/b2c61861">Paint的高级使用-xfermode</a></h3>
 ]]></content>
     </entry>
     <entry>
@@ -2609,6 +2410,422 @@ void testScheduleMicrotask(){
   */
 </code></pre>
 </li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Dagger 2 进阶使用]]></title>
+        <id>https://jxiaow.gitee.io/posts/b74c4b6c/</id>
+        <link href="https://jxiaow.gitee.io/posts/b74c4b6c/">
+        </link>
+        <updated>2019-12-04T16:22:57.000Z</updated>
+        <summary type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
+]]></summary>
+        <content type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
+<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
+<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
+<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
+<!-- more -->
+<blockquote>
+<p>本系列文章是基于 Google Dagger 2.23.2 版本， Kotlin 1.3.21版本</p>
+</blockquote>
+<p>在<a href="/post/cbb172f8.html">Dagger 2 完全解析（一）,基本使用与原理</a>中介绍了 <code>Dagger 2</code> 基本使用，但是在实战中基本使用是远远不够的，我们还需要掌握一些其它的知识，下面由简入繁地讲解这几个概念，同时结合 Dagger 2 的编译时生成代码分析背后的原理（示例代码沿用第一篇的）。</p>
+<p>下面开始对<code>Lazy</code>、<code>Provider</code>、<code>Qualifier</code>和 <code>Scope</code>进行分析。</p>
+<h2 id="lazy-延迟注入">Lazy （延迟注入）</h2>
+<p>有时我们想注入的依赖在使用时再完成初始化，提高加载速度，就可以使用注入<code>Lazy&lt;T&gt;</code>。只有在调用<code>Lazy</code>的 <code>get()</code> 方法时才会初始化依赖实例注入依赖。</p>
+<pre><code class="language-java">public interface Lazy&lt;T&gt; {
+  T get();
+}
+</code></pre>
+<p>在<code>A</code>中使用：</p>
+<pre><code class="language-kotlin">class A {
+    ...
+    @Inject
+    lateinit var lazyD: Lazy&lt;D&gt;
+
+    fun doWork(){
+        lazyD.get() // 返回D的实例
+    }
+}
+</code></pre>
+<p><code>Make app</code>后，在<code>DaggerAComponent</code>中：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private final AModule aModule;
+
+ ...
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+  private A injectA2(A instance) {
+    A_MembersInjector.injectB(instance, AModule_ProvideBFactory.provideB(aModule));
+    A_MembersInjector.injectC(instance, new C());
+    // DoubleCheck 是线程安全的Lazy实例初始化类
+    A_MembersInjector.injectLazyD(instance, DoubleCheck.lazy(D_Factory.create()));
+    return instance;
+  }
+
+...
+</code></pre>
+<p><code>DoubleCheck</code> 是线程安全的<code>Lazy</code>实例初始化工具类</p>
+<pre><code class="language-java">public static &lt;P extends Provider&lt;T&gt;, T&gt; Lazy&lt;T&gt; lazy(P provider) {
+    if (provider instanceof Lazy) {
+      @SuppressWarnings(&quot;unchecked&quot;)
+      final Lazy&lt;T&gt; lazy = (Lazy&lt;T&gt;) provider;
+      return lazy;
+    }
+    return new DoubleCheck&lt;T&gt;(checkNotNull(provider));
+  }
+
+// 在需要使用的时候调用此方法进行返回相应的实例
+  @Override
+  public T get() {
+    Object result = instance;
+    if (result == UNINITIALIZED) {
+      synchronized (this) {
+        result = instance;
+        if (result == UNINITIALIZED) {
+          result = provider.get();
+          instance = reentrantCheck(instance, result);
+          provider = null;
+        }
+      }
+    }
+    return (T) result;
+  }
+</code></pre>
+<h2 id="provider-注入">Provider 注入</h2>
+<p>有时候不仅仅是注入单个实例，我们需要多个实例，这时可以使用注入<code>Provider&lt;T&gt;</code>，每次调用它的 <code>get()</code> 方法都会调用到 <code>@Inject 构造函数</code>创建新实例或者<code>Module 的 provide 方法</code>返回实例。</p>
+<pre><code class="language-kotlin">class A {
+
+    @Inject
+    lateinit var providerD: Provider&lt;D&gt;
+
+    fun createDFactory(): MutableList&lt;D&gt; {
+        val ds = mutableListOf&lt;D&gt;()
+        for (i in 0..10) {
+            ds.add(providerD.get())
+        }
+        return ds
+    }
+}
+</code></pre>
+<p><code>Make app</code>后，在<code>DaggerAComponent</code>中：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private final AModule aModule;
+
+ ...
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+ private A injectA2(A instance) {
+    A_MembersInjector.injectB(instance, AModule_ProvideBFactory.provideB(aModule));
+    A_MembersInjector.injectC(instance, new C());
+    A_MembersInjector.injectLazyD(instance, DoubleCheck.lazy(D_Factory.create()));
+    // 注入provider ,将`Factory`传入
+    A_MembersInjector.injectProviderD(instance, D_Factory.create());
+    return instance;
+  }
+...
+</code></pre>
+<p>再来看看<code>D_Factory</code>：</p>
+<pre><code class="language-java">public final class D_Factory implements Factory&lt;D&gt; {
+  private static final D_Factory INSTANCE = new D_Factory();
+
+  // 每次调用get方法都会重新创建实例
+  @Override
+  public D get() {
+    return new D();
+  }
+
+  public static D_Factory create() {
+    return INSTANCE;
+  }
+
+  public static D newInstance() {
+    return new D();
+  }
+}
+</code></pre>
+<p>通过上面可以看到，每次调用<code>get</code>方法都会重新创建实例, <code>D_Factory</code>实现了<code>Factory&lt;D&gt;</code>而<code>Factory&lt;D&gt;</code>继承自<code>Provider&lt;D&gt;</code>。</p>
+<pre><code class="language-java">public final class D_Factory implements Factory&lt;D&gt; {}
+
+public interface Factory&lt;T&gt; extends Provider&lt;T&gt; {}
+</code></pre>
+<h2 id="qualifier限定符">Qualifier（限定符）</h2>
+<p>试想这样一种情况：在 <code>AModule</code>提供了两个生成<code>B</code> 实例的<code>provide</code> 方法，如果使用 <code>Dagger 2</code> 在 <code>A</code> 中注入<code>B</code>实例时应该选择哪一个方法呢？</p>
+<pre><code class="language-kotlin">@Module
+class AModule {
+
+    @Provides
+    fun provideB(): B = B()
+
+    @Provides
+    fun provideOther(): B = B()
+}
+</code></pre>
+<p>这时 Dagger 2 不知道使用<code>provideB</code>还是<code>provideOther</code>提供的实例，在编译时就会出现：</p>
+<pre><code class="language-java">[Dagger/DuplicateBindings] *.data.B is bound multiple times:
+</code></pre>
+<p>而<code>@Qualifier</code>注解就是用来解决这个问题，使用注解来确定使用哪种 provide 方法。</p>
+<pre><code class="language-java">@Target(ANNOTATION_TYPE)
+@Retention(RUNTIME)
+@Documented
+public @interface Qualifier {}
+</code></pre>
+<p>我们可以发现<code>@Qualifier</code>是用来修饰注解的，所以它是不能直接作用到<code>provide</code>方法上。</p>
+<p>下面是自定义的<code>@Named</code>注解，你也可以用自定义的其他 Qualifier 注解：</p>
+<pre><code class="language-java">@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface Named {
+  String value() default &quot;&quot;;
+}
+</code></pre>
+<p>在 provide 方法上加上<code>@Named</code>注解，用来区分</p>
+<pre><code class="language-kotlin">@Module
+class AModule {
+
+    @Named(&quot;b&quot;)
+    @Provides
+    fun provideB(): B = B()
+
+    @Named(&quot;other&quot;)
+    @Provides
+    fun provideOther(): B = B()
+}
+</code></pre>
+<p>还需要在<code>Inject</code> 注入的地方加上<code>@field:Named</code>注解:</p>
+<pre><code class="language-kotlin">class A {
+    @Inject
+    @field:Named(&quot;other&quot;)
+    lateinit var b: B
+     ...
+}
+</code></pre>
+<p>**tips: ** 在<code>kotlin</code>中使用<code>@Name</code>给属性注入时需要添加<code>@field</code>，不然注解不生效。</p>
+<p>这样在依赖注入时，Dagger 2 就会使用<code>provideB</code>方法提供的实例，所以<strong>Qualifier（限定符）的作用相当于起了个区分的别名。</strong></p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private final AModule aModule;
+  ...
+
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+  private A injectA2(A instance) {
+    // 使用的是 provide方法
+    A_MembersInjector.injectB(instance, AModule_ProvideBFactory.provideB(aModule));
+    ...
+    return instance;
+  }
+  ...
+}
+</code></pre>
+<p>当然啦，我们也可以自定义注解进行区分，比如：</p>
+<pre><code class="language-kotlin">@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.FIELD)
+annotation class Other
+</code></pre>
+<p>然后在<code>provideOther</code>和<code>lateinit var b: B</code>上加上<code>@Other</code>即可。</p>
+<h2 id="scope作用域">Scope（作用域）</h2>
+<p>Scope 是用来确定注入的实例的生命周期的，如果没有使用 Scope 注解，Component 每次调用 Module 中的 provide 方法或 <code>Inject 构造函数</code>生成的工厂时都会创建一个新的实例，而使用 Scope 后可以复用之前的依赖实例。下面先介绍 Scope 的基本概念与原理，再分析 Singleton、Reusable 等作用域。</p>
+<h3 id="scope-基本概念">Scope 基本概念</h3>
+<p>先介绍 Scope 的用法，<code>@Scope</code>是元注解，是用来标注自定义注解的，如下：</p>
+<pre><code class="language-java">@Target(ANNOTATION_TYPE)
+@Retention(RUNTIME)
+@Documented
+public @interface Scope {}
+</code></pre>
+<p>**Scope 注解只能标注目标类、@provide 方法和 Component。**Scope 注解要生效的话，需要同时标注在 <code>Component</code> 和提供依赖实例的<code>Module 或目标类</code>上。<strong>Module 中 provide 方法中的 Scope 注解必须和 与之绑定的 Component 的 Scope 注解一样，否则作用域不同会导致编译时会报错。</strong></p>
+<p>那么 Scope 注解又是如何产生作用的呢，怎么保证生成的依赖实例的生命周期呢？</p>
+<p>在 Dagger 2 官方文档中我找到一句话，非常清楚地描述了<code>@Scope</code>的原理：</p>
+<blockquote>
+<p>When a binding uses a scope annotation, that means that the component object holds a reference to the bound object until the component object itself is garbage-collected.</p>
+</blockquote>
+<p>当 Component 与 Module、目标类（需要被注入依赖）使用 Scope 注解绑定时，意味着 Component 对象持有绑定的依赖实例的一个引用直到 Component 对象本身被回收。<strong>也就是作用域的原理，其实是让生成的依赖实例的生命周期与 Component 绑定，Scope 注解并不能保证生命周期，要想保证赖实例的生命周期，需要确保 Component 的生命周期。</strong></p>
+<p>下面以<code>@AScope</code>为例，看 Scope 注解背后的代码：</p>
+<p>先定义<code>AScope</code></p>
+<pre><code class="language-kotlin">@Scope
+@Retention(RUNTIME)
+@Target(FIELD, FUNCTION, CLASS)
+annotation class AScope
+</code></pre>
+<h4 id="使用module方式">使用Module方式</h4>
+<p>在<code>AModule</code>中：</p>
+<pre><code class="language-kotlin">@Module
+class AModule {
+    @AScope
+    @Provides
+    fun provideB(): B = B()
+}
+</code></pre>
+<p>在<code>AComponent</code>中</p>
+<pre><code class="language-kotlin">@Component(modules = [AModule::class])
+@AScope
+interface AComponent {
+    fun injectA(a: A)
+}
+</code></pre>
+<p>这样生成的 <code>B</code>实例就与 <code>AComponent</code> 绑定了。下面看编译时生成的代码：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private Provider&lt;B&gt; provideBProvider;
+
+  private DaggerAComponent(AModule aModuleParam) {
+    initialize(aModuleParam);
+  }
+
+  ...
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private void initialize(final AModule aModuleParam) {
+    this.provideOtherProvider = DoubleCheck.provider(AModule_ProvideBFactory.create(aModuleParam));
+  }
+
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+  private A injectA2(A instance) {
+    // provideOtherProvider 不再由Factory创建，而是DobuleCheck
+    A_MembersInjector.injectB(instance, provideBProvider.get());
+    return instance;
+  }
+ ...
+}
+</code></pre>
+<p>从上面 <code>DaggerAComponent</code>的代码可以看出使用了 <code>AScope</code> 作用域后，<code>provideBProvider</code>由<code>AModule_ProvideCarFactory.create()</code>变为了<code>DoubleCheck.provider(AModule_ProvideBFactory.create())</code>。而 DoubleCheck 包装的意义在于持有了 <code>B</code>的实例，而且只会生成一次实例，也就是说：没有用 MyScope 作用域之前，<code>DaggerAComponent</code> 每次注入依赖都会新建一个 <code>B</code>实例，而用 <code>AScope</code> 作用之后，每次注入依赖都只会返回第一次生成的实例。通过生成的代码可以发现这和<code>Lazy</code>的方式很相似。</p>
+<h4 id="注解到目标类方式">注解到目标类方式</h4>
+<pre><code class="language-kotlin">class A {
+    @AScope
+    @Inject
+    lateinit var b: B
+}
+
+
+@AScope
+class B  @Inject constructor()
+
+
+@AScope
+@Component(modules = [AModule::class])
+interface AComponent {
+    fun injectA(a: A)
+}
+
+@Module
+class AModule {
+}
+</code></pre>
+<p>使用这种方式生成的代码：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private Provider&lt;B&gt; bProvider;
+
+  private DaggerAComponent() {
+
+    initialize();
+  }
+ ...
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private void initialize() {
+     // 此处使用的是Factory,不是AModule_ProvideBFactory
+    this.bProvider = DoubleCheck.provider(B_Factory.create());
+  }
+
+  @Override
+  public void injectA(A a) {
+    injectA2(a);}
+
+  private A injectA2(A instance) {
+    A_MembersInjector.injectB(instance, bProvider.get());
+    return instance;
+  }
+  ...
+}
+</code></pre>
+<p><strong>Scope 作用域的本质：Component 间接持有依赖实例的引用，把实例的作用域与 Component 绑定</strong></p>
+<h3 id="singleton">Singleton</h3>
+<p>在了解作用域的原理后，再来理解 Dagger 2 提供的自带作用域就容易了。<code>@Singleton</code>顾名思义保证单例，那么它又是如何实现的呢，实现了单例模式那样只返回一个实例吗？</p>
+<p>把上面例子中<code>@AScope</code>换成<code>@Singleton</code>，发现生成的 DaggerAComponent 和其他类没有变化。也只是用<code>DoubleCheck</code>包装了工厂而已，并没有什么特殊实现。所以 Singleton 作用域可以保证一个 Component 中的单例，但是如果产生多个 Component 实例，那么实例的单例就无法保证了。</p>
+<p>所以在网上一些例子中，有看到<code>AppComponent</code>使用 Singleton 作用域，保证绑定的依赖实例的单例。它生效的原因是<code>AppComponent</code>只会在 Application 中创建一次，由<code>AppComponent</code>的单例来保证绑定的依赖实例的单例。</p>
+<p>**注意：Component 可以同时被多个 Scope 标记。**即 Component 可以和多个 Scope 的 Moudle 或目标类绑定。</p>
+<h3 id="reusable">Reusable</h3>
+<p>上文中的自定义的<code>@AScope</code>和<code>@Singleton</code>都可以使得绑定的 Component 缓存依赖的实例，但是与之绑定 Component 必须有相同的 Scope 标记。假如我只想单纯缓存依赖的实例，可以复用之前的实例，不想关心与之绑定是什么 Component，应该怎么办呢？。</p>
+<p>这时就可以使用<code>@Reusable</code>作用域，**Reusable 作用域不关心绑定的 Component，Reusable 作用域只需要标记目标类或 provide 方法，不用标记 Component。**下面先看看使用 Reusable 作用域后，生成的 <code>DaggerAComponent</code> 的变化：</p>
+<pre><code class="language-java">public final class DaggerAComponent implements AComponent {
+  private Provider&lt;B&gt; provideBProvider;
+
+  private DaggerAComponent(AModule aModuleParam) {
+    initialize(aModuleParam);
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private void initialize(final AModule aModuleParam) {
+    this.provideBProvider = SingleCheck.provider(AModule_ProvideBFactory.create(aModuleParam));
+  }
+
+  @Override
+  public void injectA(A a) {
+    injectA2(a);
+  }
+
+  private A injectA2(A instance) {
+    A_MembersInjector.injectB(instance, provideBProvider.get());
+    return instance;
+  }
+ ...
+}
+</code></pre>
+<p>从上面代码可以看出使用<code>@Reusable</code>作用域后，利用到 Reusable 实例的 Component 会间接持有实例的引用。但是这里是用<code>SingleCheck</code>而不是<code>DoubleCheck</code>，在多线程情况下可能会生成多个实例。因为<code>@Reusable</code>作用域目的只是可以复用之前的实例，并不需要严格地保证实例的唯一，所以使用 <code>SingleCheck</code> 就足够了。</p>
+<h3 id="releasable-references可释放引用"><s>Releasable references（可释放引用）</s></h3>
+<p>相关内容在新版<code>Dagger2</code>已经废除。</p>
+<h2 id="binding-instances">Binding Instances</h2>
+<p>通过前面作用域的讲解，可以清楚 Component 可以间接持有 Module 或 Inject 目标类构造函数提供的依赖实例，除了这两种方式，Component 还可以在创建 Component 的时候绑定依赖实例，用以注入。这就是<code>@BindsInstance</code>注解的作用，只能在 Component.Builder 中使用。</p>
+<p>在 Android 中使用 Dagger 2 时，activity 实例经常也需要作为依赖实例用以注入，在之前只能使用 Module：</p>
+<pre><code class="language-kotlin">@Module
+class MainActivityModule {
+    private val mainActivity: MainActivity
+
+    constructor(mainActivity: MainActivity) {
+        this.mainActivity = mainActivity
+    }
+
+    @Provides
+    fun provideMainActivity(): MainActivity {
+        return this.mainActivity
+    }
+}
+</code></pre>
+<p>而使用<code>@BindsInstance</code>的话会更加简单：</p>
+<pre><code class="language-kotlin">@Component
+interface MainActivityComponent {
+
+    fun injectMainActivity(activity: MainActivity)
+
+    @Component.Builder
+    interface Builder {
+
+        @BindsInstance
+        fun activity(activity: Activity): Builder
+
+        fun build(): MainActivityComponent
+    }
+}
+</code></pre>
+<p>注意在调用<code>build()</code>创建 Component 之前，所有<code>@BindsInstance</code>方法必须先调用。上面例子中 <code>MainActivityComponent</code>还可以注入 Activity 类型的依赖，但是不能注入 <code>MainActivity</code>，因为 Dagger 2 是使用具体类型作为依据的（也就是只能使用<code>@Inject Activity activity</code>而不是<code>@Inject MainActivity activity</code>）。</p>
+<p>如果<code>@BindsInstance</code>方法的参数可能为 null，需要再用<code>@Nullable</code>标记，同时标注 Inject 的地方也需要用<code>@Nullable</code>标记。这时 Builder 也可以不调用<code>@BindsInstance</code>方法，这样 Component 会默认设置 instance 为 null。</p>
+<h2 id="总结">总结</h2>
+<ul>
+<li>Lazy 可以延时注入，Provider 可以创建多个实例</li>
+<li>Qualifier 限定符用来解决同一个实例不同方法提供冲突的问题，可以依赖实例起个别名用来区分，或者自定义注解</li>
+<li>Scope 作用域的本质是 Component 会持有与之绑定的依赖实例的引用，要想确保实例的生命周期，关键在于控制 Component 的生命周期。</li>
+<li>推荐优先使用<code>@BindsInstance</code>方法，相对于写一个带有构造函数带有参数的 Module。</li>
 </ul>
 ]]></content>
     </entry>

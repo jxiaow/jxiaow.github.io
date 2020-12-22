@@ -5,7 +5,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>App启动优化 | Xiaowu</title>
+<title>Paint的高级使用---xfermode | Xiaowu</title>
 
 <link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1608620648220">
 
@@ -126,23 +126,19 @@
             <article style="display:flex;">
                 <div class="post-detail gt-bg-theme-color-second gt-post-content">
                     <h2 class="post-title">
-                        App启动优化
+                        Paint的高级使用---xfermode
                     </h2>
                     <div class="post-info">
                         <div>
                             <time class="post-time gt-c-content-color-first">
-                                · 2019-07-17 ·
+                                · 2020-12-22 ·
                             </time>
-                            
-                            <a href="https://jxiaow.gitee.io/tag/f3tbfHeq9/" class="post-tags">
-                                # Android
-                            </a>
                             
                         </div>
                         <div>
                             
-                            <span id="/posts/6241fe4b/"
-                                class="leancloud_visitors" data-flag-title="App启动优化">
+                            <span id="/posts/b2c61861/"
+                                class="leancloud_visitors" data-flag-title="Paint的高级使用---xfermode">
                                 <em class="post-meta-item-text">阅读量 </em>
                                 <i class="leancloud-visitors-count">0</i>
                             </span>
@@ -152,145 +148,139 @@
 
                     <!-- <div class="post-content-wrapper"> -->
                     <div class="post-content">
-                        <p>随着手机的运行内存（RAM）越来越大，CPU处理能力越来越强的情况，App的启动速度给用户的印象越来越重要，所以App启动优化也势在必行，下面是我在App优化过程中做的一些笔记。</p>
-<!-- more -->
-<h2 id="android-系统的启动">Android 系统的启动</h2>
-<p>Android开机执行过程如下图所示：</p>
-<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images/2020/05/10-00-38-53-Android%E7%B3%BB%E7%BB%9F%E5%BC%80%E6%9C%BA%E8%BF%87%E7%A8%8B%E5%9B%BE.jpg" alt="Android系统开机过程图.jpg" loading="lazy"></figure>
-<ol>
-<li>按下电源时，固化在ROM上的引导芯片代码会开始执行，去加载<code>Bootloader</code>到RAM并开始执行；</li>
-<li>Bootloader 会将操作系统拉起来并运行；</li>
-<li><code>Linux Kernel</code>启动开启系统设置，找到文件<code>init.rc</code>启动初始化进程；</li>
-<li>init进程初始化和启动属性服务后开启<code>Zygote</code>进程；</li>
-<li>Zygote开启创建虚拟机并注册<code>JNI</code>方法，开启<code>SystemServer</code>；</li>
-<li>SystemServer 启动<code>Binder</code>线程池和<code>SystemServiceManager</code>并启动各种服务, 如<code>ActivityManagerService</code>；</li>
-<li>AMS(ActivityManagerService)启动<code>Launcher</code></li>
-</ol>
-<h2 id="launcher启动">Launcher启动</h2>
-<h3 id="adb命令">adb命令</h3>
-<ol>
-<li>
-<p>查看当前的Activity名称</p>
-<pre><code class="language-shell">adb shell dumpsys activity activities 
+                        <h1 id="xfermode">XFermode</h1>
+<p>在使用<code>Paint</code>的时候，我们能通过使用<code>Xfermode</code>能够完成图像组合的效果将绘制的图形的像素和<code>Canvas</code>上对应位置的像素按照一定的规则进行混合，形成新的像素，再更新到Canvas中形成最终的图形。</p>
+<h3 id="alpha-compositing-modes">Alpha compositing modes</h3>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>图像</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#SRC">Source</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/77bc22ec45c0b6ae23cdf9a4e959b8c9-composite_SRC-fdd186.png" alt="composite_SRC" style="zoom:50%;" /></td>
+<td>只显示源图像</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#SRC_OVER">Source Over</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/9dc296cfe41e64363a8f1c6c9b4c43d6-composite_SRC_OVER-ced90d.png" alt="composite_SRC_OVER" style="zoom:50%;" /></td>
+<td>将源图像放在目标图像上方</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#SRC_IN">Source In</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/f521a50f816ca7de9d271cf5ff63bccd-composite_SRC_IN-6e5aec.png" alt="composite_SRC_IN" style="zoom:50%;" /></td>
+<td>只在源图像和目标图像相交的地方绘制【源图像】</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#SRC_ATOP">Source Atop</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/1c19bde4e44cf4d3519a62f75b61a22a-15-1c19bde4e44cf4d3519a62f75b61a22a-15-26-44-1c19bde4e44cf4d3519a62f75b61a22a-composite_SRC_ATOP-6e88bc-222e64-ae79d3.png" alt="composite_SRC_ATOP" style="zoom:50%;" /></td>
+<td>在源图像和目标图像相交的地方绘制【源图像】，<br/>在不相交的地方绘制【目标图像】，<br/>相交处的效果受到源图像和目标图像alpha的影响</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#DST">Destination</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/b0f57bd567c0ad0043b3b70434b18877-composite_DST-019ac2.png" alt="composite_DST" style="zoom:50%;" /></td>
+<td>只显示目标图像</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#DST_OVER">Destination Over</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/14/aa78ae202c4c2afaee3d4deb33b16688-composite_DST_OVER-f6587a.png" alt="composite_DST_OVER" style="zoom:50%;" /></td>
+<td>将目标图像放在源图像上方</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#DST_IN">Destination In</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/9bcdc1c2ece44f766781e816c159e152-composite_DST_IN-9382cc.png" alt="composite_DST_IN" style="zoom:50%;" /></td>
+<td>只在源图像和目标图像相交的地方绘制【目标图像】，<br/>绘制效果受到源图像对应地方透明度影响</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#DST_ATOP">Destination Atop</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/8dafd1d7643b0e9e9ae70a0f40f9142b-composite_DST_ATOP-0afee2.png" alt="composite_DST_ATOP" style="zoom:50%;" /></td>
+<td>在源图像和目标图像相交的地方绘制【目标图像】<br/>，在不相交的地方绘制【源图像】，<br/>相交处的效果受到源图像和目标图像alpha的影响</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#CLEAR">Clear</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/bdefc01437f98ef4a42444574d3eacd6-composite_CLEAR-2b73f6.png" alt="composite_CLEAR" style="zoom:50%;" /></td>
+<td>清除图像</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#SRC_OUT">Source Out</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/ccd23f0072e4bdd5f1f8bc96ef3562a1-composite_SRC_OUT-f3f0a8.png" alt="composite_SRC_OUT" style="zoom:50%;" /></td>
+<td>只在源图像和目标图像不相交的地方绘制【源图像】，<br/>相交的地方根据目标图像的对应地方的alpha进行过滤，<br/>目标图像完全不透明则完全过滤，完全透明则不过滤</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#DST_OUT">Destination Out</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/b875a9d37fdcb75ac929710e537e1a9d-composite_DST_OUT-9e91d0.png" alt="composite_DST_OUT" style="zoom:50%;" /></td>
+<td>只在源图像和目标图像不相交的地方绘制【目标图像】，<br/>在相交的地方根据源图像的alpha进行过滤，<br/>源图像完全不透明则完全过滤，完全透明则不过滤</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#XOR">Exclusive Or</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/920824ddb82dfff076e9f73e3e0603f2-composite_XOR-33040a.png" alt="composite_XOR" style="zoom:50%;" /></td>
+<td>在源图像和目标图像相交的地方之外绘制它们，<br/>在相交的地方受到对应alpha和色值影响，如果完全不透明则相交处完全不绘制</td>
+</tr>
+</tbody>
+</table>
+<h3 id="blending-modes">Blending modes</h3>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>图像</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#DARKEN">Darken</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/66a16c8f950674cd9dcfaf27c095018b-composite_DARKEN-36d211.png" alt="composite_DARKEN" style="zoom:50%;" /></td>
+<td>变暗,较深的颜色覆盖较浅的颜色，若两者深浅程度相同则混合</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#LIGHTEN">Lighten</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/8507029c0d4cd6b0718c1c7e499c5185-composite_LIGHTEN-efedc7.png" alt="composite_LIGHTEN" style="zoom:50%;" /></td>
+<td>变亮，与DARKEN相反，DARKEN和LIGHTEN生成的图像结果与Android对颜色值深浅的定义有关</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#MULTIPLY">Multiply</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/15014a5deac1641408b5364925c00bbe-composite_MULTIPLY-e453e8.png" alt="composite_MULTIPLY" style="zoom:50%;" /></td>
+<td>正片叠底，源图像素颜色值乘以目标图像素颜色值除以255得到混合后图像像素颜色值</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#SCREEN">Screen</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/1fafd652426006c119d2dda496e5648f-composite_SCREEN-f6ab45.png" alt="composite_SCREEN" style="zoom:50%;" /></td>
+<td>滤色，色调均和,保留两个图层中较白的部分，较暗的部分被遮盖</td>
+</tr>
+<tr>
+<td><a href="https://developer.android.com/reference/android/graphics/PorterDuff.Mode#OVERLAY">Overlay</a></td>
+<td><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/16/89658d8dcb10511e93e2bab5e560bfe0-composite_OVERLAY-b343c6.png" alt="composite_OVERLAY" style="zoom:50%;" /></td>
+<td>叠加</td>
+</tr>
+</tbody>
+</table>
+<p>通过上表，我们能够很明显的知道我们的XFermode其实实际上就是在使用图形之间的相互组合以达到自己的想要的目的， 他提供了17种组合模式。</p>
+<p>阅读源码的过程中，发现<code>Xfermode</code>的子类只有一个子类<code>PorterDuffXfermode</code>。</p>
+<pre><code class="language-java">public class Xfermode {
+    static final int DEFAULT = PorterDuff.Mode.SRC_OVER.nativeInt;
+    int porterDuffMode = DEFAULT;
+}
 </code></pre>
-</li>
-<li>
-<p>查看进程</p>
-<pre><code class="language-shell">adb shell ps
+<pre><code class="language-java">public class PorterDuffXfermode extends Xfermode {
+    /**
+     * Create an xfermode that uses the specified porter-duff mode.
+     *
+     * @param mode           The porter-duff mode that is applied
+     */
+    public PorterDuffXfermode(PorterDuff.Mode mode) {
+        porterDuffMode = mode.nativeInt;
+    }
+}
 </code></pre>
-</li>
-</ol>
-<h3 id="application启动">Application启动</h3>
-<p><code>Launcher</code>源码查看：<a href="http://androidxref.com/">Android XRef</a></p>
-<ol>
-<li>
-<p>当我们点击程序图标时，就会执行<code>Launcher</code>类中的<code>onClick</code>方法并把程序的相关信息传入；</p>
-</li>
-<li>
-<p>先获取一个<code>intent---&gt;startActivitySafely(v, intent, tag)--》startActivity(v, intent, tag);--&gt;startActivity(intent)</code>；</p>
-</li>
-<li>
-<p>startActivity的流程如下：</p>
-<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-41-15-1563348657531.png" alt="1563348657531.png" loading="lazy"></figure>
-<p>startActivity会开启一个App进程，ActivityThread.java 作为入口，用attach开启App然后再加载Application和ActivityThread.attach --&gt; mgr.attachApplication(mAppThread)，会通过远端进程去回调private void handleBindApplication(AppBindData data)</p>
-<pre><code class="language-java">private void handleBindApplication(AppBindData data){
-   Application app = data.info.makeApplication(创建Application对象
-     mInstrumentation.callApplicationOnCreate(app);----》 app.onCreate();
-}                
+<p>使用：</p>
+<pre><code class="language-kotlin">val paint = Paint()
+paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.MULTIPLY)
 </code></pre>
-</li>
-</ol>
-<h2 id="黑白屏问题">黑白屏问题</h2>
-<pre><code class="language-xml">&lt;!--白屏--&gt;
-&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light&quot;&gt;
-&lt;!--黑屏 （在以前的老版本上有效，现在的版本默认使用透明处理了）--&gt;
-&lt;style name=&quot;AppTheme&quot;&gt;
-</code></pre>
-<p>黑白屏的主要原因是我们app启动耗时太长即Application中onCreate方法执行时间太长导致的，目前的我所做的修改有如下2步。</p>
-<h4 id="提升用户体验">提升用户体验</h4>
-<p>添加Splash主题，执行<code>Applciation#onCreate()</code>时显示该主题，这样可以快速打开App</p>
-<ul>
-<li>
-<p>在res/values/中修改样式：</p>
-<ul>
-<li>
-<p>在默认的<code>res/values/styles/styles.xml</code>中添加一个<code>splash</code>主题</p>
-<pre><code class="language-xml">&lt;style name=&quot;StartSplashTheme&quot; parent=&quot;AppTheme&quot;&gt;
-    &lt;!--设置一张默认的背景图来替代白屏或者黑屏--&gt;
-    &lt;item name=&quot;android:windowBackground&quot;&gt;@drawable/logo_splash&lt;/item&gt;
-    &lt;item name=&quot;android:windowFullscreen&quot;&gt;true&lt;/item&gt;
-    &lt;item name=&quot;windowNoTitle&quot;&gt;true&lt;/item&gt;
-    &lt;item name=&quot;android:windowContentOverlay&quot;&gt;@null&lt;/item&gt;
-    &lt;item name=&quot;android:windowNoTitle&quot;&gt;true&lt;/item&gt;
-&lt;/style&gt;
-</code></pre>
-</li>
-<li>
-<p>新建<code>res/values/sytles-v21/styles.xml</code>中添加一个<code>splash</code>主题：</p>
-<pre><code class="language-xml">&lt;style name=&quot;StartSplashTheme&quot; parent=&quot;AppTheme&quot;&gt;
-    &lt;item name=&quot;android:windowBackground&quot;&gt;@drawable/logo_splash&lt;/item&gt;
-    &lt;item name=&quot;android:windowFullscreen&quot;&gt;true&lt;/item&gt;
-    &lt;item name=&quot;windowNoTitle&quot;&gt;true&lt;/item&gt;
-    &lt;item name=&quot;android:windowNoTitle&quot;&gt;true&lt;/item&gt;
-    &lt;item name=&quot;android:windowDrawsSystemBarBackgrounds&quot;&gt;false&lt;/item&gt;
-    &lt;item name=&quot;android:windowContentOverlay&quot;&gt;@null&lt;/item&gt;
-&lt;/style&gt;
-</code></pre>
-</li>
-<li>
-<p>新建<code>res/values/sytles-v27/styles.xml</code>中添加一个<code>splash</code>主题：</p>
-<pre><code class="language-xml">&lt;style name=&quot;StartSplashTheme&quot; parent=&quot;AppTheme&quot;&gt;
-    &lt;item name=&quot;android:windowBackground&quot;&gt;@drawable/ic_splash&lt;/item&gt;
-    &lt;item name=&quot;android:windowFullscreen&quot;&gt;true&lt;/item&gt;
-    &lt;item name=&quot;windowNoTitle&quot;&gt;true&lt;/item&gt;
-    &lt;item name=&quot;android:windowNoTitle&quot;&gt;true&lt;/item&gt;
-    &lt;item name=&quot;android:windowContentOverlay&quot;&gt;@null&lt;/item&gt;
-    &lt;item name=&quot;android:windowDrawsSystemBarBackgrounds&quot;&gt;false&lt;/item&gt;
-    &lt;item name=&quot;android:windowTranslucentNavigation&quot;&gt;true&lt;/item&gt;
-    &lt;item name=&quot;android:windowLayoutInDisplayCutoutMode&quot; tools:targetApi=&quot;p&quot;&gt;shortEdges&lt;/item&gt;
-&lt;/style&gt;
-</code></pre>
-</li>
-</ul>
-</li>
-<li>
-<p>在<code>SplashActivity</code>中设置主题</p>
-<p>AndroidManifest.xml</p>
-<pre><code class="language-xml">&lt;activity
-          android:name=&quot;com.xx.xx.splash.SplashActivity&quot;
-          android:label=&quot;@string/app_name&quot;
-          android:screenOrientation=&quot;portrait&quot;
-          &lt;!--设置该主题--&gt;
-          android:theme=&quot;@style/StartSplashTheme&quot;&gt;
-    &lt;intent-filter&gt;
-        &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
-        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
-    &lt;/intent-filter&gt;
-&lt;/activity&gt;
-</code></pre>
-</li>
-</ul>
-<h3 id="优化applicationoncreate中的耗时方法">优化Application#onCreate()中的耗时方法</h3>
-<h4 id="启动时间查看">启动时间查看</h4>
-<p>4.4 以前可以使用adb命令：</p>
-<pre><code class="language-shell">adb shell am start -W com.xx.xx.splash.SplashActivity
-</code></pre>
-<p>4.4 以后版本在<code>Logcat</code>输入<code>Display</code>筛选系统日志，不过滤信息No Filters</p>
-<h4 id="采用trace工具分析代码执行时间">采用Trace工具分析代码执行时间</h4>
-<pre><code class="language-java">File file = new File(Environment.getExternalStorageDirectory(), &quot;xmh.trace&quot;);
-Debug.startMethodTracing(file.getAbsolutePath());
-
-/*****************************************************************************/
-.........需要检测的代码............
-/*****************************************************************************/    
-Debug.stopMethodTracing();
-</code></pre>
-<p>将文件拉取，然后在<code>Android Studio</code>中利用 <code>Profile</code>查看。</p>
-<h4 id="优化方案">优化方案</h4>
-<ol>
-<li>开启一个优先级低的线程，去处理没有<code>handler</code>相关、不操作<code>UI</code>和对异步要求不高的；</li>
-<li>懒加载， 用到的时候才去初始化，一些常量的初始化可以使用类的静态代码块去处理。</li>
-</ol>
 
                     </div>
                     <div class="essaySuffix-box">
@@ -302,8 +292,8 @@ Debug.stopMethodTracing();
                                         href="/about"
                                         target="_blank">Xiaowu</a></span></strong> <br><span
                                 style="font-weight: bold; white-space:nowrap;">本文链接</span>：<a
-                                href="https://jxiaow.gitee.io/posts/6241fe4b/"
-                                target="_blank">https://jxiaow.gitee.io/posts/6241fe4b/</a><br><span
+                                href="https://jxiaow.gitee.io/posts/b2c61861/"
+                                target="_blank">https://jxiaow.gitee.io/posts/b2c61861/</a><br><span
                                 class="essaySuffix-right-title">版权声明</span>：本博客所有文章除特别声明外，均采用 <a
                                 href="https://creativecommons.org/licenses/by-nc-nd/4.0/" alt="BY-NC-SA"
                                 title="BY-NC-SA" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</div>
@@ -313,28 +303,11 @@ Debug.stopMethodTracing();
                 <!-- </div> -->
                 <div class="toc-container">
                     <ul class="markdownIt-TOC">
-<li>
-<ul>
-<li><a href="#android-%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%90%AF%E5%8A%A8">Android 系统的启动</a></li>
-<li><a href="#launcher%E5%90%AF%E5%8A%A8">Launcher启动</a>
-<ul>
-<li><a href="#adb%E5%91%BD%E4%BB%A4">adb命令</a></li>
-<li><a href="#application%E5%90%AF%E5%8A%A8">Application启动</a></li>
-</ul>
-</li>
-<li><a href="#%E9%BB%91%E7%99%BD%E5%B1%8F%E9%97%AE%E9%A2%98">黑白屏问题</a><br>
+<li><a href="#xfermode">XFermode</a><br>
 *
 <ul>
-<li><a href="#%E6%8F%90%E5%8D%87%E7%94%A8%E6%88%B7%E4%BD%93%E9%AA%8C">提升用户体验</a></li>
-<li><a href="#%E4%BC%98%E5%8C%96applicationoncreate%E4%B8%AD%E7%9A%84%E8%80%97%E6%97%B6%E6%96%B9%E6%B3%95">优化Application#onCreate()中的耗时方法</a>
-<ul>
-<li><a href="#%E5%90%AF%E5%8A%A8%E6%97%B6%E9%97%B4%E6%9F%A5%E7%9C%8B">启动时间查看</a></li>
-<li><a href="#%E9%87%87%E7%94%A8trace%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%97%B6%E9%97%B4">采用Trace工具分析代码执行时间</a></li>
-<li><a href="#%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88">优化方案</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li><a href="#alpha-compositing-modes">Alpha compositing modes</a></li>
+<li><a href="#blending-modes">Blending modes</a></li>
 </ul>
 </li>
 </ul>
@@ -345,13 +318,6 @@ Debug.stopMethodTracing();
 
           
 
-            
-            <div class="next-post">
-                <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://jxiaow.gitee.io/posts/8f46bf8a/" class="post-title gt-a-link">
-                    Java中的静态代码块在kotlin中的表现形式
-                </a>
-            </div>
             
 
             
