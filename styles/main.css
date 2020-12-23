@@ -406,6 +406,7 @@ ul li {
 .gt-post-content th {
   border: 1px solid #dfe2e5;
   padding: 0.6em 1em;
+  vertical-align: middle;
 }
 .gt-post-content ul,
 .gt-post-content ol {
