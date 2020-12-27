@@ -7,7 +7,7 @@
 
 <title>Paint的高级使用---xfermode | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1608707567715">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1609077597956">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -112,7 +112,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1608707567715" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1609077597956" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -149,6 +149,10 @@
                     <!-- <div class="post-content-wrapper"> -->
                     <div class="post-content">
                         <p>在使用<code>Paint</code>的时候，我们能通过使用<code>Xfermode</code>能够完成图像组合的效果将绘制的图形的像素和<code>Canvas</code>上对应位置的像素按照一定的规则进行混合，形成新的像素，再更新到Canvas中形成最终的图形。</p>
+<blockquote>
+<p>在设置Xfermode模式之前绘制的称为目标图像(DST), 在设置Xfermode模式之后绘制的称为源图像(SRC)!<br>
+所以先绘制的称为DST，后绘制的称为SRC</p>
+</blockquote>
 <h3 id="alpha-compositing-modes">Alpha compositing modes</h3>
 <table>
 <thead>
@@ -276,10 +280,286 @@
     }
 }
 </code></pre>
-<p>使用：</p>
+<h3 id="使用">使用</h3>
 <pre><code class="language-kotlin">val paint = Paint()
 paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.MULTIPLY)
 </code></pre>
+<h4 id="倒影效果">倒影效果</h4>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/27/c78774ebefd82eb5aefe35d0529aaeef-image-20201227171017960-08fdbc.png" alt="image-20201227171017960" loading="lazy"></figure>
+<pre><code class="language-kotlin">class ReflectionView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
+    // 头像bitmap
+    private val avatarBmp = BitmapFactory.decodeResource(resources, R.drawable.avator)
+
+    // 原图像
+    private val srcBitmap = BitmapFactory.decodeResource(resources, R.drawable.invert_shade)
+
+    // 目标图像
+    private val invertBitmap = run {
+        // 图像倒置
+        val matrix = Matrix()
+        matrix.setScale(1f, -1f)
+        Bitmap.createBitmap(
+            avatarBmp,
+            0,
+            0,
+            avatarBmp.width,
+            avatarBmp.height,
+            matrix,
+            true
+        )
+    }
+
+    private val paint = Paint()
+
+    // xfermode 模式  dst-in 只显示两个图像交汇部分，并绘制目标图像, 绘制图像的效果
+    // 受到原图像的透明度的影响
+    private val xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        canvas.drawBitmap(avatarBmp, 0f, 0f, paint)
+        val layerId =
+            canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null, Canvas.ALL_SAVE_FLAG)
+        canvas.translate(0f, avatarBmp.height.toFloat())
+        // 先绘制的是目标图像
+        canvas.drawBitmap(invertBitmap, 0f, 0f, paint)
+        paint.xfermode = xfermode
+        // 原图像
+        canvas.drawBitmap(srcBitmap, 0f, 0f, paint)
+
+        paint.xfermode = null
+        canvas.restoreToCount(layerId)
+    }
+}
+</code></pre>
+<h4 id="心电图">心电图</h4>
+<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/27/c94a705d12ac74c3192d30e9c64843df-image-20201227180106704-0ecbf0.png" alt="image-20201227180106704" loading="lazy"></figure>
+<p><strong>ps:</strong>  <em><strong>此图只是动态图的一帧。</strong></em></p>
+<pre><code class="language-kotlin">class HeartView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
+    // 目标图像 --&gt; 心电图
+    private val dstBmp = BitmapFactory.decodeResource(resources, R.drawable.heartmap)
+
+    // 源图像
+    private val srcBmp = Bitmap.createBitmap(dstBmp.width, dstBmp.height, Bitmap.Config.ARGB_8888)
+
+    // 画笔
+    private val paint = Paint()
+
+
+    // xfermode
+    private val xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
+
+    // 创建一个canvas，用于绘制源bitmap
+    private val srcCanvas = Canvas(srcBmp)
+
+    private var dx = 0f
+
+    private val animator = ValueAnimator.ofFloat(0.2f * srcBmp.width, srcBmp.width.toFloat())
+        .apply {
+            repeatCount = ValueAnimator.INFINITE
+            interpolator = LinearInterpolator()
+            duration = 6000L
+            addUpdateListener {
+                dx = it.animatedValue as Float
+                postInvalidate()
+            }
+            start()
+        }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        srcCanvas.drawColor(Color.RED, PorterDuff.Mode.CLEAR)
+        srcCanvas.drawRect(0f, 0f, srcBmp.width.toFloat(), srcBmp.height.toFloat(), paint)
+
+        val layerId =
+            canvas.saveLayer(
+                width.toFloat() - dx,
+                0f,
+                width.toFloat(),
+                height.toFloat(),
+                null,
+                Canvas.ALL_SAVE_FLAG
+            )
+
+        // 先绘制目标图像
+        canvas.drawBitmap(dstBmp, 0f, 0f, paint)
+        paint.xfermode = xfermode
+        // 绘制源图像
+        canvas.drawBitmap(srcBmp, 0f, 0f, paint)
+        paint.xfermode = null
+        canvas.restoreToCount(layerId)
+    }
+}
+</code></pre>
+<h4 id="波浪图">波浪图</h4>
+<p><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/27/1b70b141a09a7d34efd69ef884f7527d-image-20201227184438008-4aaab0.png" alt="image-20201227184438008" loading="lazy"><br>
+<strong>ps:</strong>  <em><strong>此图只是动态图的一帧。</strong></em></p>
+<pre><code class="language-kotlin">class WaveView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
+
+    private val waveBmp = BitmapFactory.decodeResource(resources, R.drawable.wav)
+    private val shadeBmp = BitmapFactory.decodeResource(resources, R.drawable.circle_shape)
+
+    private val paint = Paint().apply {
+        isAntiAlias = true
+    }
+
+    private val xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
+
+    private val srcRect = Rect()
+
+    private val dstRect = Rect()
+
+    private var dx: Int = (0.15f * shadeBmp.height).toInt()
+
+    private val animator = ValueAnimator.ofInt(0, shadeBmp.width)
+        .apply {
+            repeatCount = ValueAnimator.INFINITE
+            interpolator = LinearInterpolator()
+            duration = 2000L
+            addUpdateListener {
+                dx = it.animatedValue as Int
+                postInvalidate()
+            }
+            start()
+        }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        canvas.drawBitmap(shadeBmp, 0f, 0f, paint)
+
+        val saveLayer =
+            canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null, Canvas.ALL_SAVE_FLAG)
+        // 截图波浪图内容到圆中
+        srcRect.set(dx, 0, shadeBmp.width + dx, shadeBmp.height)
+        dstRect.set(0, 0, shadeBmp.width, shadeBmp.height)
+        canvas.drawBitmap(waveBmp, srcRect, dstRect, paint)
+        paint.xfermode = xfermode
+        canvas.drawBitmap(shadeBmp, 0f, 0f, paint)
+        paint.xfermode = null
+        canvas.restoreToCount(saveLayer)
+    }
+}
+</code></pre>
+<h4 id="刮刮卡">刮刮卡</h4>
+<figure data-type="image" tabindex="3"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/27/7b8fbf9b7cdcc3a71632f9195d6d05e0-image-20201227211238293-bbb005.png" alt="image-20201227211238293" loading="lazy"></figure>
+<pre><code class="language-kotlin">class GuaGuaCardView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
+
+    private val textBmp = BitmapFactory.decodeResource(resources, R.drawable.guaguaka_text1)
+    private val guaBmp = BitmapFactory.decodeResource(resources, R.drawable.guaguaka)
+    private val dstBmp = Bitmap.createBitmap(guaBmp.width, guaBmp.height, Bitmap.Config.ARGB_8888)
+
+    private val paint = Paint()
+    private val path = Path()
+    private val xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OUT)
+    private val pathCanvas = Canvas(dstBmp)
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        canvas.drawBitmap(textBmp, 0f, 0f, paint)
+
+        val layerId = canvas.saveLayer(
+            0f, 0f,
+            width.toFloat(), height.toFloat(), null, Canvas.ALL_SAVE_FLAG
+        )
+        pathCanvas.drawPath(path, paint)
+        canvas.drawBitmap(dstBmp, 0f, 0f, paint)
+        paint.xfermode = xfermode
+        canvas.drawBitmap(guaBmp, 0f, 0f, paint)
+        paint.xfermode = null
+        canvas.restoreToCount(layerId)
+    }
+
+    private var preX = 0f
+    private var preY = 0f
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -&gt; {
+                preX = event.x
+                preY = event.y
+                path.moveTo(preX, preY)
+                return true
+            }
+            MotionEvent.ACTION_MOVE -&gt; {
+                if (event.x &gt; guaBmp.width || event.y &gt; guaBmp.height) {
+                    return false
+                }
+                val endX = (preX + event.x) / 2f
+                val endY = (preY + event.y) / 2f
+                path.quadTo(preX, preY, endX, endY)
+                preX = event.x
+                preY = event.y
+            }
+        }
+        postInvalidate()
+        return super.onTouchEvent(event)
+    }
+}
+</code></pre>
+<h4 id="橡皮擦">橡皮擦</h4>
+<figure data-type="image" tabindex="4"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/27/43f1635aa77754f5da3cc8e3b16c425f-image-20201227215738569-cf246f.png" alt="image-20201227215738569" loading="lazy"></figure>
+<pre><code class="language-kotlin">class EraserView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
+
+    private val srcBmp = BitmapFactory.decodeResource(resources, R.drawable.avator)
+    private val dstBmp = Bitmap.createBitmap(srcBmp.width, srcBmp.height, Bitmap.Config.ARGB_8888)
+    private val paint = Paint()
+    private val xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OUT)
+    private val pathCanvas = Canvas(dstBmp)
+    private val path = Path()
+
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        val layerId = canvas.saveLayer(
+            0f, 0f, width.toFloat(), height.toFloat(),
+            null, Canvas.ALL_SAVE_FLAG
+        )
+        pathCanvas.drawPath(path, paint)
+        canvas.drawBitmap(dstBmp, 0f, 0f, paint)
+        paint.xfermode = xfermode
+        canvas.drawBitmap(srcBmp, 0f, 0f, paint)
+        paint.xfermode = null
+        canvas.restoreToCount(layerId)
+    }
+
+    private var preX = 0f
+    private var preY = 0f
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -&gt; {
+                preX = event.x
+                preY = event.y
+                path.moveTo(preX, preY)
+                return true
+            }
+
+            MotionEvent.ACTION_MOVE -&gt; {
+                val endX = (preX + event.x) / 2f
+                val endY = (preY + event.y) / 2f
+                path.quadTo(preX, preY, endX, endY)
+                preX = event.x
+                preY = event.y
+            }
+        }
+        postInvalidate()
+        return super.onTouchEvent(event)
+
+    }
+}
+</code></pre>
+<hr>
+<p>本文部分内容参考地址：https://blog.csdn.net/crazy1235/article/details/73835933#t1</p>
 
                     </div>
                     <div class="essaySuffix-box">
@@ -308,6 +588,15 @@ paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.MULTIPLY)
 <ul>
 <li><a href="#alpha-compositing-modes">Alpha compositing modes</a></li>
 <li><a href="#blending-modes">Blending modes</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8">使用</a>
+<ul>
+<li><a href="#%E5%80%92%E5%BD%B1%E6%95%88%E6%9E%9C">倒影效果</a></li>
+<li><a href="#%E5%BF%83%E7%94%B5%E5%9B%BE">心电图</a></li>
+<li><a href="#%E6%B3%A2%E6%B5%AA%E5%9B%BE">波浪图</a></li>
+<li><a href="#%E5%88%AE%E5%88%AE%E5%8D%A1">刮刮卡</a></li>
+<li><a href="#%E6%A9%A1%E7%9A%AE%E6%93%A6">橡皮擦</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
