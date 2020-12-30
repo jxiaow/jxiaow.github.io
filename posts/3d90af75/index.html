@@ -5,7 +5,7 @@
 <meta name="description" content="心若没有栖息的地方，到哪里都是在流浪"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>360加固Gradle插件实现 | Xiaowu</title>
+<title>PathMeasure 基本使用 | Xiaowu</title>
 
 <link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1609323140739">
 
@@ -126,31 +126,31 @@
             <article style="display:flex;">
                 <div class="post-detail gt-bg-theme-color-second gt-post-content">
                     <h2 class="post-title">
-                        360加固Gradle插件实现
+                        PathMeasure 基本使用
                     </h2>
                     <div class="post-info">
                         <div>
                             <time class="post-time gt-c-content-color-first">
-                                · 2020-09-08 ·
+                                · 2020-12-30 ·
                             </time>
                             
-                            <a href="https://jxiaow.gitee.io/tag/W8dbnfRcI/" class="post-tags">
-                                # Gradle
+                            <a href="https://jxiaow.gitee.io/tag/Acpi6Puue/" class="post-tags">
+                                # Path
                             </a>
                             
-                            <a href="https://jxiaow.gitee.io/tag/20OsS2TVti/" class="post-tags">
-                                # 360加固
+                            <a href="https://jxiaow.gitee.io/tag/D0JYU0ypOH/" class="post-tags">
+                                # PathMeasure
                             </a>
                             
-                            <a href="https://jxiaow.gitee.io/tag/f3tbfHeq9/" class="post-tags">
-                                # Android
+                            <a href="https://jxiaow.gitee.io/tag/GJLfjss5g/" class="post-tags">
+                                # UI
                             </a>
                             
                         </div>
                         <div>
                             
-                            <span id="/posts/6c01e784/"
-                                class="leancloud_visitors" data-flag-title="360加固Gradle插件实现">
+                            <span id="/posts/3d90af75/"
+                                class="leancloud_visitors" data-flag-title="PathMeasure 基本使用">
                                 <em class="post-meta-item-text">阅读量 </em>
                                 <i class="leancloud-visitors-count">0</i>
                             </span>
@@ -160,57 +160,145 @@
 
                     <!-- <div class="post-content-wrapper"> -->
                     <div class="post-content">
-                        <p>最近码了一个基于360加固的流程实现的Gradle插件，在自动编译打包后进行360加固流程操作。只需要配置一些参数后，就可以实现自动打包编译和加固。</p>
-<p>项目地址:https://github.com/jxiaow/android-gradle-plugin</p>
-<h3 id="使用步骤">使用步骤</h3>
-<h4 id="1-添加依赖">1. 添加依赖</h4>
+                        <h2 id="pathmeasure-基本介绍">PathMeasure 基本介绍</h2>
+<p>PathMeasure，顾名思义，就是一个用来测量Path的类，有以下方法:</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/15/b8c92755aa56fda7a08484e6ca5e458f-image-20201215151755040-d21ec1.png" alt="image-20201215151755040" loading="lazy"></figure>
+<p>需要重点关注的有以下方法：</p>
+<h3 id="构造方法">构造方法</h3>
 <ul>
-<li>在根<code>build.gradle</code>中添加：</li>
+<li>无参构造方法</li>
 </ul>
-<pre><code class="language-groovy">allprojects {
-    repositories {
-        maven { url &quot;https://jitpack.io&quot; }
-    }
-}
-
-dependencies {
-    ...
-    classpath 'com.github.jxiaow:android-gradle-plugin:$version'
+<pre><code class="language-java">public PathMeasure() {
+    mPath = null;
+    native_instance = native_create(0, false);
 }
 </code></pre>
-<p>(请替换 <code>$version</code>为最新的版本号:<a href="https://jitpack.io/#jxiaow/android-gradle-plugin"><img src="https://jitpack.io/v/jxiaow/android-gradle-plugin.svg" alt="" loading="lazy"></a>)</p>
+<p>创建一个空的<code>PathMeasure</code>，使用之前需要先与创建好的 <code>Path</code>关联。如果关联之后 Path 内容进行了更改，则需要使用 setPath 方法重新关联。</p>
 <ul>
-<li>在<code>app</code>的模块<code>build.gradle</code>中添加：</li>
+<li>有参构造方法</li>
 </ul>
-<pre><code class="language-groovy">apply plugin: 'com.github.jxiaow.jiagu'
-</code></pre>
-<h4 id="2-参数配置">2. 参数配置</h4>
-<p>使用这款插件需要在<code>app</code>的<code>build.gradle</code>中添加一些配置信息，如下：</p>
-<pre><code class="language-groovy">jiagu {
-    home '../360jiagu' // 360加固软件的根目录
-    buildTypes 'release', 'debug' // 需要加固的编译类型
-    configs '-crashlog' // 选择360的可选配置服务
-    username 'user' // 360加固用户名
-    password 'password' // 360加固密码
-    charsetName 'GBK' // 360加固控制台输出字符编码
-    // apk签名文件， 如果在Android中配置了签名文件，此项可以不用配置，插件会自动读取名为'release'的签名文件
-    signingConfig { 
-        key_alias         : KEY_ALIAS, 
-        key_password      : KEY_PASSWORD,
-        key_store_password: KEY_STORE_PASSWORD,
-        key_store_file    : KEY_STORE_FILE
-    }
+<pre><code class="language-java">public PathMeasure(Path path, boolean forceClosed) {
+    // The native implementation does not copy the path, prevent it from being GC'd
+    mPath = path;
+    native_instance = native_create(path != null ? path.readOnlyNI() : 0, forceClosed);
 }
 </code></pre>
-<h4 id="3-开始加固">3. 开始加固</h4>
-<p>确认上述参数无误后，就可以在控制台中切换到当前项目根目录执行</p>
-<pre><code class="language-shell"># 各个系统的控制台gradle命令可能不一样： ./gradlew 或 gradlew 
-./gradlew clean jiaGuApk 
+<p>创建一个 <code>PathMeasure</code> 并关联一个<code>Path(已创建的)</code>，其中：</p>
+<ul>
+<li>参数path:  必须是之前已经创建好的，并且关联之后对Path内容进行了更改，则需要重新关联</li>
+<li>参数forceClosed:
+<ul>
+<li>用来确保Path闭合，如果设置为 true， 则不论之前Path是否闭合，都会自动闭合该 Path(如果Path可以闭合的话)</li>
+<li>forceClosed 不会影响原有Path的状态</li>
+<li>forceClosed 的设置状态可能会影响测量结果，如果 Path 没有闭合但在与 PathMeasure 关联的时候设置 forceClosed 为 true 时，测量结果可能会比 Path 实际长度稍长一点，获取得到的是该 Path 闭合时的状态</li>
+</ul>
+</li>
+</ul>
+<h3 id="getlenght">getLenght()</h3>
+<p>用于获取Path的长度。</p>
+<pre><code class="language-java">public float getLength() {
+    return native_getLength(native_instance);
+}
 </code></pre>
-<h3 id="文档">文档</h3>
-<p><a href="https://jxiaow.github.io/android-gradle-plugin/plugin/com.github.jxiaow.jiagu/index.html">android-gradle-plugin</a></p>
-<h3 id="360加固助手">360加固助手</h3>
-<p><a href="https://jiagu.360.cn/#/global/download">360加固助手</a></p>
+<h3 id="getmatrix">getMatrix()</h3>
+<p>获取路径上某一长度的位置以及该位置的正切值的矩阵。</p>
+<pre><code class="language-java">/**
+* 获取路径上某一长度的位置以及该位置的正切值的矩阵
+* @param distance 距离 Path 起点的长度，取值范围: 0 &lt;= distance &lt;= getLength
+* @param matrix 根据 falgs的设置而封装的matrix
+* @param flags 规定哪些内容会存入到matrix中，可选择：POSITION_MATRIX_FLAG(位置)、ANGENT_MATRIX_FLAG(正切)
+* @return 判断获取是否成功，true表示成功，数据会存入matrix中，false 失败，matrix内容不会改变
+*/
+public boolean getMatrix(float distance, Matrix matrix, int flags) {
+    return native_getMatrix(native_instance, distance, matrix.native_instance, flags);
+}
+</code></pre>
+<h3 id="getpostan">getPosTan()</h3>
+<p>获取指定长度的位置坐标及该点切线值tangle。</p>
+<pre><code class="language-java">/**
+* 获取指定长度的位置坐标及该点切线值tangle
+*
+* @param distance 距离 Path 起点的长度，取值范围: 0 &lt;= distance &lt;= getLength
+* @param pos 该点的坐标值，坐标值: (x==[0], y==[1])
+* @param tan 该点的正切值，正切值: (x==[0], y==[1])
+* @return 判断获取是否成功，true表示成功，数据会存入 pos 和 tan 中， false 表示失败，pos 和 tan 不会改变
+*/
+public boolean getPosTan(float distance, float pos[], float tan[]) {
+    if (pos != null &amp;&amp; pos.length &lt; 2 ||
+        tan != null &amp;&amp; tan.length &lt; 2) {
+        throw new ArrayIndexOutOfBoundsException();
+    }
+    return native_getPosTan(native_instance, distance, pos, tan);
+}
+</code></pre>
+<h3 id="getsegment">getSegment()</h3>
+<p>用于获取Path的一个片段。</p>
+<pre><code class="language-java">/**
+* 用于获取Path的一个片段
+* @param startD 开始截取位置距离 Path 起点的长度 取值范围: 0 &lt;= startD &lt; stopD &lt;= Path总长度
+* @param stopD 结束截取位置距离 Path 起点的长度 取值范围: 0 &lt;= startD &lt; stopD &lt;= Path总长度
+* @param dst 截取的 Path 将会添加到 dst 中 注意: 是添加，而不是替换
+* @param startWithMoveTo 起始点是否使用 moveTo，用于保证截取的 Path 第一个点位置不变
+*/
+public boolean getSegment(float startD, float stopD, Path dst, boolean startWithMoveTo) {
+    // Skia used to enforce this as part of it's API, but has since relaxed that restriction
+    // so to maintain consistency in our API we enforce the preconditions here.
+    float length = getLength();
+    if (startD &lt; 0) {
+        startD = 0;
+    }
+    if (stopD &gt; length) {
+        stopD = length;
+    }
+    if (startD &gt;= stopD) {
+        return false;
+    }
+ 
+    return native_getSegment(native_instance, startD, stopD, dst.mutateNI(), startWithMoveTo);
+}
+</code></pre>
+<p><strong>注意：</strong></p>
+<ul>
+<li>
+<p>如果 startD、stopD 的数值不在取值范围 [0, getLength] 内，或者 startD == stopD 则返回值为 false，不会改变 dst 内容。</p>
+</li>
+<li>
+<p>如果在安卓4.4或者之前的版本，在默认开启硬件加速的情况下，更改 dst 的内容后可能绘制会出现问题，请关闭硬件加速或者给 dst 添加一个单个操作，例如: dst.rLineTo(0, 0)</p>
+</li>
+<li>
+<p>可以用以下规则来判断 startWithMoveTo 的取值：</p>
+<p>true：保证截取得到的 Path 片段不会发生形变；</p>
+<p>false：保证存储截取片段的 Path(dst) 的连续性。</p>
+</li>
+</ul>
+<h3 id="isclosed">isClosed()</h3>
+<p>用于判断 Path 是否闭合，但是如果你在关联 Path 的时候设置 forceClosed 为 true 的话，这个方法的返回值则一定为true。</p>
+<pre><code class="language-java">public boolean isClosed() {
+    return native_isClosed(native_instance);
+}
+</code></pre>
+<h3 id="setpath">setPath()</h3>
+<p>关联一个预先创建好的Path。</p>
+<pre><code class="language-java">public void setPath(Path path, boolean forceClosed) {
+    mPath = path;
+    native_setPath(native_instance,
+                   path != null ? path.readOnlyNI() : 0,
+                   forceClosed);
+}
+</code></pre>
+<h3 id="nextcontour">nextContour()</h3>
+<pre><code class="language-java">public boolean nextContour() {
+    return native_nextContour(native_instance);
+}
+</code></pre>
+<p>用于跳转到下一条曲线到方法，如果跳转成功，则返回 true， 如果跳转失败，则返回 false。 注意：使用多路径的效果需要关闭硬件加速。</p>
+<h2 id="pathermeasure-使用">PatherMeasure 使用</h2>
+<h3 id="进度条">进度条</h3>
+<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/30/0852c042161c9437665ebbbdb6dd4b48-loading_view-84e067.gif" alt="loading_view" style="zoom:50%;" />
+<p>源码地址: <a href="https://gitee.com/jxiaow/practiseCodeAndroid/blob/master/CustomUI/app/src/main/java/com/github/jxiaow/customui/pathmeasure/LoadingView.kt">LoadingView.kt</a></p>
+<h3 id="箭头进度条">箭头进度条</h3>
+<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/30/ad7aaa29b0c3182f3ac3477e24a2a37e-arrow_loading-c350b9.gif" alt="arrow_loading" style="zoom:50%;" />
+<p>源码地址: <a href="https://gitee.com/jxiaow/practiseCodeAndroid/blob/master/CustomUI/app/src/main/java/com/github/jxiaow/customui/pathmeasure/ArrowLoadingView.kt">ArrowLoadingView.kt</a></p>
 
                     </div>
                     <div class="essaySuffix-box">
@@ -222,8 +310,8 @@ dependencies {
                                         href="/about"
                                         target="_blank">Xiaowu</a></span></strong> <br><span
                                 style="font-weight: bold; white-space:nowrap;">本文链接</span>：<a
-                                href="https://jxiaow.gitee.io/posts/6c01e784/"
-                                target="_blank">https://jxiaow.gitee.io/posts/6c01e784/</a><br><span
+                                href="https://jxiaow.gitee.io/posts/3d90af75/"
+                                target="_blank">https://jxiaow.gitee.io/posts/3d90af75/</a><br><span
                                 class="essaySuffix-right-title">版权声明</span>：本博客所有文章除特别声明外，均采用 <a
                                 href="https://creativecommons.org/licenses/by-nc-nd/4.0/" alt="BY-NC-SA"
                                 title="BY-NC-SA" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</div>
@@ -235,17 +323,22 @@ dependencies {
                     <ul class="markdownIt-TOC">
 <li>
 <ul>
-<li>
+<li><a href="#pathmeasure-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%BB%8D">PathMeasure 基本介绍</a>
 <ul>
-<li><a href="#%E4%BD%BF%E7%94%A8%E6%AD%A5%E9%AA%A4">使用步骤</a>
-<ul>
-<li><a href="#1-%E6%B7%BB%E5%8A%A0%E4%BE%9D%E8%B5%96">1. 添加依赖</a></li>
-<li><a href="#2-%E5%8F%82%E6%95%B0%E9%85%8D%E7%BD%AE">2. 参数配置</a></li>
-<li><a href="#3-%E5%BC%80%E5%A7%8B%E5%8A%A0%E5%9B%BA">3. 开始加固</a></li>
+<li><a href="#%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95">构造方法</a></li>
+<li><a href="#getlenght">getLenght()</a></li>
+<li><a href="#getmatrix">getMatrix()</a></li>
+<li><a href="#getpostan">getPosTan()</a></li>
+<li><a href="#getsegment">getSegment()</a></li>
+<li><a href="#isclosed">isClosed()</a></li>
+<li><a href="#setpath">setPath()</a></li>
+<li><a href="#nextcontour">nextContour()</a></li>
 </ul>
 </li>
-<li><a href="#%E6%96%87%E6%A1%A3">文档</a></li>
-<li><a href="#360%E5%8A%A0%E5%9B%BA%E5%8A%A9%E6%89%8B">360加固助手</a></li>
+<li><a href="#pathermeasure-%E4%BD%BF%E7%94%A8">PatherMeasure 使用</a>
+<ul>
+<li><a href="#%E8%BF%9B%E5%BA%A6%E6%9D%A1">进度条</a></li>
+<li><a href="#%E7%AE%AD%E5%A4%B4%E8%BF%9B%E5%BA%A6%E6%9D%A1">箭头进度条</a></li>
 </ul>
 </li>
 </ul>
@@ -258,13 +351,6 @@ dependencies {
 
           
 
-            
-            <div class="next-post">
-                <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://jxiaow.gitee.io/posts/84a009ed/" class="post-title gt-a-link">
-                    Http框架封装
-                </a>
-            </div>
             
 
             
