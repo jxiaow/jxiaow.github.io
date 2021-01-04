@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2021-01-04T05:56:44.081Z</updated>
+    <updated>2021-01-04T06:20:08.559Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -558,7 +558,7 @@ actionMasked比action更全面，无论处理简单拖拽还是复杂的多指�
         <content type="html"><![CDATA[<p>最近正在整理以前总结的关于 <strong>Android高级UI</strong> 相关的知识，本篇文章只是一个目录，用于进行文章归档。</p>
 <h2 id="ui-思维导图">UI 思维导图</h2>
 <!--more-->
-<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/04/0e945e7b90062318260fd15a030e68d1-Android%20UI-bfb9f1.png" alt="Android UI" loading="lazy"></figure>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/04/b8784e03ce0e921ad0fbe1a023c28e41-Android-ui-update-50349d.png" alt="Android-ui-update" loading="lazy"></figure>
 <h2 id="ui-测量布局绘制流程">UI 测量布局绘制流程</h2>
 <h3 id="整体绘制流程"><a href="https://jxiaow.gitee.io/posts/69abe299/">整体绘制流程</a></h3>
 <h3 id="布局绘制入口"><a href="https://jxiaow.gitee.io/posts/cd03afe4/">布局绘制入口</a></h3>
@@ -571,7 +571,6 @@ actionMasked比action更全面，无论处理简单拖拽还是复杂的多指�
 <h3 id="paint的高级使用-滤镜"><a href="https://jxiaow.gitee.io/posts/49e1d711">Paint的高级使用-滤镜</a></h3>
 <h3 id="paint的高级使用-xfermode"><a href="https://jxiaow.gitee.io/posts/b2c61861">Paint的高级使用-xfermode</a></h3>
 <h3 id="pathmeasure的基本使用"><a href="https://jxiaow.gitee.io/posts/3d90af75">PathMeasure的基本使用</a></h3>
-<h3 id="android事件分发机制csdn博主"><a href="https://blog.csdn.net/carson_ho/article/details/54136311">Android事件分发机制(CSDN博主)</a></h3>
 ]]></content>
     </entry>
     <entry>
