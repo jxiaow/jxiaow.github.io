@@ -1,0 +1,899 @@
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content="心若没有栖息的地方，到哪里都是在流浪"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>Android 事件分发机制 | Xiaowu</title>
+
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1609739792146">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.8.0/mermaid.min.js"></script>
+<script>
+    var config = {
+        startOnLoad:true,
+        flowchart:{
+            useMaxWidth:false,
+            htmlLabels:true
+        }
+    };
+    mermaid.initialize(config);
+    $(function(){
+        var elements = document.getElementsByClassName("language-mermaid");
+        for (var i = elements.length; i--;) {
+            element = elements[i];
+            var graphDefinition = element.innerText;
+            if (graphDefinition) {
+                var svg = mermaid.render('ha_mermaid_' + i, graphDefinition, function(svg){});
+                if (svg) {
+                    var svgElement = document.createElement('div');
+                    preNode = element.parentNode;
+                    svgElement.innerHTML = svg;
+                    svgElement.setAttribute('class', 'mermaid');
+                    svgElement.setAttribute('data-processed', 'true');
+                    preNode.parentNode.replaceChild(svgElement, preNode);
+                }
+            }
+        }
+    });
+</script>
+</head>
+
+<body>
+    <div class="main gt-bg-theme-color-first">
+        <nav class="navbar navbar-expand-lg">
+    <a href="/">
+        <div class="navbar-brand">
+            <img class="user-avatar" src="/images/avatar.png" alt="头像">
+            <div class="site-name gt-c-content-color-first">
+                Xiaowu
+            </div>
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav " style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://jxiaow.gitee.io/posts/favourite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1609739792146" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+        <div class="post-container">
+
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
+                    <h2 class="post-title">
+                        Android 事件分发机制
+                    </h2>
+                    <div class="post-info">
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2021-01-04 ·
+                            </time>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/GJLfjss5g/" class="post-tags">
+                                # UI
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/f3tbfHeq9/" class="post-tags">
+                                # Android
+                            </a>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/149503c8/"
+                                class="leancloud_visitors" data-flag-title="Android 事件分发机制">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
+                    </div>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <h1 id="android事件分发机制">Android事件分发机制</h1>
+<blockquote>
+<p>源码基于 API 30</p>
+</blockquote>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/04/66b068244f5dd3120267516cdb214013-Android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91%E6%9C%BA%E5%88%B6-bb31d3.png" alt="Android事件分发机制" loading="lazy"></figure>
+<h2 id="activity-事件分发">Activity 事件分发</h2>
+<p>流程图：</p>
+<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/31/1a58b9a8e764d57a34b8a0fa3d260f1e-Activity%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91%E6%B5%81%E7%A8%8B%E5%9B%BE-e99245.svg" alt="Activity事件分发流程图" loading="lazy"></figure>
+<h3 id="activitydispatchtouchevent">Activity#dispatchTouchEvent()</h3>
+<pre><code class="language-java">public boolean dispatchTouchEvent(MotionEvent ev) {
+    // 一般事件都是从DOWN事件开始，故此处为true
+    if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+        onUserInteraction();
+    }
+    if (getWindow().superDispatchTouchEvent(ev)) {
+        return true;
+    }
+    return onTouchEvent(ev);
+}
+</code></pre>
+<h3 id="activityonuserinteraction">Activity#onUserInteraction()</h3>
+<blockquote>
+<p>默认实现为空</p>
+<p>当activity在栈顶时，按home，back,menu键时会触发此方法</p>
+</blockquote>
+<pre><code class="language-java">public void onUserInteraction() {
+}
+</code></pre>
+<h3 id="phonewindowsuperdispatchtouchevent">PhoneWindow#superDispatchTouchEvent()</h3>
+<p>在<code>Activity#dispatchTouchEvent</code>中调用了<code>getWindow().superDisaptchTouchEvent()</code>， 而我们知道<code>getWindow()</code>返回的是<code>PhoneWindow</code>，所以 间接的调用了<code>PhoneWindow#superDispatchTouchEvent()</code>。</p>
+<pre><code class="language-java">@Override
+public boolean superDispatchTouchEvent(MotionEvent event) {
+    return mDecor.superDispatchTouchEvent(event);
+}
+</code></pre>
+<p>从上述方法可以看出，<code>superDispatchTouchEvent</code>调用了<code>mDecor</code>（不在此处详细介绍了）的<code>superDispatchTouchEvent</code>。</p>
+<h3 id="decorviewsuperdispatchtouchevent">DecorView#superDispatchTouchEvent()</h3>
+<pre><code class="language-java">public boolean superDispatchTouchEvent(MotionEvent event) {
+    return super.dispatchTouchEvent(event);
+}
+</code></pre>
+<p><code>DecorView</code>继承自<code>FrameLayout</code>，所以<code>super.dispatchTouchEvent(event)</code>会调用到<code>ViewGroup</code>中的<code>dispatchTouchEvent(event)</code>方法。</p>
+<h3 id="activityontouch">Activity#onTouch()</h3>
+<p>前面通过源码跟踪了<code>getWindow().superDispatchTouchEvent(ev)</code>的调用过程，现在看一下<code>onTouch()</code>。</p>
+<pre><code class="language-java">public boolean onTouchEvent(MotionEvent event) {
+    if (mWindow.shouldCloseOnTouch(this, event)) {
+        finish();
+        return true;
+    }
+    return false;
+}
+</code></pre>
+<p>当一个点击事件未被<code>Activity</code>下的任何一个<code>view</code>消耗时，就会调用此方法。如： 处理发生在<code>Window</code>边界外的触摸事件。</p>
+<h3 id="windowshouldcloseontouch">Window#shouldCloseOnTouch()</h3>
+<pre><code class="language-java">public boolean shouldCloseOnTouch(Context context, MotionEvent event) {
+    final boolean isOutside =
+        event.getAction() == MotionEvent.ACTION_UP &amp;&amp; isOutOfBounds(context, event)
+        || event.getAction() == MotionEvent.ACTION_OUTSIDE;
+    if (mCloseOnTouchOutside &amp;&amp; peekDecorView() != null &amp;&amp; isOutside) {
+        return true;
+    }
+    return false;
+}
+</code></pre>
+<p>主要是对于处理边界外点击事件的判断：是否是DOWN事件，event的坐标是否在边界内等。</p>
+<h2 id="viewgroup-事件分发">ViewGroup 事件分发</h2>
+<p>从上面<code>Activity</code>事件分发机制可知，<code>ViewGroup</code>事件分发机制从<code>dispatchTouchEvent()</code>开始。</p>
+<h3 id="viewgroupdispatchtouchevent">ViewGroup.dispatchTouchEvent()</h3>
+<pre><code class="language-java">@Override
+public boolean dispatchTouchEvent(MotionEvent ev) {
+    // ...
+ 
+    boolean handled = false;
+ 
+    // 过滤掉不安全的事件响应
+    if (onFilterTouchEventForSecurity(ev)) {
+        final int action = ev.getAction();
+        final int actionMasked = action &amp; MotionEvent.ACTION_MASK;
+ 
+        // DOWN事件下做初始化操作
+        // Handle an initial down.
+        if (actionMasked == MotionEvent.ACTION_DOWN) {
+            // Throw away all previous state when starting a new touch gesture.
+            // The framework may have dropped the up or cancel event for the previous gesture
+            // due to an app switch, ANR, or some other state change.
+            // 取消和清除上一次的触摸对象
+            cancelAndClearTouchTargets(ev);
+            // 重置触摸状态
+            resetTouchState();
+        }
+ 
+        // 检查是否需要拦截处理
+        // Check for interception.
+        final boolean intercepted;
+        // DOWN事件或有触摸对象的情况下，检查是否需要做事件拦截处理
+        if (actionMasked == MotionEvent.ACTION_DOWN
+            || mFirstTouchTarget != null) {
+            // 默认情况下是false,子view调用了父view的 requestDisallowInterceptTouchEvent() 改变
+            final boolean disallowIntercept = (mGroupFlags &amp; FLAG_DISALLOW_INTERCEPT) != 0;
+            // false的情况下，会调用onInterceptTouchEvent,根据intercepted的值进行判断是否需要拦截
+            if (!disallowIntercept) {
+                // 一般情况下，不做拦截
+                intercepted = onInterceptTouchEvent(ev);
+                ev.setAction(action); // restore action in case it was changed
+            } else { // 否则不拦截
+                intercepted = false;
+            }
+        } else {
+            // There are no touch targets and this action is not an initial down
+            // so this view group continues to intercept touches.
+            intercepted = true;
+        }
+ 
+        // If intercepted, start normal event dispatch. Also if there is already
+        // a view that is handling the gesture, do normal event dispatch.
+        if (intercepted || mFirstTouchTarget != null) {
+            ev.setTargetAccessibilityFocus(false);
+        }
+ 
+        // 检查是否需要取消
+        // Check for cancelation.
+        final boolean canceled = resetCancelNextUpFlag(this)
+            || actionMasked == MotionEvent.ACTION_CANCEL;
+ 
+        // Update list of touch targets for pointer down, if needed.
+        final boolean isMouseEvent = ev.getSource() == InputDevice.SOURCE_MOUSE;
+        final boolean split = (mGroupFlags &amp; FLAG_SPLIT_MOTION_EVENTS) != 0
+            &amp;&amp; !isMouseEvent;
+        TouchTarget newTouchTarget = null;
+        boolean alreadyDispatchedToNewTouchTarget = false;
+        // 不拦截，不取消的情况下
+        if (!canceled &amp;&amp; !intercepted) {
+            // If the event is targeting accessibility focus we give it to the
+            // view that has accessibility focus and if it does not handle it
+            // we clear the flag and dispatch the event to all children as usual.
+            // We are looking up the accessibility focused host to avoid keeping
+            // state since these events are very rare.
+            View childWithAccessibilityFocus = ev.isTargetAccessibilityFocus()
+                ? findChildWithAccessibilityFocus() : null;
+ 
+            // DOWN事件处理
+            if (actionMasked == MotionEvent.ACTION_DOWN
+                || (split &amp;&amp; actionMasked == MotionEvent.ACTION_POINTER_DOWN)
+                || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
+                final int actionIndex = ev.getActionIndex(); // always 0 for down
+                final int idBitsToAssign = split ? 1 &lt;&lt; ev.getPointerId(actionIndex)
+                    : TouchTarget.ALL_POINTER_IDS;
+ 
+                // Clean up earlier touch targets for this pointer id in case they
+                // have become out of sync.
+                removePointersFromTouchTargets(idBitsToAssign);
+ 
+                final int childrenCount = mChildrenCount;
+                if (newTouchTarget == null &amp;&amp; childrenCount != 0) {
+                    final float x =
+                        isMouseEvent ? ev.getXCursorPosition() : ev.getX(actionIndex);
+                    final float y =
+                        isMouseEvent ? ev.getYCursorPosition() : ev.getY(actionIndex);
+                    // Find a child that can receive the event.
+                    // Scan children from front to back.
+                    // 对当前view下所有的子view根据z轴的值大小，从小到大进行排序
+                    final ArrayList&lt;View&gt; preorderedList = buildTouchDispatchChildList();
+                    final boolean customOrder = preorderedList == null
+                        &amp;&amp; isChildrenDrawingOrderEnabled();
+                    final View[] children = mChildren;
+                    // 从后往前遍历所有child，将事件传递
+                    for (int i = childrenCount - 1; i &gt;= 0; i--) {
+                        final int childIndex = getAndVerifyPreorderedIndex(
+                            childrenCount, i, customOrder);
+                        // 获取child
+                        final View child = getAndVerifyPreorderedView(
+                            preorderedList, children, childIndex);
+                        // 如果child不能接收事件或者当前事件未在child内，则寻找下一个child
+                        if (!child.canReceivePointerEvents()
+                            || !isTransformedTouchPointInView(x, y, child, null)) {
+                            continue;
+                        }
+                        // 第一次查找，由于mFirstTouchTarget为null,所以newTouchTarget也为null
+                        newTouchTarget = getTouchTarget(child);
+                        if (newTouchTarget != null) {
+                            // Child is already receiving touch within its bounds.
+                            // Give it the new pointer in addition to the ones it is handling.
+                            newTouchTarget.pointerIdBits |= idBitsToAssign;
+                            break;
+                        }
+ 
+                        resetCancelNextUpFlag(child);
+                        // 将事件分发到child, 如果child已消耗事件，则返回true
+                        if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) {
+                            // Child wants to receive touch within its bounds.
+                            mLastTouchDownTime = ev.getDownTime();
+                            if (preorderedList != null) {
+                                // childIndex points into presorted list, find original index
+                                for (int j = 0; j &lt; childrenCount; j++) {
+                                    if (children[childIndex] == mChildren[j]) {
+                                        mLastTouchDownIndex = j;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                mLastTouchDownIndex = childIndex;
+                            }
+                            mLastTouchDownX = ev.getX();
+                            mLastTouchDownY = ev.getY();
+                            // 事件被child消耗，那么会将child复制给 mFirstTouchTarget和 newTouchTarget, 并结束查找
+                            newTouchTarget = addTouchTarget(child, idBitsToAssign);
+                            alreadyDispatchedToNewTouchTarget = true;
+                            break;
+                        }
+ 
+                        // The accessibility focus didn't handle the event, so clear
+                        // the flag and do a normal dispatch to all children.
+                        ev.setTargetAccessibilityFocus(false);
+                    }
+                    if (preorderedList != null) preorderedList.clear();
+                }
+                // 如果已经找到,newTouchTarget 不为空
+                if (newTouchTarget == null &amp;&amp; mFirstTouchTarget != null) {
+                    // Did not find a child to receive the event.
+                    // Assign the pointer to the least recently added target.
+                    newTouchTarget = mFirstTouchTarget;
+                    while (newTouchTarget.next != null) {
+                        newTouchTarget = newTouchTarget.next;
+                    }
+                    newTouchTarget.pointerIdBits |= idBitsToAssign;
+                }
+            }
+        }
+        // 如果 mFirstTouchTarget 为 null，表明没有找到需要消耗该事件的child
+        // Dispatch to touch targets.
+        if (mFirstTouchTarget == null) {
+            // 传递child 为null后，会调用 super.dispatchTouchEvent()，进入view的事件分发中
+            // No touch targets so treat this as an ordinary view.
+            handled = dispatchTransformedTouchEvent(ev, canceled, null,
+                                                    TouchTarget.ALL_POINTER_IDS);
+        } else { // 找到了需要拦截的child, 进行后续事件处理
+            // Dispatch to touch targets, excluding the new touch target if we already
+            // dispatched to it.  Cancel touch targets if necessary.
+            TouchTarget predecessor = null;
+            TouchTarget target = mFirstTouchTarget;
+            while (target != null) {
+                final TouchTarget next = target.next;
+                if (alreadyDispatchedToNewTouchTarget &amp;&amp; target == newTouchTarget) {
+                    // Down 事件 拦截处理
+                    handled = true;
+                } else {
+                    final boolean cancelChild = resetCancelNextUpFlag(target.child)
+                        || intercepted;
+                    // 其他事件调用child分发
+                    if (dispatchTransformedTouchEvent(ev, cancelChild,
+                                                      target.child, target.pointerIdBits)) {
+                        handled = true;
+                    }
+                    if (cancelChild) {
+                        if (predecessor == null) {
+                            mFirstTouchTarget = next;
+                        } else {
+                            predecessor.next = next;
+                        }
+                        target.recycle();
+                        target = next;
+                        continue;
+                    }
+                }
+                predecessor = target;
+                target = next;
+            }
+        }
+        // ...
+    }
+    // ...
+    return handled;
+}
+</code></pre>
+<h3 id="viewgrouponfiltertoucheventforsecurity">ViewGroup.onFilterTouchEventForSecurity()</h3>
+<p>当视图被隐藏或者窗口被遮挡时，过滤掉该事件响应。</p>
+<pre><code class="language-java">public boolean onFilterTouchEventForSecurity(MotionEvent event) {
+    //noinspection RedundantIfStatement
+    // 当视图被隐藏或者窗口被遮挡时，过滤掉该事件响应
+    if ((mViewFlags &amp; FILTER_TOUCHES_WHEN_OBSCURED) != 0
+        &amp;&amp; (event.getFlags() &amp; MotionEvent.FLAG_WINDOW_IS_OBSCURED) != 0) {
+        // Window is obscured, drop this touch.
+        return false;
+    }
+    return true;
+}
+</code></pre>
+<h3 id="viewgrouprequestdisallowintercepttouchevent">ViewGroup.requestDisallowInterceptTouchEvent()</h3>
+<p>设置是否允许父view拦截触摸事件， true 不允许，false运行。</p>
+<pre><code class="language-java">@Override
+public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+ 
+    if (disallowIntercept == ((mGroupFlags &amp; FLAG_DISALLOW_INTERCEPT) != 0)) {
+        // We're already in this state, assume our ancestors are too
+        return;
+    }
+ 
+    if (disallowIntercept) {
+        mGroupFlags |= FLAG_DISALLOW_INTERCEPT;
+    } else {
+        mGroupFlags &amp;= ~FLAG_DISALLOW_INTERCEPT;
+    }
+ 
+    // Pass it up to our parent
+    if (mParent != null) {
+        mParent.requestDisallowInterceptTouchEvent(disallowIntercept);
+    }
+}
+</code></pre>
+<h3 id="viewgrouponintercepttouchevent">ViewGroup.onInterceptTouchEvent()</h3>
+<p><code>onInterceptTouchEvent</code>的返回值决定当前viewGroup是否要对触摸事件进行拦截，如果为true，则进行拦截并终止事件往下传递，一般情况下不拦截。</p>
+<pre><code class="language-java">public boolean onInterceptTouchEvent(MotionEvent ev) {
+    if (ev.isFromSource(InputDevice.SOURCE_MOUSE)
+            &amp;&amp; ev.getAction() == MotionEvent.ACTION_DOWN
+            &amp;&amp; ev.isButtonPressed(MotionEvent.BUTTON_PRIMARY)
+            &amp;&amp; isOnScrollbarThumb(ev.getX(), ev.getY())) {
+        return true;
+    }
+    return false;
+}
+</code></pre>
+<h3 id="viewgroupbuildtouchdispatchchildlist">ViewGroup.buildTouchDispatchChildList()</h3>
+<p>将<code>child</code>根据<code>z</code>轴值的大小进行从小到大排列（即 离用户的远近进行排列）。</p>
+<pre><code class="language-java">public ArrayList&lt;View&gt; buildTouchDispatchChildList() {
+    return buildOrderedChildList();
+}
+</code></pre>
+<pre><code class="language-java">ArrayList&lt;View&gt; buildOrderedChildList() {
+    final int childrenCount = mChildrenCount;
+    if (childrenCount &lt;= 1 || !hasChildWithZ()) return null;
+ 
+    if (mPreSortedChildren == null) {
+        mPreSortedChildren = new ArrayList&lt;&gt;(childrenCount);
+    } else {
+        // callers should clear, so clear shouldn't be necessary, but for safety...
+        mPreSortedChildren.clear();
+        mPreSortedChildren.ensureCapacity(childrenCount);
+    }
+ 
+    final boolean customOrder = isChildrenDrawingOrderEnabled();
+    // 遍历child，根据getZ()进行排列
+    for (int i = 0; i &lt; childrenCount; i++) {
+        // add next child (in child order) to end of list
+        final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+        final View nextChild = mChildren[childIndex];
+        final float currentZ = nextChild.getZ();
+ 
+        // insert ahead of any Views with greater Z
+        int insertIndex = i;
+        while (insertIndex &gt; 0 &amp;&amp; mPreSortedChildren.get(insertIndex - 1).getZ() &gt; currentZ) {
+            insertIndex--;
+        }
+        mPreSortedChildren.add(insertIndex, nextChild);
+    }
+    return mPreSortedChildren;
+}
+</code></pre>
+<h3 id="viewgroupgettouchtarget">ViewGroup.getTouchTarget()</h3>
+<p>根据child获取触摸的对象，第一次执行时，返回值为null。</p>
+<pre><code class="language-java">private TouchTarget getTouchTarget(@NonNull View child) {
+    for (TouchTarget target = mFirstTouchTarget; target != null; target = target.next) {
+        if (target.child == child) {
+            return target;
+        }
+    }
+    return null;
+}
+</code></pre>
+<h3 id="viewgroupdispatchtransformedtouchevent">ViewGroup.dispatchTransformedTouchEvent()</h3>
+<p>将当前事件进行child分发，当child为null时，调用<code>super.dispatchTouchEvent()</code>，返回true，代表事件已被消耗。</p>
+<pre><code class="language-java">private boolean dispatchTransformedTouchEvent(MotionEvent event, boolean cancel,
+                                              View child, int desiredPointerIdBits) {
+    final boolean handled;
+ 
+    // Canceling motions is a special case.  We don't need to perform any transformations
+    // or filtering.  The important part is the action, not the contents.
+    final int oldAction = event.getAction();
+    if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
+        event.setAction(MotionEvent.ACTION_CANCEL);
+        if (child == null) {
+            handled = super.dispatchTouchEvent(event);
+        } else {
+            handled = child.dispatchTouchEvent(event);
+        }
+        event.setAction(oldAction);
+        return handled;
+    }
+ 
+    // Calculate the number of pointers to deliver.
+    final int oldPointerIdBits = event.getPointerIdBits();
+    final int newPointerIdBits = oldPointerIdBits &amp; desiredPointerIdBits;
+ 
+    // If for some reason we ended up in an inconsistent state where it looks like we
+    // might produce a motion event with no pointers in it, then drop the event.
+    if (newPointerIdBits == 0) {
+        return false;
+    }
+ 
+    // If the number of pointers is the same and we don't need to perform any fancy
+    // irreversible transformations, then we can reuse the motion event for this
+    // dispatch as long as we are careful to revert any changes we make.
+    // Otherwise we need to make a copy.
+    final MotionEvent transformedEvent;
+    if (newPointerIdBits == oldPointerIdBits) {
+        if (child == null || child.hasIdentityMatrix()) {
+            if (child == null) {
+                handled = super.dispatchTouchEvent(event);
+            } else {
+                final float offsetX = mScrollX - child.mLeft;
+                final float offsetY = mScrollY - child.mTop;
+                event.offsetLocation(offsetX, offsetY);
+ 
+                handled = child.dispatchTouchEvent(event);
+ 
+                event.offsetLocation(-offsetX, -offsetY);
+            }
+            return handled;
+        }
+        transformedEvent = MotionEvent.obtain(event);
+    } else {
+        transformedEvent = event.split(newPointerIdBits);
+    }
+ 
+    // Perform any necessary transformations and dispatch.
+    if (child == null) {
+        handled = super.dispatchTouchEvent(transformedEvent);
+    } else {
+        final float offsetX = mScrollX - child.mLeft;
+        final float offsetY = mScrollY - child.mTop;
+        transformedEvent.offsetLocation(offsetX, offsetY);
+        if (!child.hasIdentityMatrix()) {
+            transformedEvent.transform(child.getInverseMatrix());
+        }
+ 
+        handled = child.dispatchTouchEvent(transformedEvent);
+    }
+ 
+    // Done.
+    transformedEvent.recycle();
+    return handled;
+}
+</code></pre>
+<h2 id="view-事件分发">View 事件分发</h2>
+<h3 id="viewgroupaddtouchtarget">ViewGroup.addTouchTarget()</h3>
+<p>获取<code>TouchTarget</code>并将其赋值给<code>mFirstTouchTarget</code>。</p>
+<pre><code class="language-java">private TouchTarget addTouchTarget(@NonNull View child, int pointerIdBits) {
+    final TouchTarget target = TouchTarget.obtain(child, pointerIdBits);
+    target.next = mFirstTouchTarget;
+    mFirstTouchTarget = target;
+    return target;
+}
+</code></pre>
+<h3 id="viewdispatchtouchevent">View.dispatchTouchEvent()</h3>
+<p>touch事件最终会传递到<code>View</code>的<code>dispatchTouchEvent</code>中，根据其返回值决定是否会消耗该事件。</p>
+<pre><code class="language-java">public boolean dispatchTouchEvent(MotionEvent event) {
+    // ...
+    boolean result = false;
+ 
+    if (mInputEventConsistencyVerifier != null) {
+        mInputEventConsistencyVerifier.onTouchEvent(event, 0);
+    }
+    // DOWN事件下停止上一次的滚动事件
+    final int actionMasked = event.getActionMasked();
+    if (actionMasked == MotionEvent.ACTION_DOWN) {
+        // Defensive cleanup for new gesture
+        stopNestedScroll();
+    }
+    // 过滤到不安全的事件响应
+    if (onFilterTouchEventForSecurity(event)) {
+        if ((mViewFlags &amp; ENABLED_MASK) == ENABLED &amp;&amp; handleScrollBarDragging(event)) {
+            result = true;
+        }
+        // 先处理setOnTouchListener中的onTouch方法，如果返回true，则不再进行方法传递
+        //noinspection SimplifiableIfStatement
+        ListenerInfo li = mListenerInfo;
+        if (li != null &amp;&amp; li.mOnTouchListener != null
+                &amp;&amp; (mViewFlags &amp; ENABLED_MASK) == ENABLED
+                &amp;&amp; li.mOnTouchListener.onTouch(this, event)) {
+            result = true;
+        }
+        // 如果mOnTouchListener == null  或 mOnTouchListener.onTouch() 为false,则会调用onTouchEvent()方法。
+        if (!result &amp;&amp; onTouchEvent(event)) {
+            result = true;
+        }
+    }
+ 
+    if (!result &amp;&amp; mInputEventConsistencyVerifier != null) {
+        mInputEventConsistencyVerifier.onUnhandledEvent(event, 0);
+    }
+ 
+    // Clean up after nested scrolls if this is the end of a gesture;
+    // also cancel it if we tried an ACTION_DOWN but we didn't want the rest
+    // of the gesture.
+    if (actionMasked == MotionEvent.ACTION_UP ||
+            actionMasked == MotionEvent.ACTION_CANCEL ||
+            (actionMasked == MotionEvent.ACTION_DOWN &amp;&amp; !result)) {
+        stopNestedScroll();
+    }
+ 
+    return result;
+}
+</code></pre>
+<h2 id="补充点">补充点</h2>
+<p><strong>action与actionMasked</strong>的区别：</p>
+<blockquote>
+<p><strong>相同点：</strong><br>
+都表示此次MotionEvent的事件类型-手指按下/移动/抬起</p>
+<p><strong>不同点：</strong><br>
+action 无法直接识别第二根手指的按下与抬起，而 actionMasked 可以。action 的类型有 按下、移动、抬起，而 actionMasked 有额外两种类型：<br>
+ACTION_POINTER_DOWN - “已经有手指按着了，又按下了新手指”<br>
+ACTION_POINTER_UP - “手指抬起了，但仍有其它手指按着”</p>
+<p><strong>使用建议：</strong><br>
+action比actionMasked少了多指识别，适合&quot;检测点击位置&quot;、&quot;记录按下时间&quot;这种只涉及按下抬起的动作。<br>
+对于单指拖拽动作要确保用户只用一根手指，不会出现类似“按下第二根手指后抬起第一根手指，继续拖拽”这种临时多指的动作，否则位置会跳。<br>
+actionMasked比action更全面，无论处理简单拖拽还是复杂的多指事件都适用。</p>
+</blockquote>
+<pre><code class="language-kotlin">fun parseActionString(actionMasked: Int): String {
+    return when (actionMasked) {
+        MotionEvent.ACTION_DOWN -&gt; &quot;按下&quot;
+            MotionEvent.ACTION_POINTER_DOWN -&gt; &quot;按下(已有其它触摸点)&quot;
+            MotionEvent.ACTION_MOVE -&gt; &quot;移动&quot;
+            MotionEvent.ACTION_POINTER_UP -&gt; &quot;抬起(仍留其它触摸点)&quot;
+            MotionEvent.ACTION_UP -&gt; &quot;抬起&quot;
+            MotionEvent.ACTION_CANCEL -&gt; &quot;取消&quot;
+            else -&gt; &quot;未知&quot;
+            }
+}
+</code></pre>
+
+                    </div>
+                    <div class="essaySuffix-box">
+                        <div class="essaySuffix-box-left"><img
+                                src="/images/avatar.png" alt="">
+                        </div>
+                        <div class="essaySuffix-box-right"><span
+                                class="essaySuffix-right-title">本文作者</span>：<strong><span style="font-size: 12px;"><a
+                                        href="/about"
+                                        target="_blank">Xiaowu</a></span></strong> <br><span
+                                style="font-weight: bold; white-space:nowrap;">本文链接</span>：<a
+                                href="https://jxiaow.gitee.io/posts/149503c8/"
+                                target="_blank">https://jxiaow.gitee.io/posts/149503c8/</a><br><span
+                                class="essaySuffix-right-title">版权声明</span>：本博客所有文章除特别声明外，均采用 <a
+                                href="https://creativecommons.org/licenses/by-nc-nd/4.0/" alt="BY-NC-SA"
+                                title="BY-NC-SA" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</div>
+                        <div style="clear: both;"></div>
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
+<li><a href="#android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91%E6%9C%BA%E5%88%B6">Android事件分发机制</a>
+<ul>
+<li><a href="#activity-%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91">Activity 事件分发</a>
+<ul>
+<li><a href="#activitydispatchtouchevent">Activity#dispatchTouchEvent()</a></li>
+<li><a href="#activityonuserinteraction">Activity#onUserInteraction()</a></li>
+<li><a href="#phonewindowsuperdispatchtouchevent">PhoneWindow#superDispatchTouchEvent()</a></li>
+<li><a href="#decorviewsuperdispatchtouchevent">DecorView#superDispatchTouchEvent()</a></li>
+<li><a href="#activityontouch">Activity#onTouch()</a></li>
+<li><a href="#windowshouldcloseontouch">Window#shouldCloseOnTouch()</a></li>
+</ul>
+</li>
+<li><a href="#viewgroup-%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91">ViewGroup 事件分发</a>
+<ul>
+<li><a href="#viewgroupdispatchtouchevent">ViewGroup.dispatchTouchEvent()</a></li>
+<li><a href="#viewgrouponfiltertoucheventforsecurity">ViewGroup.onFilterTouchEventForSecurity()</a></li>
+<li><a href="#viewgrouprequestdisallowintercepttouchevent">ViewGroup.requestDisallowInterceptTouchEvent()</a></li>
+<li><a href="#viewgrouponintercepttouchevent">ViewGroup.onInterceptTouchEvent()</a></li>
+<li><a href="#viewgroupbuildtouchdispatchchildlist">ViewGroup.buildTouchDispatchChildList()</a></li>
+<li><a href="#viewgroupgettouchtarget">ViewGroup.getTouchTarget()</a></li>
+<li><a href="#viewgroupdispatchtransformedtouchevent">ViewGroup.dispatchTransformedTouchEvent()</a></li>
+</ul>
+</li>
+<li><a href="#view-%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91">View 事件分发</a>
+<ul>
+<li><a href="#viewgroupaddtouchtarget">ViewGroup.addTouchTarget()</a></li>
+<li><a href="#viewdispatchtouchevent">View.dispatchTouchEvent()</a></li>
+</ul>
+</li>
+<li><a href="#%E8%A1%A5%E5%85%85%E7%82%B9">补充点</a></li>
+</ul>
+</li>
+</ul>
+
+                </div>
+            </article>
+            <!-- </div> -->
+
+          
+
+            
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://jxiaow.gitee.io/posts/b1e45c68/" class="post-title gt-a-link">
+                    高级UI
+                </a>
+            </div>
+            
+
+            
+
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'mp',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+            
+
+            <div class="site-footer gt-c-content-color-first">
+
+  <div class="social-container">
+
+    <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
+      <i class="fab fa-github gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
+      <i class="fas fa-blog gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
+      <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
+    </a>
+
+    <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
+      <i class="fas fa-envelope gt-c-content-color-first"></i>
+    </a>
+
+  </div>
+  <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+  
+  <div>
+    <div>
+      Theme by <a href="https://github.com/jxiaow/gridea-theme-pure-fashion" target="_blank">jxiaow</a>, Powered by <a
+              href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://jxiaow.gitee.io/atom.xml" target="_blank">RSS</a></a>
+  </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+            <script>
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+  
+  if (mainNavLinks == null || mainNavLinks.length == 0) {
+    let tocContainer = document.querySelector(".toc-container");
+    tocContainer.classList.remove("toc-container")
+    // tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
+  } else {
+
+    // This should probably be throttled.
+    // Especially because it triggers during smooth scrolling.
+    // https://lodash.com/docs/4.17.10#throttle
+    // You could do like...
+    // window.addEventListener("scroll", () => {
+    //    _.throttle(doThatStuff, 100);
+    // });
+    // Only not doing it here to keep this Pen dependency-free.
+
+
+    window.addEventListener("scroll", event => {
+      let fromTop = window.scrollY;
+
+      mainNavLinks.forEach((link, index) => {
+        let section = document.getElementById(decodeURI(link.hash).substring(1));
+        let nextSection = null
+        if (mainNavLinks[index + 1]) {
+          nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+        }
+        if (section.offsetTop <= fromTop) {
+          if (nextSection) {
+            if (nextSection.offsetTop > fromTop) {
+              link.classList.add("current");
+            } else {
+              link.classList.remove("current");
+            }
+          } else {
+            link.classList.add("current");
+          }
+        } else {
+          link.classList.remove("current");
+        }
+      });
+    });
+  }
+
+
+
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+
+<script>
+  let images = document.querySelectorAll("figure > img");
+  //   debugger
+  //   console.log("dddd: "+ images);
+  images.forEach(image => {
+    var parent = image.parentElement;
+    parent.removeChild(image);
+    var aelem = document.createElement('a');
+    aelem.href = image.src;
+    aelem.dataset['fancybox'] = 'gallery';
+    aelem.classList.add('fancybox');
+    aelem.appendChild(image);
+    parent.appendChild(aelem);
+  })
+
+//   <a data-fancybox="gallery" href="big_1.jpg"><img src="small_1.jpg"></a>
+// <a data-fancybox="gallery" href="big_2.jpg"><img src="small_2.jpg"></a>
+</script>
+        </div>
+    </div>
+
+</body>
+
+</html>
