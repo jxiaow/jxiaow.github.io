@@ -7,7 +7,7 @@
 
 <title>UI布局绘制入口 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1609813758554">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1610701443576">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -112,7 +112,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1609813758554" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1610701443576" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -295,6 +295,7 @@ mParams保存的是创建顶层View的layout参数。<br>
 </code></pre>
 <pre><code class="language-java">public interface ViewParent {}
 </code></pre>
+<h2 id="viewrootimpl">ViewRootImpl</h2>
 <h3 id="setview">setView</h3>
 <pre><code class="language-java">/**
   * We have one child
@@ -496,6 +497,10 @@ final class TraversalRunnable implements Runnable {
 <li><a href="#windowmanager">WindowManager</a>
 <ul>
 <li><a href="#addview">addView</a></li>
+</ul>
+</li>
+<li><a href="#viewrootimpl">ViewRootImpl</a>
+<ul>
 <li><a href="#setview">setView</a></li>
 <li><a href="#requestlayout">requestLayout</a></li>
 <li><a href="#scheduletraversals">scheduleTraversals</a></li>
