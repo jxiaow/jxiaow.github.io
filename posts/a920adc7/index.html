@@ -7,7 +7,7 @@
 
 <title>UI测量流程  | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1610961192961">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1611050804919">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -112,7 +112,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1610961192961" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1611050804919" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -161,6 +161,7 @@
                     <!-- <div class="post-content-wrapper"> -->
                     <div class="post-content">
                         <p>在上一次的源码分析中知道了<code>performTraversals()</code>是整个UI绘制流程的入口，通过调用<code>performMeasure()</code>进行<code>UI布局的测量</code>。</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/19/33e7bd205c0b16843a0ee43c2a0e8fd1-%E6%B5%8B%E9%87%8F%E6%B5%81%E7%A8%8B-8441b0.png" alt="测量流程" loading="lazy"></figure>
 <h2 id="performmeasure">performMeasure</h2>
 <pre><code class="language-java">private void performMeasure(int childWidthMeasureSpec, int childHeightMeasureSpec) {
     if (mView == null) {
@@ -259,7 +260,7 @@ UNSPECIFIED: 不确定，源码内部使用
         -------一般在ScrollView，ListView
 </code></pre>
 <h3 id="规格">规格</h3>
-<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/23/16207c1a6965e2e44669d35b9116ecdc-measurespec1-5fde04.png" alt="measurespec1" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/11/23/16207c1a6965e2e44669d35b9116ecdc-measurespec1-5fde04.png" alt="measurespec1" loading="lazy"></figure>
 <h2 id="viewmeasure">View#measure</h2>
 <p>看完MeasureSpec后，我们来看看<code>mView.measure()</code>方法，在这<code>mView</code>就是<code>DecorView</code>,这也就说明了</p>
 <blockquote>
@@ -328,7 +329,7 @@ UNSPECIFIED: 不确定，源码内部使用
 </code></pre>
 <p>里面调用了<code>getChildMeasureSpec</code>方法，把父容器的MeasureSpec以及自身的<code>layoutParams</code>属性传递进去来获取子View的MeasureSpe，在这里我们可以看到直接又调用了子类的measure。</p>
 <h2 id="总结">总结</h2>
-<p>测量流程：在performTraversals开始获得DecorView种的系统布局的尺寸，然后在performMeasure方法中开始测量流程，对于不同的layout布局有着不同的实现方式，但大体上是在onMeasure方法中，对每一个子View进行遍历，根据ViewGroup的MeasureSpec及子View的layoutParams来确定自身的测量宽高，然后最后根据所有子View的测量宽高信息再确定爸爸的宽高， 不断的遍历子View的measure方法，根据ViewGroup的MeasureSpec及子View的LayoutParams来决定子View的MeasureSpec，进一步获取子View的测量宽高，然后逐层返回，不断保存ViewGroup的测量宽高。</p>
+<p>测量流程：在performTraversals开始获得DecorView种的系统布局的尺寸，然后在performMeasure方法中开始测量流程，对于不同的layout布局有着不同的实现方式，但大体上是在onMeasure方法中，对每一个子View进行遍历，根据ViewGroup的MeasureSpec及子View的layoutParams来确定自身的测量宽高，然后最后根据所有子View的测量宽高信息再确定父view的宽高， 不断的遍历子View的measure方法，根据ViewGroup的MeasureSpec及子View的LayoutParams来决定子View的MeasureSpec，进一步获取子View的测量宽高，然后逐层返回，不断保存ViewGroup的测量宽高。</p>
 
                     </div>
                     <div class="essaySuffix-box">
