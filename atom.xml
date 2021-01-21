@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2021-01-20T14:18:57.485Z</updated>
+    <updated>2021-01-21T15:08:25.891Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -10,6 +10,149 @@
     <logo>https://jxiaow.gitee.io/images/avatar.png</logo>
     <icon>https://jxiaow.gitee.io/favicon.ico</icon>
     <rights>All rights reserved 2021, Xiaowu</rights>
+    <entry>
+        <title type="html"><![CDATA[屏幕适配]]></title>
+        <id>https://jxiaow.gitee.io/posts/9233ed3f/</id>
+        <link href="https://jxiaow.gitee.io/posts/9233ed3f/">
+        </link>
+        <updated>2021-01-21T15:00:41.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="dp-和-sp">dp 和 sp</h2>
+<p>dp与像素无关， Android系统允许用户自定义文字尺寸大小（小、正常、大、超大等等），当文字尺寸是“正常”时，1sp=1dp=0.00625英寸，而当文字尺寸是“大”或“超大”时，1sp&gt;1dp=0.00625英寸。类似我们在windows里调整字体尺寸以后的效果——窗口大小不变，只有文字大小改变。</p>
+<h2 id="android-布局文件适配">Android 布局文件适配</h2>
+<p><strong>Android 分辨率</strong></p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/17/3499134421b76a11b04b406081c0c756-1592361871473-f993ade9-a337-4f81-bac3-0bfa55b45f9c-8f16fe.png" alt="1592361871473f993ade9a3374f81bac30bfa55b45f9c" loading="lazy"></figure>
+<p>如果在不同的分辨率上布局文件不一致，我们可以在res目录下，新建一个文件夹，如：layout-1080x720 <strong>数值大的在前面</strong></p>
+<h2 id="android使用最小宽度限定符">Android使用最小宽度限定符</h2>
+<p>Android开发中最头疼的问题之一就是兼容不同尺寸和分辨率的设备。在使用最小宽度限定符时这个最小宽度的该如何计算。<br>
+最小宽度限定符可以使用一个与屏幕像素密度无关为单位（dp）的数值区分出的不同设备，以应用不同的资源。<br>
+如下图中values-sw600dp的sw表示最小宽度，那么600dp是如何确定的呢？<br>
+<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/17/3951c6895aa89c18d0edb4ed07c7422b-1592361824722-3dc4f61f-cf86-4f64-a49d-5b44a9323dfc-6aea5c.jpeg" alt="" loading="lazy"></p>
+<p>举个例子：一般情况下我们可以容易知道设备的分辨率和尺寸的参数。比如现在有平板A（分辨率1280<em>720px，尺寸是8inch）， 手机B（分辨率1920</em>1080px，尺寸是5.7inch），手机C（分辨率1280*720px，尺寸是5inch）。通过下面的屏幕像素密度的计算公式，我们可以分别计算出他们的屏幕像素密度：<br>
+<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/17/c90f834a918dd3c890ff085200b82c99-1592361824704-5e404eb9-c6d6-4892-a694-cb799b7f98d8-307fca.jpeg" alt="" loading="lazy"></p>
+<p>平板A约为184dpi，手机B约为386dpi，手机C约为293dpi。<br>
+接下里需要注意的是，最小宽度是不考虑横屏或竖屏的，也就是说最小宽度是设备屏幕四条边里最短的那两条边。<br>
+如果需要考虑横竖屏那么可以加入屏幕方向限定符，这不在我们讨论之列。那么接下来我们取最短边的像素数，并通过下面的公式计算最小宽度（dp）： 平板A约为626dp，手机B约为448dp，手机C约为393dp。<br>
+<img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2020/12/17/272d10e130c9cee86c82ad20765303f4-1592361824487-166a5ec5-7be0-44cd-9370-12465939e47d-718378.jpeg" alt="" loading="lazy"></p>
+<h2 id="android-studio-插件">Android Studio 插件</h2>
+<p>在Android Studio插件市场，我们可以找到<code>ScreenMatch</code>来自动生成dimen.xml文件。</p>
+<p>github地址：<a href="https://github.com/mengzhinan/PhoneScreenMatch">GitHub - mengzhinan/PhoneScreenMatch: 屏幕适配方案</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Android属性动画]]></title>
+        <id>https://jxiaow.gitee.io/posts/c521d2cf/</id>
+        <link href="https://jxiaow.gitee.io/posts/c521d2cf/">
+        </link>
+        <updated>2021-01-21T12:51:11.000Z</updated>
+        <content type="html"><![CDATA[<p>属性动画整理的脑图如下：</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/21/d78657d763dc999937aadb47a4225b21-%E5%B1%9E%E6%80%A7%E5%8A%A8%E7%94%BB-6d8276.png" alt="属性动画" loading="lazy"></figure>
+<h2 id="基本使用">基本使用</h2>
+<h3 id="valueanimator">ValueAnimator</h3>
+<p><code>ValueAnimator</code>是整个属性动画机制当中最核心的一个类，属性动画的运行机制是<strong>通过不断地对值进行操作</strong>来实现的，而初始值和结束值之间的动画过渡就是由<code>ValueAnimator</code>这个类来负责计算的。它的内部使用一种时间循环的机制来计算值与值之间的动画过渡，我们只需要将初始值和结束值提供给ValueAnimator，并且告诉它动画所需运行的时长，那么ValueAnimator就会自动帮我们完成从初始值平滑地过渡到结束值这样的效果。除此之外，ValueAnimator还负责管理动画的播放次数、播放模式、以及对动画设置监听器等，确实是一个非常重要的类。</p>
+<pre><code class="language-kotlin"> ValueAnimator.ofXXX(0f, 100f, 50f, 100f)
+       .apply {
+          duration = 300
+          addUpdateListener {
+          // ...
+       }
+  }.start()
+</code></pre>
+<p>ps：<code>ofXXX</code>代表数值类型，可以是<code>ofInt</code>，<code>ofFloat</code>等。</p>
+<h3 id="objectanimator">ObjectAnimator</h3>
+<p><code>ObjectAnimator</code>继承自<code>ValueAnimator</code>, ValueAnimator是对值进行了一个平滑的动画过渡，而ObjectAnimator 可以直接对任意对象的任意属性进行动画操作的，比如说View的alpha属性。</p>
+<pre><code class="language-kotlin">// 设置imageView的透明度属性
+ObjectAnimator.ofFloat(imageView, &quot;alpha&quot;, 1.0f, 0.4f, 1.0f)
+    .apply {
+        duration = 1000
+        startDelay = 300
+    }.start()
+</code></pre>
+<h3 id="propertyvaluesholder">PropertyValuesHolder</h3>
+<p><code>PropertyValuesHolder</code>对象可用于通过<code>ValueAnimator</code>或<code>ObjectAnimator</code>创建动画，这些动画可以并行操作多个不同的属性。</p>
+<pre><code class="language-kotlin">val holder1 = PropertyValuesHolder.ofFloat(&quot;alpha&quot;, 1f, 0.5f)
+val holder2 = PropertyValuesHolder.ofFloat(&quot;scaleX&quot;, 1f, 0.5f)
+val holder3 = PropertyValuesHolder.ofFloat(&quot;scaleY&quot;, 1f, 0.5f)
+val animator: ObjectAnimator =
+        ObjectAnimator.ofPropertyValuesHolder(binding.imgIv, holder1, holder2, holder3)
+animator.duration = 200
+animator.start()
+</code></pre>
+<h3 id="typeevaluator">TypeEvaluator</h3>
+<p>通过<code>ValueAnimator#setEvaluator()</code>方法设置估值器，<code>TypeEvaluator</code>能够支持我们创建支持任意属性类型的动画。</p>
+<p>系统内置了一些估值器：</p>
+<blockquote>
+<p><strong>ArgbEvaluator</strong>, <strong>FloatArrayEvaluator</strong>, <strong>FloatEvaluator</strong>, <strong>IntArrayEvaluator</strong>, <strong>IntEvaluator</strong>, <strong>PointFEvaluator</strong>, <strong>RectEvaluator</strong>， <strong>TypeEvaluator</strong></p>
+</blockquote>
+<p>我们也可以自定义，如下：</p>
+<pre><code class="language-kotlin">ValueAnimator().apply {
+    duration = 3000
+    setObjectValues(PointF(0f, 0f))
+    interpolator = AccelerateInterpolator(10f)
+    val point = PointF()
+    //自定义估值器
+    setEvaluator { fraction, startValue, endValue -&gt;
+                  point.x = 100f * (fraction * 5)
+                  // y=vt=1/2*g*t*t(重力计算)
+                  point.y = 0.5f * 98f * (fraction * 5) * (fraction * 5)
+                  point
+                 }
+    addUpdateListener {
+        val p = it.animatedValue as PointF
+        imageView.apply {
+            x = p.x
+            y = p.y
+        }
+    }
+}.start()
+</code></pre>
+<h3 id="interpolator">Interpolator</h3>
+<p><code>Interpolator</code>被用于定义动画的变化速率。也可以说是加速度。系统自带了一些插值器如下：</p>
+<ul>
+<li>AccelerateDecelerateInterolator：先加速后减速</li>
+<li>AccelerateInterpolator：加速</li>
+<li>DecelerateInterpolator：减速</li>
+<li>AnticipateInterpolator：先向相反方向改变一段再加速播放</li>
+<li>AnticipateOvershootInterpolator：先向相反方向改变，再加速播放，会超出目标值然后缓慢移动至目标值，类似于弹簧回弹</li>
+<li>BounceInterpolator：快到目标值时值会跳跃</li>
+<li>CycleIinterpolator：动画循环一定次数，值的改变为一正弦函数：Math.sin(2 * mCycles * Math.PI)</li>
+<li>LinearInterpolator：线性均匀改变</li>
+<li>OvershottInterpolator：最后超出目标值然后缓慢改变到目标值</li>
+<li>TimeInterpolator：一个允许自定义Interpolator的接口，以上都实现了该接口</li>
+</ul>
+<p>都是通过：<br>
+<code>valueAnimator.setInterpolator(new LinearInterpolator());</code><br>
+设置即可。</p>
+<pre><code class="language-kotlin">ValueAnimator().apply {
+    duration = 3000
+    setObjectValues(PointF(0f, 0f))
+    interpolator = AccelerateInterpolator(10f)
+}.start()
+</code></pre>
+<h3 id="animatorset">AnimatorSet</h3>
+<p><code>AnimatorSet</code>是对属性动画的一个集合，可以让很多动画按一定顺序或者 同时进行。</p>
+<pre><code class="language-kotlin">val translationXAnimator = ObjectAnimator.ofFloat(binding.imgIv, &quot;translationX&quot;, 0f, 500f)
+val alphaAnimator = ObjectAnimator.ofFloat(binding.imgIv, &quot;alpha&quot;, 0f, 1f)
+val scaleXAnimator = ObjectAnimator.ofFloat(binding.imgIv, &quot;scaleX&quot;, 0f, 2f)
+
+val animatorSet = AnimatorSet()
+animatorSet.duration = 500
+
+// 按照顺序执行
+// animatorSet.playSequentially(translationXAnimator, alphaAnimator, scaleXAnimator)
+// 一起执行
+// animatorSet.playTogether(translationXAnimator, alphaAnimator, scaleXAnimator)
+// 链式调用
+// animatorSet.play(translationXAnimator).with(alphaAnimator).with(scaleXAnimator)
+// after 在 play之前执行  before 在 play之后执行
+animatorSet.play(translationXAnimator).after(scaleXAnimator).before(alphaAnimator)
+animatorSet.start()
+</code></pre>
+<h2 id="实战">实战</h2>
+<p><a href="https://gitee.com/jxiaow/practiseCodeAndroid/blob/master/AnimationSample/app/src/main/java/com/github/jxiaow/animation/SplashView.kt">xiaow/AndroidPractiseCode: Android 代码练习库 - Gitee.com</a></p>
+<h2 id="动画框架">动画框架</h2>
+<p><a href="https://gitee.com/jxiaow/practiseCodeAndroid/blob/master/AnimationSample/app/src/main/java/com/github/jxiaow/framework/AnimatorScrollView.kt">xiaow/AndroidPractiseCode: Android 代码练习库 - Gitee.com</a></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[使用Klint格式化代码]]></title>
         <id>https://jxiaow.gitee.io/posts/745cbbe1/</id>
@@ -610,6 +753,9 @@ actionMasked比action更全面，无论处理简单拖拽还是复杂的多指�
 <h3 id="paint的高级使用-滤镜"><a href="https://jxiaow.gitee.io/posts/49e1d711">Paint的高级使用-滤镜</a></h3>
 <h3 id="paint的高级使用-xfermode"><a href="https://jxiaow.gitee.io/posts/b2c61861">Paint的高级使用-xfermode</a></h3>
 <h3 id="pathmeasure的基本使用"><a href="https://jxiaow.gitee.io/posts/3d90af75">PathMeasure的基本使用</a></h3>
+<h2 id="自定义view">自定义view</h2>
+<h3 id="自定义view-2"><a href="https://jxiaow.gitee.io/posts/b6d9f081">自定义view</a></h3>
+<h3 id=""></h3>
 ]]></content>
     </entry>
     <entry>
@@ -1526,590 +1672,6 @@ public &lt;T&gt; void observe(LifecycleOwner owner,
 </ul>
 </li>
 </ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Dagger2在Android中的使用]]></title>
-        <id>https://jxiaow.gitee.io/posts/e781e647/</id>
-        <link href="https://jxiaow.gitee.io/posts/e781e647/">
-        </link>
-        <updated>2019-12-06T16:24:44.000Z</updated>
-        <summary type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
-<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
-<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
-<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
-]]></summary>
-        <content type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
-<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
-<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
-<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
-<!-- more -->
-<blockquote>
-<p>本系列文章是基于 Google Dagger 2.23.2 版本， Kotlin 1.3.21版本</p>
-</blockquote>
-<p>在Android项目中使用Dagger2时，像 <code>Activity</code>和<code>Fragment</code>这种类型的初始化操作都是有Android系统提供的，如果要往其注入对象，不免会有这样的写法：</p>
-<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
-
-    @Inject
-    lateinit var activity: MainActivity
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        DaggerMainActivityComponent.builder()
-            .mainActivityModule(MainActivityModule(this))
-            .appComponent(
-                (application as MyApplication)
-                    .daggerAppComponent
-            ).build()
-            .inject(this)
-    }
-}
-</code></pre>
-<p>上述写法，会有以下几个我们几乎无法避免的问题：</p>
-<ol>
-<li>
-<p>上述Dagger部分的代码存在<strong>模板代码</strong>，在每个Activity中都会这么写到，即便抽取到BaseActivity中，也有一些特殊部分需要在每个Activity中单独处理，随着业务的增加后期维护不易；</p>
-</li>
-<li>
-<p>从上面的代码可以看出，<code>MainActivityModule</code>中持有了<code>MainActivity</code>实例，并且需要在<code>MainActivity</code>传入参数，它打破了依赖注入的核心原则：<strong>类不应该知道它是如何注入的。</strong></p>
-</li>
-</ol>
-<p>因此为了解决上面的问题，谷歌官方推出了<code>dagger.android</code>。</p>
-<p>下面是基本的使用方式，包括如何注入<code>Activity</code>和<code>Fragment</code>,本篇只讲如何使用，后续再分析其原理。</p>
-<h2 id="引入daggerandroid依赖">引入<code>Dagger.android</code>依赖</h2>
-<p>在<code>build.gradle</code>中添加：</p>
-<pre><code class="language-groovy">implementation 'com.google.dagger:dagger-android:2.23.2'
-implementation 'com.google.dagger:dagger-android-support:2.23.2'
-kapt 'com.google.dagger:dagger-android-processor:2.23.2'
-</code></pre>
-<h2 id="注入activity">注入Activity</h2>
-<p>以<code>MainActivity</code>为例</p>
-<h3 id="dagger2中的写法">Dagger2中的写法</h3>
-<pre><code class="language-kotlin">class MainActivity : AppCompatActivity() {
-    // 这里只是做了一个例子
-    @Inject
-    lateinit var activity: MainActivity
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        DaggerMainActivityComponent.builder()
-            .mainActivityModule(MainActivityModule(this))
-            .appComponent(
-                (application as MyApplication)
-                    .daggerAppComponent
-            ).build()
-            .inject(this)
-    }
-}
-
-@ActivityScope
-@Component(modules = [MainActivityModule::class], dependencies = [AppComponent::class])
-interface MainActivityComponent {
-    fun inject(activity: MainActivity)
-}
-
-@Module
-class MainActivityModule(private val activity: MainActivity) {
-    @Provides
-    fun provideMainActivity(): MainActivity = activity
-}
-
-@Scope
-annotation class ActivityScope
-</code></pre>
-<h3 id="dagger2-android中的写法">Dagger2-Android中的写法</h3>
-<h4 id="修改mainactivitycomponent">修改<code>MainActivityComponent</code></h4>
-<pre><code class="language-kotlin">@ActivityScope
-@Subcomponent
-interface MainActivityComponent : AndroidInjector&lt;MainActivity&gt; {
-    // 声明MainActivity创建的工厂接口
-    @dagger.Subcomponent.Factory
-    interface Factory : AndroidInjector.Factory&lt;MainActivity&gt;
-}
-</code></pre>
-<h4 id="修改mainactivitymodule">修改<code>MainActivityModule</code></h4>
-<pre><code class="language-kotlin">@Module(subcomponents = [MainActivityComponent::class])
-abstract class MainActivityModule {
-    // module中提供绑定工厂方法
-    @Binds
-    @IntoMap
-    @ClassKey(MainActivity::class)
-    abstract fun bind(
-        factory: MainActivityComponent.Factory
-    ): AndroidInjector.Factory&lt;*&gt;
-}
-</code></pre>
-<h4 id="修改oncreate中的dagger注入">修改<code>onCreate()</code>中的Dagger注入</h4>
-<pre><code class="language-kotlin">override fun onCreate(savedInstanceState: Bundle?) {
-   // 在super.onCreate前添加
-   AndroidInjection.inject(this)
-   super.onCreate(savedInstanceState)
-   setContentView(R.layout.activity_main)
-}
-</code></pre>
-<h4 id="修改myapplication">修改<code>MyApplication</code></h4>
-<p>通过<code>dagger.android</code>注入时，Application中也发生了相应的变化</p>
-<pre><code class="language-kotlin">class MyApplication : Application(), HasAndroidInjector {
-
-    @Inject
-    lateinit var dispatchingAndroidInjector: DqispatchingAndroidInjector&lt;Any&gt;
-
-    override fun onCreate() {
-        super.onCreate()
-        DaggerAppComponent.factory().create(this).inject(this)
-    }
-
-    override fun androidInjector(): AndroidInjector&lt;Any&gt; {
-        return dispatchingAndroidInjector
-    }
-}
-
-@dagger.Component(
-    modules = [AndroidInjectionModule::class,// 引入框架提供的InjectionModule
-        AndroidSupportInjectionModule::class,// 如果使用了support相关的类，也需要引入
-        MainActivityModule::class // 这是我们自定义的Module
-    ]
-)
-interface AppComponent : AndroidInjector&lt;MyApplication&gt; {
-    @dagger.Component.Factory
-    interface Factory : AndroidInjector.Factory&lt;MyApplication&gt;
-}
-</code></pre>
-<p>我们需要将我们在<code>MainActivity</code>中的<code>MainActivityModule</code>加入到<code>Application</code>中的<code>AppComponent</code>的<code>module</code>,然后<code>Make Project</code>或<code>Make App</code>或<code>build project</code>，如果未报错即成功。</p>
-<h3 id="简洁写法">简洁写法</h3>
-<p>如果相应的<code>ActivityComponent</code>中只有以下操作时：</p>
-<pre><code class="language-kotlin">@ActivityScope
-@Subcomponent
-interface MainActivityComponent : AndroidInjector&lt;MainActivity&gt; {
-    // 声明MainActivity创建的工厂接口
-    @dagger.Subcomponent.Factory
-    interface Factory : AndroidInjector.Factory&lt;MainActivity&gt;
-}
-</code></pre>
-<p>我们可以新建一个module类， 将满足以上条件的Component 集中到一起，并删除对应的Component，如：</p>
-<pre><code class="language-kotlin">@Module
-abstract class ActivityBindingModule {
-    @ActivityScoped
-    @ContributesAndroidInjector(modules = [MainActivityModule.class])
-    abstract fun mainActivity() : MainActivity
-
-    @ActivityScoped
-    @ContributesAndroidInjector(modules = [AddEditTaskModule.class])
-    abstract fun addEditTaskActivity(): AddEditTaskActivity 
-}
-</code></pre>
-<p>删除 原有module中的<code>bind*</code>方法</p>
-<pre><code class="language-java">@Module
-public class MainActivityModule{
-
-}
-</code></pre>
-<h2 id="注入fragment">注入Fragment</h2>
-<p>注入<code>Fragment</code>与注入<code>Activity</code>类似，唯一不同的地方在于我们需要在<code>onAttach</code>方法中执行<code>AndroidSupportInject.inject(this)</code></p>
-<pre><code class="language-kotlin">class BlankFragment : Fragment() {
-
-    override fun onAttach(context: Context?) {
-        AndroidSupportInjection.inject(this)
-        super.onAttach(context)
-    }
-}
-
-@dagger.Module
-abstract class FragmentBindModule {
-    @ContributesAndroidInjector
-    abstract fun blankFragment(): BlankFragment
-}
-
-
-@dagger.Component(
-    modules = [AndroidInjectionModule::class,
-        AndroidSupportInjectionModule::class,
-        ActivityBinder::class,
-        FragmentBindModule::class
-    ]
-)
-interface AppComponent : AndroidInjector&lt;MyApplication&gt; {
-
-    @dagger.Component.Factory
-    interface Factory : AndroidInjector.Factory&lt;MyApplication&gt;
-}
-</code></pre>
-<p>对于<code>FragmentBindModule</code>不仅可以放入到<code>AppComponent</code>中，也可以放入到<code>MainActivityComponent</code>,或者<code>FragmentComponent</code>如：</p>
-<pre><code class="language-kotlin">@dagger.Subcomponent(modules = [FragmentBindModule::class])
-interface MainActivityComponent : AndroidInjector&lt;MainActivity&gt;{
-
-    @dagger.Subcomponent.Factory
-    interface Factory: AndroidInjector.Factory&lt;MainActivity&gt;
-}
-
-
-@dagger.Module(subcomponents = [
-    MainActivityComponent::class // 将fragment放入到了activity对应的Component
-])
-abstract class MainActivityModule{
-
-    @Binds
-    @IntoMap
-    @ClassKey(MainActivity::class)
-    abstract fun bind(factory:MainActivityComponent.Factory):AndroidInjector.Factory&lt;*&gt;
-}
-</code></pre>
-<h2 id="一些问题">一些问题</h2>
-<h3 id="model-注解的是抽象类时-provides-标注的必须是静态方法">@Model  注解的是抽象类时  @provides 标注的必须是静态方法</h3>
-<blockquote>
-<p>A @Module may not contain both non-static @Provides methods and abstract @Binds or @Multibinds declarations</p>
-</blockquote>
-<p>这个错误提示是将<code>Module</code>定义成了抽象类，这在<code>java</code>中只需要将<code>@Provide</code>标注的方法设置为静态方法即可，但是在<code>Kotlin</code>中是行不通的，因为在<code>kotlin</code>中静态方法是写在<code>companion object</code>代码块内，所以解决方法有两种：</p>
-<ul>
-<li>
-<p>用<code>Module</code>标注<code>companion object</code></p>
-<pre><code class="language-kotlin">@dagger.Module
-abstract class MainActivityModule() {
-    @dagger.Module
-    companion object {
-        @JvmStatic
-        @Provides
-        fun provideFragment() = BlankFragment()
-    }
-
-    @Binds
-    abstract fun context(activity: MainActivity): Context
-}
-</code></pre>
-</li>
-<li>
-<p>使用多个<code>Module</code>将抽象方法和<code>@provide</code>标注的方法分开，如：</p>
-<pre><code class="language-kotlin">@Module
-abstract class MainActivityBindsModule {
-    @Binds
-    abstract fun context(activity: MainActivity): Context
-}
-
-@Module(includes = arrayOf(MainActivityBindsModule ::class))
-class MainActivityProvidesModule {
-      @Provides
-      fun provideFragment() = BlankFragment()
-}
-</code></pre>
-</li>
-</ul>
-<h2 id="总结">总结</h2>
-<p>通过前面的例子我们亦可以看出：</p>
-<ol>
-<li>Dagger2-android 使用的是Dagger2中的<strong>继承关系</strong>；</li>
-<li>使用它，我们就可以不用写那么多的模版代码，相对于<code>Dagger2</code>方便了许多；</li>
-<li>Dagger2-Android 比Dagger2更强大，我们使用<code>@Binds</code>绑定抽象方法来注入一些提供初始化的类等。</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Dagger 2 Component 与 SubComponent]]></title>
-        <id>https://jxiaow.gitee.io/posts/e30bee8a/</id>
-        <link href="https://jxiaow.gitee.io/posts/e30bee8a/">
-        </link>
-        <updated>2019-12-05T16:23:48.000Z</updated>
-        <summary type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
-<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
-<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
-<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
-]]></summary>
-        <content type="html"><![CDATA[<p><a href="/posts/cbb172f8">Dagger 2 完全解析（一）,基本使用与原理</a><br>
-<a href="/posts/b74c4b6c">Dagger 2 完全解析（二）, 进阶使用</a><br>
-<a href="/posts/e30bee8a">Dagger 2 完全解析（三）,  Component 与 SubComponent</a><br>
-<a href="/posts/e781e647">Dagger 2 完全解析（四）,在Android中的使用</a></p>
-<!-- more -->
-<blockquote>
-<p>本系列文章是基于 Google Dagger 2.23.2 版本， Kotlin 1.3.21版本</p>
-</blockquote>
-<p>理解前面两篇文章后，可以使用 <code>Dagger 2</code>框架完成一个对象的依赖注入。但是在实战中会存在多个需要注入依赖的对象，也就是说会有多个 <code>Component</code>，它们之间会有相同的依赖，那么该如何处理它们之间的关系呢？</p>
-<p>我们先来看一个简单的例子：</p>
-<p>假如有三个类：<code>A</code>、<code>B</code>和<code>C</code>, <code>A</code>和<code>B</code>都各自持有<code>C</code>的实例，并且通过<code>Dagger2</code>进行注入</p>
-<pre><code class="language-kotlin">class A {
-    @Inject
-    lateinit var c: C
-}
-
-class B {
-    @Inject
-    lateinit var c: C
-}
-
-class C @Inject constructor()
-</code></pre>
-<p>Component:</p>
-<pre><code class="language-kotlin">@Component
-interface AComponent {
-    fun injectA(a: A)
-}
-
-@Component
-interface BComponent {
-    fun injectA(b: B)
-}
-</code></pre>
-<p>如果要让<code>A</code>、<code>B</code>持有的实例<code>C</code>相同的话，我们该如何处理？</p>
-<p>很多人第一时间会想到下面这种设计：</p>
-<pre><code class="language-kotlin">@Singleton
-@Component(modules = [CModule::class])
-interface AComponent {
-    fun injectA(a: A)
-}
-
-@Singleton
-@Component(modules = [CModule::class])
-interface BComponent {
-    fun injectA(b: B)
-}
-
-@Module
-class CModule {
-
-    companion object {
-        private var c: C? = null
-    }
-
-    @Singleton
-    @Provides
-    fun provideC(): C {
-        if (c == null) {
-            c = C()
-        }
-        return c!!
-    }
-}
-</code></pre>
-<p>把 Component 需要的依赖都在<code>modules</code>属性中声明，但是这样有两个问题：</p>
-<p>（1）有时依赖实例需要共享，例如上面场景中，<code>A</code>和<code>C</code>都持有<code>C</code>的实例，并且根据<code>Module</code>里的实现，会存在谁先创建<code>C</code>实例的问题。</p>
-<p>（2）Scope 作用域容易失效，例如 <code>CModule</code> 的<code>provideCar()</code>使用 <code>@Singleton</code> 作用域，<code>AComponent</code>和<code>BComponent</code>也要用 <code>Singleton</code> 标注，但它们都会持有一个<code>C</code>实例。</p>
-<p>假如<code>A</code>先创建了<code>C</code>那么，<code>BComponent</code>需要依赖 <code>AComponent</code>提供的 <code>C</code>实例，这就是 <code>Component</code> 组织关系中的一种。</p>
-<h2 id="component-的组织关系">Component 的组织关系</h2>
-<p>Component 管理着依赖实例，根据依赖实例之间的关系就能确定 Component 的关系。这些关系可以用<code>object graph</code>描述，我称之为依赖关系图。在 Dagger 2 中 Component 的组织关系分为两种：</p>
-<ul>
-<li>依赖关系，一个 Component 依赖其他 Compoent<code>公开</code>的依赖实例，用 Component 中的<code>dependencies</code>声明。</li>
-<li>继承关系，一个 Component 继承（也可以叫扩展）某 Component 提供更多的依赖，SubComponent 就是继承关系的体现。</li>
-</ul>
-<p>所以前文中<code>AComponent</code>和<code>BComponent</code>是依赖关系。</p>
-<h3 id="依赖关系">依赖关系</h3>
-<p>具体的实现代码：</p>
-<pre><code class="language-kotlin">@Component(modules = [CModule::class])
-interface AComponent {
-    fun injectA(a: A)
-
-    fun c(): C
-}
-
-@Component(dependencies = [AComponent::class])
-interface BComponent {
-    fun injectA(b: B)
-}
-
-@Module
-class CModule {
-    @Provides
-    fun provideC(): C = C()
-}
-</code></pre>
-<p><strong>注</strong>：<strong>因为 BComponent和 AComponent是依赖关系，如果<code>AComponent</code>声明了作用域的话，那么<code>BComponent</code>也必须声明（反之可以），而且它们的 Scope 不能相同，并且两个都有作用域的情况下 @Singleton 修饰的 Component （BComponent）不能依赖其他的 Component。</strong></p>
-<pre><code class="language-java">public final class DaggerBComponent implements BComponent {
-  private final AComponent aComponent;
-
-  private DaggerBComponent(AComponent aComponentParam) {
-    this.aComponent = aComponentParam;
-  }
- ....
-
-  @Override
-  public void injectA(B b) {
-    injectB(b);}
-
-  private B injectB(B instance) {
-      // 注入时，使用了aComponent.c()
-    B_MembersInjector.injectC(instance, Preconditions.checkNotNull(aComponent.c(), &quot;Cannot return null from a non-@Nullable component method&quot;));
-    return instance;
-  }
-...
-}
-</code></pre>
-<p>编译时生成的代码 DaggerBComponent 中会调用<code>aComponent.c()</code>，如果 AComponent 没有向外提供C 实例的接口的话，DaggerBComponent 就会注入失败。</p>
-<p>依赖注入：</p>
-<pre><code>val aComponent = DaggerAComponent.builder().build()
-DaggerBComponent.builder().aComponent(aComponent).build().inject(b)
-</code></pre>
-<p>依赖关系就跟生活中的朋友关系相当，注意事项如下：</p>
-<ol>
-<li>被依赖的 Component 需要把暴露的依赖实例用显式的接口声明。</li>
-<li>依赖关系中的 Component 的 Scope 不能相同，因为它们的生命周期不同。</li>
-</ol>
-<h3 id="继承关系">继承关系</h3>
-<p>继承关系跟面向对象中的继承的概念有点像，<code>SubComponent</code>称为<code>子 Component</code>，类似于平常说的子类。下面先看看下面这个场景：</p>
-<pre><code class="language-kotlin">class Parent {
-    @Inject
-    lateinit var car: Car
-}
-
-class Child {
-    @Inject
-    lateinit var car: Car
-    @Inject
-    lateinit var bike: Bike
-}
-
-class Car @Inject constructor()
-class Bike @Inject constructor()
-</code></pre>
-<p>Child 可以开Parent的车 car，也可以骑自己的自行车 bike。依赖关系图：</p>
-<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/ixiaow/cdn-images/2020/05/10-00-48-48-1561371949435.png" alt="1561371949435.png" loading="lazy"></figure>
-<p>上图中 ChildComponent 在 ParentComponent之中，ChildComponent子承父业，可以访问 ParentComponent 的依赖，而 ParentComponent只知道 ChildComponent 是它的子类，可以访问 SubComponent.Builder，却无法访问 SubComponent 中的依赖。</p>
-<pre><code class="language-kotlin">@Component(modules = [CarModule::class])
-interface ParentComponent {
-    fun inject(parent: Parent)
-}
-
-@Subcomponent(modules = [BikeModule::class])
-interface ChildComponent {
-    fun inject(child: Child)
-
-    // SubComponent 必须显式地声明 Subcomponent.Builder，parentComponent 需要用 Builder 来创建 ChildComponent
-    @Subcomponent.Builder
-    interface Builder {
-        fun build(): ChildComponent
-    }
-}
-</code></pre>
-<p><code>@SubComponent</code>的写法与<code>@Component</code>一样，只能标注接口或抽象类，与依赖关系一样，SubComponent 与 parent Component 的 Scope 不能相同，只是 SubComponent 表明它是继承扩展某 Component 的。怎么表明一个 SubComponent 是属于哪个 parent Component 的呢？只需要在 parent Component 依赖的 Module 中的<code>subcomponents</code>加上 SubComponent 的 class，然后就可以在 parent Component 中请求 SubComponent.Builder。</p>
-<pre><code class="language-kotlin">@Component(modules = [CarModule::class])
-interface ParentComponent {
-    ...
-    // 用来创建childComponent
-    fun childComponent(): ChildComponent.Builder
-}
-
-@Subcomponent(modules = [BikeModule::class])
-interface ChildComponent {
-    ...
-    // SubComponent 必须显式地声明 Subcomponent.Builder，parentComponent 需要用 Builder 来创建 ChildComponent
-    @Subcomponent.Builder
-    interface Builder {
-        fun build(): ChildComponent
-    }
-}
-// 在CarModule上添加subComponents
-@Module(subcomponents = [ChildComponent::class])
-class CarModule {
-    @Provides
-    fun provideCar() = Car()
-}
-
-@Module
-class BikeModule {
-    @Provides
-    fun provideBike() = Bike()
-}
-</code></pre>
-<p>上面的代码经过<code>make project</code>后，dagger2生成的代码：</p>
-<pre><code class="language-java">public final class DaggerParentComponent implements ParentComponent {
-  ...
-  @Override
-  public ChildComponent.Builder childComponent() {
-    return new ChildComponentBuilder();}
-  ...
-  private final class ChildComponentBuilder implements ChildComponent.Builder {
-    @Override
-    public ChildComponent build() {
-      return new ChildComponentImpl(new BikeModule());
-    }
-  }
-
-  private final class ChildComponentImpl implements ChildComponent {
-    private final BikeModule bikeModule;
-
-    private ChildComponentImpl(BikeModule bikeModuleParam) {
-      this.bikeModule = bikeModuleParam;
-    }
-   ...
-    private Child injectChild(Child instance) {
-      // 注入car时，调用的parentComponent的carModule提供
-      Child_MembersInjector.injectCar(instance, CarModule_ProvideCarFactory.provideCar(DaggerParentComponent.this.carModule));
-      Child_MembersInjector.injectBike(instance, BikeModule_ProvideBikeFactory.provideBike(bikeModule));
-      return instance;
-    }
-  }
-}
-</code></pre>
-<p>SubComponent 编译时不会生成 DaggerChildComponent，需要通过 parentComponent 的获取 SubComponent.Builder 方法获取 ChildComponent 实例。</p>
-<pre><code class="language-kotlin">val parentComponent = DaggerParentComponent.builder().build()
-parentComponent.childComponent().build().inject(child)
-</code></pre>
-<p><strong>继承关系和依赖关系最大的区别就是：继承关系中不用显式地提供依赖实例的接口，SubComponent 继承 parent Component 的所有依赖。</strong></p>
-<h3 id="依赖关系-vs-继承关系">依赖关系 vs 继承关系</h3>
-<p>相同点：</p>
-<ul>
-<li>两者都能复用其他 Component 的依赖</li>
-<li>有依赖关系和继承关系的 Component 不能有相同的 Scope</li>
-</ul>
-<p>区别：</p>
-<ul>
-<li>依赖关系中被依赖的 Component 必须显式地提供公开依赖实例的接口，而 SubComponent 默认继承 parent Component 的依赖。</li>
-<li>依赖关系会生成两个独立的 DaggerXXComponent 类，而 SubComponent 不会生成 独立的 DaggerXXComponent 类。</li>
-</ul>
-<p>在 Android 开发中，Activity 是 App 运行中组件，Fragment 又是 Activity 一部分，这种组件化思想适合继承关系，所以在 Android 中一般使用 SubComponent。</p>
-<h2 id="subcomponent-的其他问题">SubComponent 的其他问题</h2>
-<h3 id="抽象工厂方法定义继承关系">抽象工厂方法定义继承关系</h3>
-<p>除了使用 Module 的<code>subcomponents</code>属性定义继承关系，还可以在 parent Component 中声明返回 SubComponent 的抽象工厂方法来定义：</p>
-<pre><code class="language-kotlin">@Component(modules = [CarModule::class])
-interface ParentComponent {
-    ...
-    // 用来创建childComponent
-    //// 这个抽象工厂方法表明 ChildComponent 继承 ParentComponent
-    fun childComponent(): ChildComponent
-}
-
-@Subcomponent(modules = [BikeModule::class])
-interface ChildComponent {
-    ...
-}
-
-@Module
-class CarModule {
-    @Provides
-    fun provideCar() = Car()
-}
-
-@Module
-class BikeModule {
-    @Provides
-    fun provideBike() = Bike()
-}
-</code></pre>
-<p>这种定义方式不能很明显地表明继承关系，一般推荐使用 Module 的<code>subcomponents</code>属性定义。</p>
-<h3 id="重复的-module">重复的 Module</h3>
-<p>当相同的 Module 注入到 parent Component 和它的 SubComponent 中时，则每个 Component 都将自动使用这个 Module 的同一实例。也就是如果在 SubComponent.Builder 中调用相同的 Module 或者在返回 SubComponent 的抽象工厂方法中以重复 Module 作为参数时，会出现错误。（前者在编译时不能检测出，是运行时错误）</p>
-<pre><code class="language-java">@Component(modules = {RepeatedModule.class, ...})
-interface ComponentOne {
-  ComponentTwo componentTwo(RepeatedModule repeatedModule); // 编译时报错
-  ComponentThree.Builder componentThreeBuilder();
-}
-
-@Subcomponent(modules = {RepeatedModule.class, ...})
-interface ComponentTwo { ... }
-
-@Subcomponent(modules = {RepeatedModule.class, ...})
-interface ComponentThree {
-  @Subcomponent.Builder
-  interface Builder {
-    Builder repeatedModule(RepeatedModule repeatedModule);
-    ComponentThree build();
-  }
-}
-
-DaggerComponentOne.create().componentThreeBuilder()
-    .repeatedModule(new RepeatedModule()) // 运行时报错 UnsupportedOperationException!
-    .build();
-</code></pre>
-<h2 id="总结">总结</h2>
-<p>Component 之间共用相同依赖，可以有两种组织关系：依赖关系与继承关系。至于如何选择试具体情况而定，但在 Android 开发中，一般使用继承关系，以 AppComponent 作为 root Component，AppComponent 一般还会使用 @Singleton 作用域，而 ActivityComponent 为 SubComponent。</p>
 ]]></content>
     </entry>
 </feed>
