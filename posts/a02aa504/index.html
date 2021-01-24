@@ -7,7 +7,7 @@
 
 <title>deepin日常使用 | Xiaowu</title>
 
-<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1611241375163">
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1611482815860">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
@@ -112,7 +112,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1611241375163" action="/search/index.html">
+            <form id="gridea-search-form" style="position: relative" data-update="1611482815860" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
             </form>
@@ -395,7 +395,7 @@ $ ls
 <pre><code class="language-textile"># 将U改为F
 Exec=&quot;/opt/Mark Text/marktext&quot; --no-sandbox %F 
 </code></pre>
-<h2 id="android-studio-和-idea-输入法光标无法跟随"><s>Android Studio 和 IDEA 输入法光标无法跟随</s></h2>
+<h2 id="android-studio-和-idea-输入法光标无法跟随">Android Studio 和 IDEA 输入法光标无法跟随</h2>
 <p>在deepin下使用Android Studio或 Idea 时出现了输入法候选词固定在了左下角，解决方式如下：</p>
 <ul>
 <li>
@@ -434,6 +434,18 @@ export PATH=/home/jxiaow/App/node-$VERSION-$DISTRO/bin:$PATH  # nodejs 的根目
 <pre><code class="language-shell">node -v
 </code></pre>
 <p>如果有输出版本号，则代表添加成功。</p>
+<h1 id="appimage-修改">AppImage 修改</h1>
+<p>解包：</p>
+<pre><code class="language-shell">./NAME.AppImage --appimage-extract
+</code></pre>
+<p>打包：</p>
+<pre><code class="language-shell">./appimagetool-x86_64.AppImage squashfs-root NAME_NEW.AppImage
+</code></pre>
+<p>备注：</p>
+<p>这个需要用到appimagetool工具，这个工具可以从github上下到：</p>
+<pre><code class="language-shell">wget &quot;https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage&quot;
+chmod a+x appimagetool-x86_64.AppImage
+</code></pre>
 
                     </div>
                     <div class="essaySuffix-box">
@@ -489,10 +501,11 @@ export PATH=/home/jxiaow/App/node-$VERSION-$DISTRO/bin:$PATH  # nodejs 的根目
 <li><a href="#deepin20-%E5%A4%A7%E5%9C%86%E8%A7%92%E4%BF%AE%E5%A4%8D%E8%A1%A5%E4%B8%81">deepin20 大圆角修复补丁</a></li>
 <li><a href="#marktext%E6%97%A0%E6%B3%95%E5%90%AF%E5%8A%A8">markText无法启动</a>
 <ul>
-<li><a href="#android-studio-%E5%92%8C-idea-%E8%BE%93%E5%85%A5%E6%B3%95%E5%85%89%E6%A0%87%E6%97%A0%E6%B3%95%E8%B7%9F%E9%9A%8F"><s>Android Studio 和 IDEA 输入法光标无法跟随</s></a></li>
+<li><a href="#android-studio-%E5%92%8C-idea-%E8%BE%93%E5%85%A5%E6%B3%95%E5%85%89%E6%A0%87%E6%97%A0%E6%B3%95%E8%B7%9F%E9%9A%8F">Android Studio 和 IDEA 输入法光标无法跟随</a></li>
 </ul>
 </li>
 <li><a href="#nodejs-%E5%AE%89%E8%A3%85">nodejs 安装</a></li>
+<li><a href="#appimage-%E4%BF%AE%E6%94%B9">AppImage 修改</a></li>
 </ul>
 
                 </div>

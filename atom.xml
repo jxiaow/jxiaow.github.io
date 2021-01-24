@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2021-01-21T15:08:25.891Z</updated>
+    <updated>2021-01-24T10:07:03.868Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -755,7 +755,6 @@ actionMasked比action更全面，无论处理简单拖拽还是复杂的多指�
 <h3 id="pathmeasure的基本使用"><a href="https://jxiaow.gitee.io/posts/3d90af75">PathMeasure的基本使用</a></h3>
 <h2 id="自定义view">自定义view</h2>
 <h3 id="自定义view-2"><a href="https://jxiaow.gitee.io/posts/b6d9f081">自定义view</a></h3>
-<h3 id=""></h3>
 ]]></content>
     </entry>
     <entry>
