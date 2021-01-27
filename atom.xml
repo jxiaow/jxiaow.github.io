@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2021-01-27T10:05:12.834Z</updated>
+    <updated>2021-01-27T10:27:27.723Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -352,7 +352,9 @@ prev.next = msg;
 <p>第一种：p==null表示对象池中已经运行到了最后一个，无需再循环。</p>
 <p>第二种：碰到下一个消息when小于前一个，立马退出循环（不管对象池中所有message是否遍历完），进行从新排序。</p>
 <h2 id="常见问题分析">常见问题分析</h2>
-<h3 id="为什么不能在子线程中更新ui根本原因是什么">为什么不能在子线程中更新UI,根本原因是什么?</h3>
+<ul>
+<li>为什么不能在子线程中更新UI,根本原因是什么?</li>
+</ul>
 <pre><code class="language-java">// ViewRootImpl.java
 void checkThread() {
    if (mThread != Thread.currentThread()) {
@@ -367,27 +369,39 @@ void checkThread() {
 <blockquote>
 <p>setContentView只是建立了View树，并没有进行渲染工作（其实真正的渲染工作是在onResume之后）。也正是建立了View树，因此我们可以通过findViewById（）来获取到View对象，但是由于并没有进行渲染视图的工作，也就是没有执行ViewRootImpl.performTransversal。同样View中也不会执行onMeasure（），如果在onResume（）方法里直接获取View.getHeight（）/View.getWidth（）得到的结果总是0。</p>
 </blockquote>
-<h3 id="为什么主线程用looper死循环不会引发anr异常">为什么主线程用Looper死循环不会引发ANR异常?</h3>
+<ul>
+<li>为什么主线程用Looper死循环不会引发ANR异常?</li>
+</ul>
 <blockquote>
 <p>简单说就是在主线程的MessageQueue没有消息时，便阻塞在loop的queue.next()中的nativePollOnce()方法里，此时主线程会释放CPU资源进入休眠状态，直到下个消息到达或者有事务发生，通过往pipe管道写端写入数据来唤醒主线程工作。这里采用的epoll机制，是一种IO多路复用机制。</p>
 </blockquote>
-<h3 id="为什么handler构造方法里面的looper不是直接new">为什么Handler构造方法里面的Looper不是直接new？</h3>
+<ul>
+<li>为什么Handler构造方法里面的Looper不是直接new？</li>
+</ul>
 <blockquote>
 <p>如果在Handler构造方法里面new Looper，怕是无法保证保证Looper唯一，只有用Looper.prepare()才能保证唯一性。</p>
 </blockquote>
-<h3 id="messagequeue为什么要放在looper私有构造方法初始化">MessageQueue为什么要放在Looper私有构造方法初始化？</h3>
+<ul>
+<li>MessageQueue为什么要放在Looper私有构造方法初始化？</li>
+</ul>
 <blockquote>
 <p>因为一个线程只绑定一个Looper，所以在Looper构造方法里面初始化就可以保证mQueue也是唯一的Thread对应一个Looper 对应一个 mQueue。</p>
 </blockquote>
-<h3 id="handlerpost的逻辑在哪个线程执行的是由looper所在线程还是handler所在线程决定的">Handler.post的逻辑在哪个线程执行的，是由Looper所在线程还是Handler所在线程决定的？</h3>
+<ul>
+<li>Handler.post的逻辑在哪个线程执行的，是由Looper所在线程还是Handler所在线程决定的？</li>
+</ul>
 <blockquote>
 <p>由Looper所在线程决定的。逻辑是在Looper.loop()方法中，从MsgQueue中拿出msg，并且执行其逻辑，这是在Looper中执行的，因此有Looper所在线程决定。</p>
 </blockquote>
-<h3 id="messagequeuenext会因为发现了延迟消息而进行阻塞-那么为什么后面加入的非延迟消息没有被阻塞呢">MessageQueue.next()会因为发现了延迟消息，而进行阻塞。那么为什么后面加入的非延迟消息没有被阻塞呢？</h3>
+<ul>
+<li>MessageQueue.next()会因为发现了延迟消息，而进行阻塞。那么为什么后面加入的非延迟消息没有被阻塞呢？</li>
+</ul>
 <blockquote>
 <p>MessageQueue 唤醒机制</p>
 </blockquote>
-<h3 id="handler的dispatchmessage分发消息的处理流程">Handler的dispatchMessage()分发消息的处理流程？</h3>
+<ul>
+<li>Handler的dispatchMessage()分发消息的处理流程？</li>
+</ul>
 <blockquote>
 <p>Msg.callback 在mHandler.post（）中使用, mCallback在new Handler是通过接口回调</p>
 </blockquote>
