@@ -1,0 +1,758 @@
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content="心若没有栖息的地方，到哪里都是在流浪"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>Handler机制 | Xiaowu</title>
+
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1611741908220">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.8.0/mermaid.min.js"></script>
+<script>
+    var config = {
+        startOnLoad:true,
+        flowchart:{
+            useMaxWidth:false,
+            htmlLabels:true
+        }
+    };
+    mermaid.initialize(config);
+    $(function(){
+        var elements = document.getElementsByClassName("language-mermaid");
+        for (var i = elements.length; i--;) {
+            element = elements[i];
+            var graphDefinition = element.innerText;
+            if (graphDefinition) {
+                var svg = mermaid.render('ha_mermaid_' + i, graphDefinition, function(svg){});
+                if (svg) {
+                    var svgElement = document.createElement('div');
+                    preNode = element.parentNode;
+                    svgElement.innerHTML = svg;
+                    svgElement.setAttribute('class', 'mermaid');
+                    svgElement.setAttribute('data-processed', 'true');
+                    preNode.parentNode.replaceChild(svgElement, preNode);
+                }
+            }
+        }
+    });
+</script>
+</head>
+
+<body>
+    <div class="main gt-bg-theme-color-first">
+        <nav class="navbar navbar-expand-lg">
+    <a href="/">
+        <div class="navbar-brand">
+            <img class="user-avatar" src="/images/avatar.png" alt="头像">
+            <div class="site-name gt-c-content-color-first">
+                Xiaowu
+            </div>
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav " style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://jxiaow.gitee.io/posts/favourite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1611741908220" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+        <div class="post-container">
+
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
+                    <h2 class="post-title">
+                        Handler机制
+                    </h2>
+                    <div class="post-info">
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2021-01-27 ·
+                            </time>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/6TPWcEwet/" class="post-tags">
+                                # FrameWorker
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/XAOQszA7EG/" class="post-tags">
+                                # Handler
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/f3tbfHeq9/" class="post-tags">
+                                # Android
+                            </a>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/5daabb/"
+                                class="leancloud_visitors" data-flag-title="Handler机制">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
+                    </div>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <h2 id="handler的作用">handler的作用</h2>
+<ol>
+<li>与前端的ajax有异曲同工之妙；</li>
+<li>使得Android开发难度大大降低；</li>
+<li>几乎看不到线程死锁的问题。</li>
+</ol>
+<h2 id="线程通信开发中存在的问题">线程通信开发中存在的问题？</h2>
+<h3 id="线程间如何通讯">线程间如何通讯？</h3>
+<blockquote>
+<p>Handler 通信实际采用的是内存共享方案</p>
+</blockquote>
+<h3 id="为什么线程间通信不会干扰">为什么线程间通信不会干扰？</h3>
+<blockquote>
+<p>内存管理设计思路优秀</p>
+</blockquote>
+<h3 id="为什么wait和notify用武之地不大">为什么wait和notify用武之地不大？</h3>
+<blockquote>
+<p>handler已经将需要的这部分功能进行了Linux层的封装</p>
+</blockquote>
+<h2 id="handle消息机制模型">Handle消息机制模型</h2>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/25/cdc2253fd297966ac6d47656ded7ca41-1600148470244-3ed87e98-231f-4b6d-8c1c-4b24ae88e22d-db1d4d.png" alt="20200629140531178png" loading="lazy"></figure>
+<ul>
+<li><code>Handler</code>通过<code>sendMessage()</code>发送消息，然后通过<code>enqueueMessage</code>将消息添加到消息队列<code>MessageQueue</code>中；</li>
+<li><code>Looper</code>负责去遍历消息队列并且将队列中消息分发给对应的<code>Handler</code>去处理；</li>
+<li>在<code>Handler</code>的<code>handleMessage</code>方法中处理该消息，这就完成了一个消息的发送和处理过程。</li>
+</ul>
+<p>从图中可以看到参与消息处理有四个对象，它们分别是 <strong>Handler</strong>,<strong>Message</strong>, <strong>MessageQueue</strong>，<strong>Looper</strong>。</p>
+<h2 id="handler源码分析">Handler源码分析</h2>
+<blockquote>
+<p>源码基于API 30</p>
+</blockquote>
+<h3 id="threadloacal">ThreadLoacal</h3>
+<p>ThreadLocal 是一个线程内部的数据存储类，通过它可以在指定的线程中存储数据，数据存储以后，只有在指定的线程中可以获取到存储数据，对于其他线程来说则无法获取到数据。</p>
+<h3 id="handler">handler</h3>
+<ol>
+<li>
+<p>如何实现线程间跨越的？</p>
+</li>
+<li>
+<p>Handler是如何管理那块共享的内存的？</p>
+</li>
+</ol>
+<h4 id="启动app时创建全局唯一的looper对象和全局唯一的messagequeue对象">启动App时，创建全局唯一的Looper对象和全局唯一的MessageQueue对象</h4>
+<p>在<code>main</code>方法中调用<code>Looper.prepareMainLooper()</code>创建<code>Looper</code>对象和<code>MessageQueue</code>对象，并将其绑定到一起。然后调用<code>Looper.loop()</code>循环遍历取出消息并处理。</p>
+<pre><code class="language-java">public static void main(String[] args) {
+    // ...
+    Looper.prepareMainLooper();
+    // ...
+    ActivityThread thread = new ActivityThread();
+    thread.attach(false, startSeq);
+
+    if (sMainThreadHandler == null) {
+        sMainThreadHandler = thread.getHandler();
+    }
+    // ...
+    Looper.loop();
+    throw new RuntimeException(&quot;Main thread loop unexpectedly exited&quot;);
+}
+</code></pre>
+<pre><code class="language-java">public static void prepareMainLooper() {
+    prepare(false);
+    synchronized (Looper.class) {
+        if (sMainLooper != null) {
+            throw new IllegalStateException(&quot;The main Looper has already been prepared.&quot;);
+        }
+        sMainLooper = myLooper();
+    }
+}
+</code></pre>
+<pre><code class="language-java">private static void prepare(boolean quitAllowed) {
+    if (sThreadLocal.get() != null) {
+        throw new RuntimeException(&quot;Only one Looper may be created per thread&quot;);
+    }
+    sThreadLocal.set(new Looper(quitAllowed));
+}
+</code></pre>
+<pre><code class="language-java">private Looper(boolean quitAllowed) {
+    mQueue = new MessageQueue(quitAllowed);
+    mThread = Thread.currentThread();
+}
+</code></pre>
+<h4 id="activity中创建handler">Activity中创建handler</h4>
+<p>在<code>Handler</code>的构造方法中，新版本中创建一个<code>Handler</code>对象时需要传递Looper对象，在使用的过程中会调用<code>Looper.getMainLooper()</code>获取Looper对象。这就避免了无法在子线程中创建Handler实例的问题。</p>
+<pre><code class="language-java">public Handler(@NonNull Looper looper) {
+   this(looper, null, false);
+}
+</code></pre>
+<pre><code class="language-java">public Handler(@NonNull Looper looper, @Nullable Callback callback) {
+   this(looper, callback, false);
+}
+</code></pre>
+<pre><code class="language-java">/*
+ * @hide
+ *  此方法源码隐藏，不对外提供调用
+ */
+@UnsupportedAppUsage
+public Handler(@NonNull Looper looper, @Nullable Callback callback, boolean async) {
+   mLooper = looper;
+   mQueue = looper.mQueue;
+   mCallback = callback;
+   mAsynchronous = async;
+}
+</code></pre>
+<h4 id="通过handler发送消息">通过handler发送消息</h4>
+<p>通过handler发送消息时，回调用<code>sendXXX()</code>系列方法，如<code>sendMessage()</code>，通过方法调用跟踪发现，最终会调用到<code>enqueuMessage()</code>将消息压入到<code>MessageQueue</code>中。</p>
+<pre><code class="language-java">public final boolean sendMessage(@NonNull Message msg) {
+   return sendMessageDelayed(msg, 0);
+}
+</code></pre>
+<pre><code class="language-java">public final boolean sendMessageDelayed(@NonNull Message msg, long delayMillis) {
+    if (delayMillis &lt; 0) {
+        delayMillis = 0;
+    }
+    return sendMessageAtTime(msg, SystemClock.uptimeMillis() + delayMillis);
+}
+</code></pre>
+<pre><code class="language-java">public boolean sendMessageAtTime(@NonNull Message msg, long uptimeMillis) {
+   MessageQueue queue = mQueue;
+   if (queue == null) {
+       RuntimeException e = new RuntimeException(
+           this + &quot; sendMessageAtTime() called with no mQueue&quot;);
+       Log.w(&quot;Looper&quot;, e.getMessage(), e);
+       return false;
+    }
+   return enqueueMessage(queue, msg, uptimeMillis);
+}
+</code></pre>
+<pre><code class="language-java">private boolean enqueueMessage(@NonNull MessageQueue queue, @NonNull Message msg,
+            long uptimeMillis) {
+  msg.target = this;
+  msg.workSourceUid = ThreadLocalWorkSource.getUid();
+
+  if (mAsynchronous) {
+       msg.setAsynchronous(true);
+  }
+  return queue.enqueueMessage(msg, uptimeMillis);
+}
+</code></pre>
+<h4 id="消息处理">消息处理</h4>
+<p>在对<code>Looper</code>创建时，了解到<code>ActivityThread#main()</code>中会调用<code>Looper.loop()</code>处理消息。</p>
+<pre><code class="language-java">// Looper.java
+public static void loop() {
+   // 从sThreadLocal中获取Looper对象
+   final Looper me = myLooper();
+   // looper对象不能为空
+   if (me == null) {
+       throw new RuntimeException(&quot;No Looper; Looper.prepare() wasn't called on this thread.&quot;);
+   }
+   // ...
+   // 从looper中获取MessageQueue
+   final MessageQueue queue = me.mQueue;
+   // ...
+   for (;;) {
+       // 从messageQueue中不断的获取消息，如果没有消息则堵塞，等待下一条消息将其唤醒
+       Message msg = queue.next(); // might block
+       if (msg == null) {
+            // No message indicates that the message queue is quitting.
+           return;
+       }
+       // ...
+       try {
+           // msg.target == handler
+           // 获取到消息后，回调用handler的dispatchMessage()进行消息分发处理
+           msg.target.dispatchMessage(msg);
+       } 
+       // ...
+       // 最后将msg进行回收
+       msg.recycleUnchecked();
+   }
+}
+</code></pre>
+<pre><code class="language-java">// Handler.java
+public void dispatchMessage(@NonNull Message msg) {
+   if (msg.callback != null) {
+       handleCallback(msg);
+   } else {
+       if (mCallback != null) {
+           if (mCallback.handleMessage(msg)) {
+                return;
+           }
+        }
+    handleMessage(msg);
+   }
+}
+</code></pre>
+<p>从<code>dispatchMessage</code>中可以看出处理消息的优先级是 1. msg.callback 2. handler.callback 3. handleMessage。</p>
+<h4 id="消息阻塞和延时">消息阻塞和延时</h4>
+<p>Looper的阻塞主要是靠MessageQueue来实现，在<code>MessageQueue#next()</code>时进行阻塞，在<code>MessageQueue#enqueueMessage()</code>进行唤醒。主要是依赖<code>navtive</code>层的<code>epoll</code>机制进行的。</p>
+<pre><code class="language-java">@UnsupportedAppUsage
+Message next() {
+    // Return here if the message loop has already quit and been disposed.
+    // This can happen if the application tries to restart a looper after quit
+    // which is not supported.
+    final long ptr = mPtr;
+    if (ptr == 0) {
+        return null;
+    }
+
+    int pendingIdleHandlerCount = -1; // -1 only during first iteration
+    int nextPollTimeoutMillis = 0;
+    for (;;) {
+        if (nextPollTimeoutMillis != 0) {
+            Binder.flushPendingCommands();
+        }
+
+        nativePollOnce(ptr, nextPollTimeoutMillis);
+
+        synchronized (this) {
+            // Try to retrieve the next message.  Return if found.
+            final long now = SystemClock.uptimeMillis();
+            Message prevMsg = null;
+            Message msg = mMessages;
+            if (msg != null &amp;&amp; msg.target == null) {
+                // Stalled by a barrier.  Find the next asynchronous message in the queue.
+                do {
+                    prevMsg = msg;
+                    msg = msg.next;
+                } while (msg != null &amp;&amp; !msg.isAsynchronous());
+            }
+            if (msg != null) {
+                if (now &lt; msg.when) {
+                    // Next message is not ready.  Set a timeout to wake up when it is ready.
+                    nextPollTimeoutMillis = (int) Math.min(msg.when - now, Integer.MAX_VALUE);
+                } else {
+                    // Got a message.
+                    mBlocked = false;
+                    if (prevMsg != null) {
+                        prevMsg.next = msg.next;
+                    } else {
+                        mMessages = msg.next;
+                    }
+                    msg.next = null;
+                    if (DEBUG) Log.v(TAG, &quot;Returning message: &quot; + msg);
+                    msg.markInUse();
+                    return msg;
+                }
+            } else {
+                // No more messages.
+                nextPollTimeoutMillis = -1;
+            }
+
+            // Process the quit message now that all pending messages have been handled.
+            if (mQuitting) {
+                dispose();
+                return null;
+            }
+        }
+        // Reset the idle handler count to 0 so we do not run them again.
+        pendingIdleHandlerCount = 0;
+
+        // While calling an idle handler, a new message could have been delivered
+        // so go back and look again for a pending message without waiting.
+        nextPollTimeoutMillis = 0;
+    }
+}
+</code></pre>
+<p>阻塞和延时，主要是<code>next()</code>中<code>nativePollOnce(ptr, nextPollTimeoutMillis)</code>调用 naive方法操作管道，由<code>nextPollTimeoutMillis</code>决定是否需要阻塞。 nextPollTimeoutMillis为0的时表示不阻塞，为 -1的时候表示一直阻塞直到被唤醒，其他时间表示延时。</p>
+<h4 id="唤醒">唤醒</h4>
+<p>消息处理的唤醒是在<code>MessageQueue#enqueueMessage()</code>中进行的。</p>
+<pre><code class="language-java">boolean enqueueMessage(Message msg, long when) {
+    if (msg.target == null) {
+        throw new IllegalArgumentException(&quot;Message must have a target.&quot;);
+    }
+
+    synchronized (this) {
+        if (msg.isInUse()) {
+            throw new IllegalStateException(msg + &quot; This message is already in use.&quot;);
+        }
+
+        if (mQuitting) {
+            IllegalStateException e = new IllegalStateException(
+                msg.target + &quot; sending message to a Handler on a dead thread&quot;);
+            Log.w(TAG, e.getMessage(), e);
+            msg.recycle();
+            return false;
+        }
+
+        msg.markInUse();
+        msg.when = when;
+        Message p = mMessages;
+        boolean needWake;
+        if (p == null || when == 0 || when &lt; p.when) {
+            // New head, wake up the event queue if blocked.
+            msg.next = p;
+            mMessages = msg;
+            needWake = mBlocked;
+        } else {
+            // Inserted within the middle of the queue.  Usually we don't have to wake
+            // up the event queue unless there is a barrier at the head of the queue
+            // and the message is the earliest asynchronous message in the queue.
+            needWake = mBlocked &amp;&amp; p.target == null &amp;&amp; msg.isAsynchronous();
+            Message prev;
+            for (;;) {
+                prev = p;
+                p = p.next;
+                if (p == null || when &lt; p.when) {
+                    break;
+                }
+                if (needWake &amp;&amp; p.isAsynchronous()) {
+                    needWake = false;
+                }
+            }
+            msg.next = p; // invariant: p == prev.next
+            prev.next = msg;
+        }
+
+        // We can assume mPtr != 0 because mQuitting is false.
+        if (needWake) {
+            nativeWake(mPtr);
+        }
+    }
+    return true;
+} 
+</code></pre>
+<p>就是在主线程的MessageQueue没有消息时，便阻塞在loop的queue.next()中的nativePollOnce()方法里，此时主线程会释放CPU资源进入休眠状态，直到下个消息到达或者有事务发生，通过往pipe管道写端写入数据来唤醒主线程工作。</p>
+<p>这里采用的epoll机制，是一种IO多路复用机制，可以同时监控多个描述符，当某个描述符就绪(读或写就绪)，则立刻通知相应程序进行读或写操作，本质同步I/O，即读写是阻塞的。 所以说，主线程大多数时候都是处于休眠状态，并不会消耗大量CPU资源。</p>
+<h4 id="延时入队列">延时入队列</h4>
+<pre><code class="language-java">needWake = mBlocked &amp;&amp; p.target == null &amp;&amp; msg.isAsynchronous();
+Message prev;
+for (;;) {
+    prev = p;
+    p = p.next;
+    if (p == null || when &lt; p.when) {
+        break;
+    }
+    if (needWake &amp;&amp; p.isAsynchronous()) {
+       needWake = false;
+    }
+}
+msg.next = p; // invariant: p == prev.next
+prev.next = msg;
+</code></pre>
+<p>此处for死循环推出情况分两种</p>
+<p>第一种：p==null表示对象池中已经运行到了最后一个，无需再循环。</p>
+<p>第二种：碰到下一个消息when小于前一个，立马退出循环（不管对象池中所有message是否遍历完），进行从新排序。</p>
+<h2 id="常见问题分析">常见问题分析</h2>
+<h3 id="为什么不能在子线程中更新ui根本原因是什么">为什么不能在子线程中更新UI,根本原因是什么?</h3>
+<pre><code class="language-java">// ViewRootImpl.java
+void checkThread() {
+   if (mThread != Thread.currentThread()) {
+       throw new CalledFromWrongThreadException(
+         &quot;Only the original thread that created a view hierarchy can touch its views.&quot;);
+   }
+}
+</code></pre>
+<blockquote>
+<p>mThread是UI线程，这里会检查当前线程是不是UI线程。那么为什么onCreate里面没有进行这个检查呢。这个问题原因出现在Activity的生命周期中，在onCreate方法中，UI处于创建过程，对用户来说界面还不可视，直到onStart方法后界面可视了，再到onResume方法后界面可以交互。从某种程度来讲，在onCreate方法中不能算是更新UI，只能说是配置UI，或者是设置UI的属性。这个时候不会调用到ViewRootImpl.checkThread()，因为ViewRootImpl没被创建。而在onResume方法后，ViewRootImpl才被创建。这个时候去交互界面才算是更新UI。</p>
+</blockquote>
+<blockquote>
+<p>setContentView只是建立了View树，并没有进行渲染工作（其实真正的渲染工作是在onResume之后）。也正是建立了View树，因此我们可以通过findViewById（）来获取到View对象，但是由于并没有进行渲染视图的工作，也就是没有执行ViewRootImpl.performTransversal。同样View中也不会执行onMeasure（），如果在onResume（）方法里直接获取View.getHeight（）/View.getWidth（）得到的结果总是0。</p>
+</blockquote>
+<h3 id="为什么主线程用looper死循环不会引发anr异常">为什么主线程用Looper死循环不会引发ANR异常?</h3>
+<blockquote>
+<p>简单说就是在主线程的MessageQueue没有消息时，便阻塞在loop的queue.next()中的nativePollOnce()方法里，此时主线程会释放CPU资源进入休眠状态，直到下个消息到达或者有事务发生，通过往pipe管道写端写入数据来唤醒主线程工作。这里采用的epoll机制，是一种IO多路复用机制。</p>
+</blockquote>
+<h3 id="为什么handler构造方法里面的looper不是直接new">为什么Handler构造方法里面的Looper不是直接new？</h3>
+<blockquote>
+<p>如果在Handler构造方法里面new Looper，怕是无法保证保证Looper唯一，只有用Looper.prepare()才能保证唯一性。</p>
+</blockquote>
+<h3 id="messagequeue为什么要放在looper私有构造方法初始化">MessageQueue为什么要放在Looper私有构造方法初始化？</h3>
+<blockquote>
+<p>因为一个线程只绑定一个Looper，所以在Looper构造方法里面初始化就可以保证mQueue也是唯一的Thread对应一个Looper 对应一个 mQueue。</p>
+</blockquote>
+<h3 id="handlerpost的逻辑在哪个线程执行的是由looper所在线程还是handler所在线程决定的">Handler.post的逻辑在哪个线程执行的，是由Looper所在线程还是Handler所在线程决定的？</h3>
+<blockquote>
+<p>由Looper所在线程决定的。逻辑是在Looper.loop()方法中，从MsgQueue中拿出msg，并且执行其逻辑，这是在Looper中执行的，因此有Looper所在线程决定。</p>
+</blockquote>
+<h3 id="messagequeuenext会因为发现了延迟消息而进行阻塞-那么为什么后面加入的非延迟消息没有被阻塞呢">MessageQueue.next()会因为发现了延迟消息，而进行阻塞。那么为什么后面加入的非延迟消息没有被阻塞呢？</h3>
+<blockquote>
+<p>MessageQueue 唤醒机制</p>
+</blockquote>
+<h3 id="handler的dispatchmessage分发消息的处理流程">Handler的dispatchMessage()分发消息的处理流程？</h3>
+<blockquote>
+<p>Msg.callback 在mHandler.post（）中使用, mCallback在new Handler是通过接口回调</p>
+</blockquote>
+
+                    </div>
+                    <div class="essaySuffix-box">
+                        <div class="essaySuffix-box-left"><img
+                                src="/images/avatar.png" alt="">
+                        </div>
+                        <div class="essaySuffix-box-right"><span
+                                class="essaySuffix-right-title">本文作者</span>：<strong><span style="font-size: 12px;"><a
+                                        href="/about"
+                                        target="_blank">Xiaowu</a></span></strong> <br><span
+                                style="font-weight: bold; white-space:nowrap;">本文链接</span>：<a
+                                href="https://jxiaow.gitee.io/posts/5daabb/"
+                                target="_blank">https://jxiaow.gitee.io/posts/5daabb/</a><br><span
+                                class="essaySuffix-right-title">版权声明</span>：本博客所有文章除特别声明外，均采用 <a
+                                href="https://creativecommons.org/licenses/by-nc-nd/4.0/" alt="BY-NC-SA"
+                                title="BY-NC-SA" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</div>
+                        <div style="clear: both;"></div>
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#handler%E7%9A%84%E4%BD%9C%E7%94%A8">handler的作用</a></li>
+<li><a href="#%E7%BA%BF%E7%A8%8B%E9%80%9A%E4%BF%A1%E5%BC%80%E5%8F%91%E4%B8%AD%E5%AD%98%E5%9C%A8%E7%9A%84%E9%97%AE%E9%A2%98">线程通信开发中存在的问题？</a>
+<ul>
+<li><a href="#%E7%BA%BF%E7%A8%8B%E9%97%B4%E5%A6%82%E4%BD%95%E9%80%9A%E8%AE%AF">线程间如何通讯？</a></li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1%E4%B8%8D%E4%BC%9A%E5%B9%B2%E6%89%B0">为什么线程间通信不会干扰？</a></li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88wait%E5%92%8Cnotify%E7%94%A8%E6%AD%A6%E4%B9%8B%E5%9C%B0%E4%B8%8D%E5%A4%A7">为什么wait和notify用武之地不大？</a></li>
+</ul>
+</li>
+<li><a href="#handle%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6%E6%A8%A1%E5%9E%8B">Handle消息机制模型</a></li>
+<li><a href="#handler%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90">Handler源码分析</a>
+<ul>
+<li><a href="#threadloacal">ThreadLoacal</a></li>
+<li><a href="#handler">handler</a>
+<ul>
+<li><a href="#%E5%90%AF%E5%8A%A8app%E6%97%B6%E5%88%9B%E5%BB%BA%E5%85%A8%E5%B1%80%E5%94%AF%E4%B8%80%E7%9A%84looper%E5%AF%B9%E8%B1%A1%E5%92%8C%E5%85%A8%E5%B1%80%E5%94%AF%E4%B8%80%E7%9A%84messagequeue%E5%AF%B9%E8%B1%A1">启动App时，创建全局唯一的Looper对象和全局唯一的MessageQueue对象</a></li>
+<li><a href="#activity%E4%B8%AD%E5%88%9B%E5%BB%BAhandler">Activity中创建handler</a></li>
+<li><a href="#%E9%80%9A%E8%BF%87handler%E5%8F%91%E9%80%81%E6%B6%88%E6%81%AF">通过handler发送消息</a></li>
+<li><a href="#%E6%B6%88%E6%81%AF%E5%A4%84%E7%90%86">消息处理</a></li>
+<li><a href="#%E6%B6%88%E6%81%AF%E9%98%BB%E5%A1%9E%E5%92%8C%E5%BB%B6%E6%97%B6">消息阻塞和延时</a></li>
+<li><a href="#%E5%94%A4%E9%86%92">唤醒</a></li>
+<li><a href="#%E5%BB%B6%E6%97%B6%E5%85%A5%E9%98%9F%E5%88%97">延时入队列</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90">常见问题分析</a>
+<ul>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E5%9C%A8%E5%AD%90%E7%BA%BF%E7%A8%8B%E4%B8%AD%E6%9B%B4%E6%96%B0ui%E6%A0%B9%E6%9C%AC%E5%8E%9F%E5%9B%A0%E6%98%AF%E4%BB%80%E4%B9%88">为什么不能在子线程中更新UI,根本原因是什么?</a></li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%BB%E7%BA%BF%E7%A8%8B%E7%94%A8looper%E6%AD%BB%E5%BE%AA%E7%8E%AF%E4%B8%8D%E4%BC%9A%E5%BC%95%E5%8F%91anr%E5%BC%82%E5%B8%B8">为什么主线程用Looper死循环不会引发ANR异常?</a></li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88handler%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E9%87%8C%E9%9D%A2%E7%9A%84looper%E4%B8%8D%E6%98%AF%E7%9B%B4%E6%8E%A5new">为什么Handler构造方法里面的Looper不是直接new？</a></li>
+<li><a href="#messagequeue%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E6%94%BE%E5%9C%A8looper%E7%A7%81%E6%9C%89%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E5%88%9D%E5%A7%8B%E5%8C%96">MessageQueue为什么要放在Looper私有构造方法初始化？</a></li>
+<li><a href="#handlerpost%E7%9A%84%E9%80%BB%E8%BE%91%E5%9C%A8%E5%93%AA%E4%B8%AA%E7%BA%BF%E7%A8%8B%E6%89%A7%E8%A1%8C%E7%9A%84%E6%98%AF%E7%94%B1looper%E6%89%80%E5%9C%A8%E7%BA%BF%E7%A8%8B%E8%BF%98%E6%98%AFhandler%E6%89%80%E5%9C%A8%E7%BA%BF%E7%A8%8B%E5%86%B3%E5%AE%9A%E7%9A%84">Handler.post的逻辑在哪个线程执行的，是由Looper所在线程还是Handler所在线程决定的？</a></li>
+<li><a href="#messagequeuenext%E4%BC%9A%E5%9B%A0%E4%B8%BA%E5%8F%91%E7%8E%B0%E4%BA%86%E5%BB%B6%E8%BF%9F%E6%B6%88%E6%81%AF%E8%80%8C%E8%BF%9B%E8%A1%8C%E9%98%BB%E5%A1%9E-%E9%82%A3%E4%B9%88%E4%B8%BA%E4%BB%80%E4%B9%88%E5%90%8E%E9%9D%A2%E5%8A%A0%E5%85%A5%E7%9A%84%E9%9D%9E%E5%BB%B6%E8%BF%9F%E6%B6%88%E6%81%AF%E6%B2%A1%E6%9C%89%E8%A2%AB%E9%98%BB%E5%A1%9E%E5%91%A2">MessageQueue.next()会因为发现了延迟消息，而进行阻塞。那么为什么后面加入的非延迟消息没有被阻塞呢？</a></li>
+<li><a href="#handler%E7%9A%84dispatchmessage%E5%88%86%E5%8F%91%E6%B6%88%E6%81%AF%E7%9A%84%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B">Handler的dispatchMessage()分发消息的处理流程？</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+                </div>
+            </article>
+            <!-- </div> -->
+
+          
+
+            
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://jxiaow.gitee.io/posts/9233ed3f/" class="post-title gt-a-link">
+                    屏幕适配
+                </a>
+            </div>
+            
+
+            
+
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'mp',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+            
+
+            <div class="site-footer gt-c-content-color-first">
+
+  <div class="social-container">
+
+    <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
+      <i class="fab fa-github gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
+      <i class="fas fa-blog gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
+      <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
+    </a>
+
+    <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
+      <i class="fas fa-envelope gt-c-content-color-first"></i>
+    </a>
+
+  </div>
+  <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+  
+  <div>
+    <div>
+      Theme by <a href="https://github.com/jxiaow/gridea-theme-pure-fashion" target="_blank">jxiaow</a>, Powered by <a
+              href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://jxiaow.gitee.io/atom.xml" target="_blank">RSS</a></a>
+  </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+            <script>
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+  
+  if (mainNavLinks == null || mainNavLinks.length == 0) {
+    let tocContainer = document.querySelector(".toc-container");
+    tocContainer.classList.remove("toc-container")
+    // tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
+  } else {
+
+    // This should probably be throttled.
+    // Especially because it triggers during smooth scrolling.
+    // https://lodash.com/docs/4.17.10#throttle
+    // You could do like...
+    // window.addEventListener("scroll", () => {
+    //    _.throttle(doThatStuff, 100);
+    // });
+    // Only not doing it here to keep this Pen dependency-free.
+
+
+    window.addEventListener("scroll", event => {
+      let fromTop = window.scrollY;
+
+      mainNavLinks.forEach((link, index) => {
+        let section = document.getElementById(decodeURI(link.hash).substring(1));
+        let nextSection = null
+        if (mainNavLinks[index + 1]) {
+          nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+        }
+        if (section.offsetTop <= fromTop) {
+          if (nextSection) {
+            if (nextSection.offsetTop > fromTop) {
+              link.classList.add("current");
+            } else {
+              link.classList.remove("current");
+            }
+          } else {
+            link.classList.add("current");
+          }
+        } else {
+          link.classList.remove("current");
+        }
+      });
+    });
+  }
+
+
+
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+
+<script>
+  let images = document.querySelectorAll("figure > img");
+  //   debugger
+  //   console.log("dddd: "+ images);
+  images.forEach(image => {
+    var parent = image.parentElement;
+    parent.removeChild(image);
+    var aelem = document.createElement('a');
+    aelem.href = image.src;
+    aelem.dataset['fancybox'] = 'gallery';
+    aelem.classList.add('fancybox');
+    aelem.appendChild(image);
+    parent.appendChild(aelem);
+  })
+
+//   <a data-fancybox="gallery" href="big_1.jpg"><img src="small_1.jpg"></a>
+// <a data-fancybox="gallery" href="big_2.jpg"><img src="small_2.jpg"></a>
+</script>
+        </div>
+    </div>
+
+</body>
+
+</html>
