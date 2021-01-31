@@ -1,0 +1,1089 @@
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content="心若没有栖息的地方，到哪里都是在流浪"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>AIDL文件编写及源码分析 | Xiaowu</title>
+
+<link rel="shortcut icon" href="https://jxiaow.gitee.io/favicon.ico?v=1612100013697">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://jxiaow.gitee.io/styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.8.0/mermaid.min.js"></script>
+<script>
+    var config = {
+        startOnLoad:true,
+        flowchart:{
+            useMaxWidth:false,
+            htmlLabels:true
+        }
+    };
+    mermaid.initialize(config);
+    $(function(){
+        var elements = document.getElementsByClassName("language-mermaid");
+        for (var i = elements.length; i--;) {
+            element = elements[i];
+            var graphDefinition = element.innerText;
+            if (graphDefinition) {
+                var svg = mermaid.render('ha_mermaid_' + i, graphDefinition, function(svg){});
+                if (svg) {
+                    var svgElement = document.createElement('div');
+                    preNode = element.parentNode;
+                    svgElement.innerHTML = svg;
+                    svgElement.setAttribute('class', 'mermaid');
+                    svgElement.setAttribute('data-processed', 'true');
+                    preNode.parentNode.replaceChild(svgElement, preNode);
+                }
+            }
+        }
+    });
+</script>
+</head>
+
+<body>
+    <div class="main gt-bg-theme-color-first">
+        <nav class="navbar navbar-expand-lg">
+    <a href="/">
+        <div class="navbar-brand">
+            <img class="user-avatar" src="/images/avatar.png" alt="头像">
+            <div class="site-name gt-c-content-color-first">
+                Xiaowu
+            </div>
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav " style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://jxiaow.gitee.io/posts/favourite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1612100013697" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+        <div class="post-container">
+
+            <!-- <div class="post-detail gt-bg-theme-color-second"> -->
+            <article style="display:flex;">
+                <div class="post-detail gt-bg-theme-color-second gt-post-content">
+                    <h2 class="post-title">
+                        AIDL文件编写及源码分析
+                    </h2>
+                    <div class="post-info">
+                        <div>
+                            <time class="post-time gt-c-content-color-first">
+                                · 2021-01-30 ·
+                            </time>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/hGIlZgJcP/" class="post-tags">
+                                # Binder
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/6TPWcEwet/" class="post-tags">
+                                # FrameWorker
+                            </a>
+                            
+                            <a href="https://jxiaow.gitee.io/tag/f3tbfHeq9/" class="post-tags">
+                                # Android
+                            </a>
+                            
+                        </div>
+                        <div>
+                            
+                            <span id="/posts/40026fc8/"
+                                class="leancloud_visitors" data-flag-title="AIDL文件编写及源码分析">
+                                <em class="post-meta-item-text">阅读量 </em>
+                                <i class="leancloud-visitors-count">0</i>
+                            </span>
+                            
+                        </div>
+                    </div>
+
+                    <!-- <div class="post-content-wrapper"> -->
+                    <div class="post-content">
+                        <h2 id="aidl编写">AIDL编写</h2>
+<p>Binder被用来实现进程间的通信，基本使用步骤如下：</p>
+<ol>
+<li>创建AIDL文件，编写接口方法；</li>
+<li>如果有自定义的model对象，则在aidl下创建包名一致且名称与model名一致的aidl文件；</li>
+<li>make project</li>
+<li>编写相应的代码，启动服务发送和接收数据。</li>
+</ol>
+<p>具体操作：</p>
+<p><strong>以下例子来源于 <a href="https://gitee.com/jxiaow/practiseCodeAndroid/tree/master/FrameWork/BinderSample">FrameWork/BinderSample</a></strong></p>
+<h3 id="创建model对象">创建model对象</h3>
+<p><code>Person</code> 实现 <code>Parcelable</code> 接口 （如果不需要自定义model，则不需要）</p>
+<pre><code class="language-java">package com.github.jxiaow.sample.model;
+import android.os.Parcel;
+import android.os.Parcelable;
+ 
+public class Personal implements Parcelable {
+   public String name;
+   public int age;
+ 
+   public Personal(String name, int age) {
+      this.name = name;
+      this.age = age;
+   }
+   // .....
+}
+</code></pre>
+<h3 id="创建aidl文件">创建AIDL文件</h3>
+<p>如果有自定义model对象并且与AIDL接口文件的包名不一致时需要创建一个<code>AIDL</code>文件表示</p>
+<pre><code class="language-java">// IPersonal.aidl
+// 包名必须与model的一致
+package com.github.jxiaow.sample.model;
+ 
+// Declare any non-default types here with import statements
+// 自定义的model需要使用parcelable进行声明
+parcelable Personal;
+</code></pre>
+<p>编写AIDL接口文件</p>
+<pre><code class="language-java">// ILeoAidl.aidl
+package com.github.jxiaow.sample;
+// Declare any non-default types here with import statements
+// 导入model对应的aidl文件
+import com.github.jxiaow.sample.model.IPersonal;
+ 
+interface IPersonalAidlInterface {
+    // 自己定义的model 需要添加in修饰
+    void addPersonal(in Personal person);
+    List&lt;Personal&gt; getPersonalList();
+}
+</code></pre>
+<h3 id="make-project">make project</h3>
+<p>通过Android studio 的 make project 后生成java版本的aidl接口类。代码结构：</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/28/0e5e4f7da463171b64417ed0ba4492d8-image-20210128112830363-ea556a.png" alt="image-20210128112830363" loading="lazy"></figure>
+<p>生成的重要部分代码如下：</p>
+<pre><code class="language-java">package com.github.jxiaow.sample;
+ 
+public interface IPersonalAidlInterface extends android.os.IInterface {
+    /**
+     * Local-side IPC implementation stub class.
+     * Stub 用于数据服务接收端，该抽象方法由服务接收端实现
+     *  通过asInterface 返回一个proxy给数据发送端
+     */
+    public static abstract class Stub extends android.os.Binder
+           implements com.github.jxiaow.sample.IPersonalAidlInterface {
+        // 通过该字段区分binder
+        private static final java.lang.String DESCRIPTOR =
+            &quot;com.github.jxiaow.sample.IPersonalAidlInterface&quot;;
+ 
+        /**
+         * Construct the stub at attach it to the interface.
+         */
+        public Stub() {
+            this.attachInterface(this, DESCRIPTOR);
+        }
+ 
+        /**
+         * Cast an IBinder object into an com.github.jxiaow.sample.IPersonalAidlInterface interface,
+         * generating a proxy if needed.
+         */
+        public static com.github.jxiaow.sample.IPersonalAidlInterface asInterface(android.os.IBinder obj) {
+            if ((obj == null)) {
+                return null;
+            }
+            // 如果服务端和客户端不在同一进程，那么obj.queryLocalInterface(DESCRIPTOR)为null
+            android.os.IInterface iin = obj.queryLocalInterface(DESCRIPTOR);
+            if (((iin != null) &amp;&amp; (iin instanceof com.github.jxiaow.sample.IPersonalAidlInterface))) {
+                return ((com.github.jxiaow.sample.IPersonalAidlInterface) iin);
+            }
+            // 返回一个服务端代理，用于客户端远程调用服务端的方法
+            return new com.github.jxiaow.sample.IPersonalAidlInterface.Stub.Proxy(obj);
+        }
+ 
+        @Override
+        public android.os.IBinder asBinder() {
+            return this;
+        }
+        // onTransact 复写了Binder中的onTransact
+        // 客户端调用代理执行相应的方法后会调用到服务端的此方法上进行相应的方法调用
+        // 数据发送端proxy调用transact后通过binder会调用stub的onTransact
+        @Override
+        public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+                    throws android.os.RemoteException {
+            java.lang.String descriptor = DESCRIPTOR;
+            switch (code) {
+                case INTERFACE_TRANSACTION: {
+                    reply.writeString(descriptor);
+                    return true;
+                }
+                case TRANSACTION_addPersonal: {
+                    data.enforceInterface(descriptor);
+                    com.github.jxiaow.sample.model.Personal _arg0;
+                    if ((0 != data.readInt())) {
+                        _arg0 = com.github.jxiaow.sample.model.Personal.CREATOR.createFromParcel(data);
+                    } else {
+                        _arg0 = null;
+                    }
+                    this.addPersonal(_arg0);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_getPersonalList: {
+                    data.enforceInterface(descriptor);
+                    java.util.List&lt;com.github.jxiaow.sample.model.Personal&gt; _result = this.getPersonalList();
+                    reply.writeNoException();
+                    reply.writeTypedList(_result);
+                    return true;
+                }
+                default: {
+                    return super.onTransact(code, data, reply, flags);
+                }
+            }
+        }
+        // 代理静态内部类，用于发送数据到服务端
+        private static class Proxy implements com.github.jxiaow.sample.IPersonalAidlInterface {
+            private android.os.IBinder mRemote;
+ 
+            Proxy(android.os.IBinder remote) {
+                mRemote = remote;
+            }
+ 
+            @Override
+            public android.os.IBinder asBinder() {
+                return mRemote;
+            }
+ 
+            public java.lang.String getInterfaceDescriptor() {
+                return DESCRIPTOR;
+            }
+ 
+            @Override
+            public void addPersonal(com.github.jxiaow.sample.model.Personal person)
+                throws android.os.RemoteException {
+                // _data 是发送的数据
+                // _reply 接收的数据              
+                android.os.Parcel _data = android.os.Parcel.obtain();
+                android.os.Parcel _reply = android.os.Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    if ((person != null)) {
+                        _data.writeInt(1);
+                        person.writeToParcel(_data, 0);
+                    } else {
+                        _data.writeInt(0);
+                    }
+                    // mRemote.transact方法会调用到服务端的onTransact，然后进行方法标记分发
+                    boolean _status = mRemote.transact(Stub.TRANSACTION_addPersonal, _data, _reply, 0);
+                    if (!_status &amp;&amp; getDefaultImpl() != null) {
+                        getDefaultImpl().addPersonal(person);
+                        return;
+                    }
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+ 
+            @Override
+            public java.util.List&lt;com.github.jxiaow.sample.model.Personal&gt; getPersonalList()
+                throws android.os.RemoteException {
+                android.os.Parcel _data = android.os.Parcel.obtain();
+                android.os.Parcel _reply = android.os.Parcel.obtain();
+                java.util.List&lt;com.github.jxiaow.sample.model.Personal&gt; _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    boolean _status = mRemote.transact(Stub.TRANSACTION_getPersonalList, _data, _reply, 0);
+                    if (!_status &amp;&amp; getDefaultImpl() != null) {
+                        return getDefaultImpl().getPersonalList();
+                    }
+                    _reply.readException();
+                    _result = _reply.createTypedArrayList(com.github.jxiaow.sample.model.Personal.CREATOR);
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+ 
+            public static com.github.jxiaow.sample.IPersonalAidlInterface sDefaultImpl;
+        }
+        // 每个方法的标志
+        static final int TRANSACTION_addPersonal = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
+        static final int TRANSACTION_getPersonalList = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
+ 
+    }
+ 
+    // 此方法有继承自Stub的子类实现
+    public void addPersonal(com.github.jxiaow.sample.model.Personal person)
+        throws android.os.RemoteException;
+ 
+    public java.util.List&lt;com.github.jxiaow.sample.model.Personal&gt; getPersonalList()
+        throws android.os.RemoteException;
+}
+</code></pre>
+<h3 id="客户端使用">客户端使用</h3>
+<pre><code class="language-java">// 8.0 以后，不允许service后台运行，所以如果将service至于后台，bindService会报错
+// W/ActivityManager: Unable to start service Intent
+// { cmp=com.github.jxiaow.binderservice/.MyService } U=0: not found
+val intent = Intent()
+intent.setClassName(
+    &quot;com.github.jxiaow.binderservice&quot;,
+    &quot;com.github.jxiaow.binderservice.MyService&quot;
+)
+bindService(intent, conn, Context.BIND_AUTO_CREATE)
+</code></pre>
+<p>通过asInterface 获取使用。</p>
+<pre><code class="language-java">private val conn = object : ServiceConnection {
+    override fun onServiceConnected(name: ComponentName, service: IBinder) {
+        Log.d(&quot;Personal&quot;, &quot;onServiceConnected: &quot;)
+        personalInterface = IPersonalAidlInterface.Stub.asInterface(service)
+    }
+ 
+    override fun onServiceDisconnected(name: ComponentName) {
+        personalInterface = null
+    }
+}
+</code></pre>
+<h2 id="源码分析流程">源码分析流程</h2>
+<blockquote>
+<p>源码基于API 30</p>
+</blockquote>
+<h3 id="activitybindservice">Activity#bindService</h3>
+<p>在<code>Acitivity</code>中绑定或启动<code>Service</code>时，经常会使用下面的方式，我们就以下面的方式进行源码调用分析。</p>
+<pre><code class="language-kotlin">val intent = Intent(this, PersonalService::class.java)
+bindService(intent, conn, Context.BIND_AUTO_CREATE)
+</code></pre>
+<h3 id="contextwrapperbindservice">ContextWrapper#bindService</h3>
+<pre><code class="language-java">@Override
+public boolean bindService(Intent service, ServiceConnection conn, int flags) {
+    return mBase.bindService(service, conn, flags);
+}
+</code></pre>
+<p>以上方法中调用了<code>mBase.bindService</code>，而我们可以知道<code>mBase</code>就是<code>ContextImpl</code>的实例。</p>
+<h3 id="contextimplbindservice">ContextImpl#bindService</h3>
+<pre><code class="language-java">@Override
+public boolean bindService(Intent service, ServiceConnection conn, int flags) {
+    warnIfCallingFromSystemProcess();
+    return bindServiceCommon(service, conn, flags, null, mMainThread.getHandler(), null, getUser());
+}
+</code></pre>
+<h3 id="contextimplbindservicecommon">ContextImpl#bindServiceCommon</h3>
+<p><code>bindServiceCommon</code>通过<code>ActivityManagerService</code>进行<code>Service</code>的相关操作。</p>
+<pre><code class="language-java">private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags,
+                                  String instanceName, Handler handler, Executor executor, UserHandle user) {
+        // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser.
+        // ....
+        try {
+            IBinder token = getActivityToken();
+            if (token == null &amp;&amp; (flags&amp;BIND_AUTO_CREATE) == 0 &amp;&amp; mPackageInfo != null
+                &amp;&amp; mPackageInfo.getApplicationInfo().targetSdkVersion
+                &lt; android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                flags |= BIND_WAIVE_PRIORITY;
+            }
+            service.prepareToLeaveProcess(this);
+            // 重点, 此处调用了ActivityManagerService中的方法
+            // 用于service的相关生命周期处理
+            int res = ActivityManager.getService().bindIsolatedService(
+                mMainThread.getApplicationThread(), getActivityToken(), service,
+                service.resolveTypeIfNeeded(getContentResolver()),
+                sd, flags, instanceName, getOpPackageName(), user.getIdentifier());
+            if (res &lt; 0) {
+                throw new SecurityException(
+                    &quot;Not allowed to bind to service &quot; + service);
+            }
+            return res != 0;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+}
+</code></pre>
+<h3 id="activitymanagergetservice">ActivityManager#getService</h3>
+<pre><code class="language-java">// 获取一个IActivityManager AIDL接口实现proxy实例
+// 由于android 8.0 采用的AIDL模板生成代码的方式，无法在Andorid Studio中看到生成的代码Proxy
+// 返回一个单例 ActivityMangerService的Binder代理类
+@UnsupportedAppUsage
+public static IActivityManager getService() {
+    return IActivityManagerSingleton.get();
+}
+ 
+@UnsupportedAppUsage
+private static final Singleton&lt;IActivityManager&gt; IActivityManagerSingleton =
+    new Singleton&lt;IActivityManager&gt;() {
+    @Override
+    protected IActivityManager create() {
+        // 通过ServiceManager获取IActivityManager服务端（ActivityManagerService)的代理类
+        final IBinder b = ServiceManager.getService(Context.ACTIVITY_SERVICE);
+        // 通过Stub.asInterface 获取AIDL接口生成代码中的proxy实例
+        // 此处获取的就是AIDL中的proxy, 如果有疑问，去看一下前面的创建AIDL文件处的代码
+        final IActivityManager am = IActivityManager.Stub.asInterface(b);
+        return am;
+    }
+};
+</code></pre>
+<p>具体的解析，请看上面代码中的注释，<code>ActivityManager.getService()</code>获取到的是一个<code>IActivityManagerService</code>的代理类。</p>
+<pre><code class="language-java">public class ActivityManagerService extends IActivityManager.Stub
+       implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback{}
+</code></pre>
+<h3 id="activitymanagerservicebindisolatedservice">ActivityManagerService#bindIsolatedService</h3>
+<pre><code class="language-java">public int bindIsolatedService(IApplicationThread caller, IBinder token, Intent service,
+                            String resolvedType, IServiceConnection connection,
+                            int flags, String instanceName,
+                            String callingPackage, int userId)
+    throws TransactionTooLargeException {
+     // ....
+     synchronized(this) {
+         return mServices.bindServiceLocked(caller, token, service,
+              resolvedType, connection, flags, instanceName, callingPackage, userId);
+     }
+}
+</code></pre>
+<h3 id="activieservicebindservicelocked">ActivieService#bindServiceLocked</h3>
+<p>如果service已经存在则直接绑定，如果不存在则先创建然后再绑定</p>
+<pre><code class="language-java">int bindServiceLocked(IApplicationThread caller, IBinder token, Intent service,
+                      String resolvedType, final IServiceConnection connection, int flags,
+                      String instanceName, String callingPackage, final int userId)
+    throws TransactionTooLargeException {
+    // ....
+    final boolean callerFg = callerApp.setSchedGroup != ProcessList.SCHED_GROUP_BACKGROUND;
+    final boolean isBindExternal = (flags &amp; Context.BIND_EXTERNAL_SERVICE) != 0;
+    final boolean allowInstant = (flags &amp; Context.BIND_ALLOW_INSTANT) != 0;
+    // 获取Service信息缓存(serivceInfo)，如果缓存不存在则创建
+    // 如果启动一个未启动的service，那么此处是没有缓存的
+    // 如果启动的是一个已经启动了的service，那么缓存是存在的
+    ServiceLookupResult res =
+        retrieveServiceLocked(service, instanceName, resolvedType, callingPackage,
+                              Binder.getCallingPid(), Binder.getCallingUid(), userId, true,
+                              callerFg, isBindExternal, allowInstant);
+    if (res == null) {
+        return 0;
+    }
+    if (res.record == null) {
+        return -1;
+    }
+    ServiceRecord s = res.record;
+    final long origId = Binder.clearCallingIdentity();
+    try {
+        // ....
+        if ((flags&amp;Context.BIND_AUTO_CREATE) != 0) {
+            s.lastActivity = SystemClock.uptimeMillis();
+            // 创建和绑定service
+            if (bringUpServiceLocked(s, service.getFlags(), callerFg, false,
+                                     permissionsReviewRequired) != null) {
+                return 0;
+            }
+        }
+        // 由于service的创建最终是通过handler转发的，那么创建的时间一般情况下会晚于下面的代码执行
+        // b.intent.received 未执行绑定操作时，默认情况下是 false,  publishService中置为true
+        if (s.app != null &amp;&amp; b.intent.received) {
+            // Service is already running, so we can immediately
+            // publish the connection.
+            try {
+                // 调用的是ServiceDispatcher中的相关方法间接调用onServiceConnection
+                c.conn.connected(s.name, b.intent.binder, false);
+            } catch (Exception e) {
+                Slog.w(TAG, &quot;Failure sending service &quot; + s.shortInstanceName
+                       + &quot; to connection &quot; + c.conn.asBinder()
+                       + &quot; (in &quot; + c.binding.client.processName + &quot;)&quot;, e);
+            }
+ 
+            // If this is the first app connected back to this binding,
+            // and the service had previously asked to be told when
+            // rebound, then do so.
+            // b.intnet.doRebind 默认是false
+            if (b.intent.apps.size() == 1 &amp;&amp; b.intent.doRebind) {
+                // 检查是否需要重新绑定
+                requestServiceBindingLocked(s, b.intent, callerFg, true);
+            }
+        } 
+        // 默认是false,绑定成功后为true，
+        // 如果bringUpServiceLocked能执行到realStartService中,则b.intent.requested = true
+        else if (!b.intent.requested) { 
+            // 请求绑定service
+            requestServiceBindingLocked(s, b.intent, callerFg, false);
+        }
+        getServiceMapLocked(s.userId).ensureNotStartingBackgroundLocked(s);
+    }
+    // ...
+    return 1;
+}
+</code></pre>
+<h3 id="activieservicebringupservicelocked">ActivieService#bringUpServiceLocked</h3>
+<p><code>bringUpServiceLocked</code>中 先判断<code>service</code>是否已经创建，如果创建调用<code>sendServiceArgsLocked</code>方法进行相关操作，否则</p>
+<p>调用<code>realStartServiceLocked</code>进行<code>service</code>创建和绑定。</p>
+<pre><code class="language-java">private String bringUpServiceLocked(ServiceRecord r, int intentFlags, boolean execInFg,
+                                    boolean whileRestarting, boolean permissionsReviewRequired)
+    throws TransactionTooLargeException {
+    // 如果service已经启动调用sendServiceArgsLocked方法通过远程服务执行onStartCommon
+    if (r.app != null &amp;&amp; r.app.thread != null) {
+        sendServiceArgsLocked(r, execInFg, false);
+        return null;
+    }
+    // ....
+    // 判断每次启动Service时是否需要独立开启一个进程，此属性是通过 android:isolatedProcess=&quot;false&quot; 设置
+    // 默认false
+    final boolean isolated = (r.serviceInfo.flags&amp;ServiceInfo.FLAG_ISOLATED_PROCESS) != 0;
+    if (!isolated) {
+        app = mAm.getProcessRecordLocked(procName, r.appInfo.uid, false);
+        if (DEBUG_MU) Slog.v(TAG_MU, &quot;bringUpServiceLocked: appInfo.uid=&quot; + r.appInfo.uid
+                             + &quot; app=&quot; + app);
+        // 启动服务的app是否为null
+        if (app != null &amp;&amp; app.thread != null) {
+            try {
+                app.addPackage(r.appInfo.packageName, r.appInfo.longVersionCode, mAm.mProcessStats);
+                // 重点, 创建并绑定service
+                // 此方法
+                realStartServiceLocked(r, app, execInFg);
+                return null;
+            }
+            // ...
+        }
+    }
+    // ....
+    return null;
+}
+</code></pre>
+<h3 id="activieservicesendserviceargslocked">ActivieService#sendServiceArgsLocked</h3>
+<pre><code class="language-java">private final void sendServiceArgsLocked(ServiceRecord r, boolean execInFg,
+                                         boolean oomAdjusted) throws TransactionTooLargeException {
+    // r.pendingStarts在service执行完onStartCommon后为空
+    // 在startServiceLocked中添加service到pendingStarts中 （startService方式启动service）
+    // 在realStartServiceLocked中也会添加 (bindService 方式启动service)
+    final int N = r.pendingStarts.size();
+    // 此处可以判断可以说明 onStartCommon只会执行一次
+    if (N == 0) {
+        return;
+    }
+    // ...
+    ParceledListSlice&lt;ServiceStartArgs&gt; slice = new ParceledListSlice&lt;&gt;(args);
+    slice.setInlineCountLimit(4);
+    Exception caughtException = null;
+    try {
+        // 调用 applicationThread中的scheduleServiceArgs
+        r.app.thread.scheduleServiceArgs(r, slice);
+    }
+    // ...
+}
+</code></pre>
+<h3 id="acitivieservicerealstartservicelocked">AcitivieService#realStartServiceLocked</h3>
+<p><code>realStartServiceLocked</code>方法中主要完成了2件事：1. 在<code>ApplicationThread</code>中调用<code>scheduleCreateService</code>进行 Service的创建；2. 请求绑定Service。</p>
+<pre><code class="language-java">private final void realStartServiceLocked(ServiceRecord r,
+                                          ProcessRecord app, boolean execInFg) throws RemoteException {
+    // ....
+    boolean created = false;
+    try {
+        //....
+        // app.thread ===&gt; ApplicationThread
+        // 1. AplicationThread 创建Service
+        app.thread.scheduleCreateService(r, r.serviceInfo,
+                                         mAm.compatibilityInfoForPackage(r.serviceInfo.applicationInfo),
+                                         app.getReportedProcState());
+        r.postNotification();
+        created = true;
+    }
+    // ....
+    // 2. 请求绑定Service
+    requestServiceBindingsLocked(r, execInFg);
+ 
+    // 3. 如果是startService方式，service恢复时调用onStartCommon方法
+    // 正好验证了bindService() 不会调用onStartCommon方法
+    // If the service is in the started state, and there are no
+    // pending arguments, then fake up one so its onStartCommand() will
+    // be called.
+    if (r.startRequested &amp;&amp; r.callStart &amp;&amp; r.pendingStarts.size() == 0) {
+        r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
+                                                        null, null, 0));
+    }
+    sendServiceArgsLocked(r, execInFg, true);
+}
+</code></pre>
+<h3 id="activitythreadhandlecreateservice">ActivityThread#handleCreateService</h3>
+<p>在<code>AcitivieService#realStartServiceLocked()</code>中调用<code>ApplicationThread#scheduleCreateService</code>后，<code>scheduleCreateService</code> 通过Handler发送what为<code>CREATE_SERVICE</code>的事件，然后在会调用<code>ActivityThread#handlerCreateService</code>进行Service 创建。</p>
+<pre><code class="language-java">// 创建Service
+@UnsupportedAppUsage
+private void handleCreateService(CreateServiceData data) {
+    // If we are getting ready to gc after going to the background, well
+    // we are back active so skip it.
+    unscheduleGcIdler();
+    LoadedApk packageInfo = getPackageInfoNoCheck(
+        data.info.applicationInfo, data.compatInfo);
+    // 反射创建
+    Service service = null;
+    try {
+        java.lang.ClassLoader cl = packageInfo.getClassLoader();
+        service = packageInfo.getAppFactory()
+            .instantiateService(cl, data.info.name, data.intent);
+    } catch (Exception e) {
+    }
+    try {
+        // ....
+        // 调用service的onCreate
+        service.onCreate();
+        mServices.put(data.token, service);
+       // ...
+    } catch (Exception e) {
+        // ....
+    }
+}
+</code></pre>
+<h3 id="activitythreadhandlebindservice">ActivityThread#handleBindService</h3>
+<p>在<code>AcitivieService#realStartServiceLocked</code>中Service创建成功后，会调用<code>requestServiceBindingsLocked</code>进行Service的绑定，最终调用到<code>ActivityThread#handleBindService</code>。</p>
+<pre><code class="language-java">// 绑定Service
+private void handleBindService(BindServiceData data) {
+    Service s = mServices.get(data.token);
+    // ...
+    if (s != null) {
+        try {
+            data.intent.setExtrasClassLoader(s.getClassLoader());
+            data.intent.prepareToEnterProcess();
+            try {
+                if (!data.rebind) {
+                    // onBind方法返回binder
+                    IBinder binder = s.onBind(data.intent);
+                    // 调用activityManagerService 的publishService
+                    // 调用ServiceConnection的conn
+                    ActivityManager.getService().publishService(
+                        data.token, data.intent, binder);
+                } else {
+                    // 重新绑定
+                    s.onRebind(data.intent);
+                    ActivityManager.getService().serviceDoneExecuting(
+                        data.token, SERVICE_DONE_EXECUTING_ANON, 0, 0);
+                }
+            } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
+            }
+        } catch (Exception e) {
+            // ....
+        }
+    }
+}
+</code></pre>
+<h3 id="activitymanagerservicepublishservice">ActivityManagerService#publishService</h3>
+<pre><code class="language-java">public void publishService(IBinder token, Intent intent, IBinder service) {
+    // ...
+    synchronized(this) {
+        if (!(token instanceof ServiceRecord)) {
+            throw new IllegalArgumentException(&quot;Invalid service token&quot;);
+        }
+        mServices.publishServiceLocked((ServiceRecord)token, intent, service);
+    }
+}
+</code></pre>
+<h3 id="activeservicespublishservicelocked">ActiveServices#publishServiceLocked</h3>
+<ol>
+<li>通过<code>intent</code>进行过滤获取<code>IntentBindRecord</code>并对<code>request</code>、<code>received</code>赋值为true；</li>
+<li>遍历<code>connections</code>，调用<code>c.conn.connected</code>。</li>
+</ol>
+<pre><code class="language-java">void publishServiceLocked(ServiceRecord r, Intent intent, IBinder service) {
+    final long origId = Binder.clearCallingIdentity();
+    try {
+        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, &quot;PUBLISHING &quot; + r
+                                  + &quot; &quot; + intent + &quot;: &quot; + service);
+        if (r != null) {
+            // 通过intent过滤获取IntentBindRecord
+            Intent.FilterComparison filter
+                = new Intent.FilterComparison(intent);
+            IntentBindRecord b = r.bindings.get(filter);
+            if (b != null &amp;&amp; !b.received) {
+                b.binder = service;
+                b.requested = true;
+                b.received = true;
+                ArrayMap&lt;IBinder, ArrayList&lt;ConnectionRecord&gt;&gt; connections = r.getConnections();
+                for (int conni = connections.size() - 1; conni &gt;= 0; conni--) {
+                    ArrayList&lt;ConnectionRecord&gt; clist = connections.valueAt(conni);
+                    for (int i=0; i&lt;clist.size(); i++) {
+                        ConnectionRecord c = clist.get(i);
+                        // ...
+                        try {
+                            c.conn.connected(r.name, service, false);
+                        } catch (Exception e) {
+                            // ...
+                        }
+                    }
+                }
+            }
+            serviceDoneExecutingLocked(r, mDestroyingServices.contains(r), false);
+        }
+    } finally {
+        Binder.restoreCallingIdentity(origId);
+    }
+}
+</code></pre>
+<h3 id="contextimplbindservicecommon-2">ContextImpl#bindServiceCommon</h3>
+<p>前面对<code>service</code>启动和绑定的分析完毕后，在来看看是如何回调<code>ServiceConnection</code>的相关方法的。</p>
+<pre><code class="language-java">private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags,
+                                  String instanceName, Handler handler, Executor executor, UserHandle user) {
+    // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser.
+    IServiceConnection sd;
+    ....
+        if (mPackageInfo != null) {
+            if (executor != null) {
+                // IServiceConnection 来源
+                sd = mPackageInfo.getServiceDispatcher(conn, getOuterContext(), executor, flags);
+            } else {
+                sd = mPackageInfo.getServiceDispatcher(conn, getOuterContext(), handler, flags);
+            }
+        } else {
+            throw new RuntimeException(&quot;Not supported in system context&quot;);
+        }
+    ....
+}
+</code></pre>
+<h3 id="loadapkgetservicedispatchercommon">LoadApk#getServiceDispatcherCommon</h3>
+<p>创建<code>ServiceDispatcher</code>（对ServiceConnect实例进行包装和增强）。</p>
+<pre><code class="language-java">private IServiceConnection getServiceDispatcherCommon(ServiceConnection c,
+                                                      Context context, Handler handler,
+                                                      Executor executor, int flags) {
+    synchronized (mServices) {
+        ....
+            if (sd == null) {
+                if (executor != null) {
+                    sd = new ServiceDispatcher(c, context, executor, flags);
+                } else {
+                    sd = new ServiceDispatcher(c, context, handler, flags);
+                }
+                if (DEBUG) Slog.d(TAG, &quot;Creating new dispatcher &quot; + sd + &quot; for conn &quot; + c);
+                if (map == null) {
+                    map = new ArrayMap&lt;&gt;();
+                    mServices.put(context, map);
+                }
+                map.put(c, sd);
+            } else {
+                sd.validate(context, handler, executor);
+            }
+        return sd.getIServiceConnection();
+    }
+}
+</code></pre>
+<pre><code class="language-java">@UnsupportedAppUsage
+ServiceDispatcher(ServiceConnection conn,
+                  Context context, Handler activityThread, int flags) {
+    // connection的实际类型
+    mIServiceConnection = new InnerConnection(this);
+    mConnection = conn;
+    mContext = context;
+    mActivityThread = activityThread;
+    mActivityExecutor = null;
+    mLocation = new ServiceConnectionLeaked(null);
+    mLocation.fillInStackTrace();
+    mFlags = flags;
+}
+</code></pre>
+<h3 id="innerconnection">InnerConnection</h3>
+<p><code>InnerConnection</code>继承自 <code>AIDL</code>中生成的<code>Stub</code>类。</p>
+<pre><code class="language-java">private static class InnerConnection extends IServiceConnection.Stub {
+    @UnsupportedAppUsage
+    final WeakReference&lt;LoadedApk.ServiceDispatcher&gt; mDispatcher;
+ 
+    InnerConnection(LoadedApk.ServiceDispatcher sd) {
+        mDispatcher = new WeakReference&lt;LoadedApk.ServiceDispatcher&gt;(sd);
+    }
+ 
+    public void connected(ComponentName name, IBinder service, boolean dead)
+        throws RemoteException {
+        LoadedApk.ServiceDispatcher sd = mDispatcher.get();
+        if (sd != null) {
+            sd.connected(name, service, dead);
+        }
+    }
+}
+</code></pre>
+<pre><code class="language-java">public void connected(ComponentName name, IBinder service, boolean dead) {
+    if (mActivityExecutor != null) {
+        mActivityExecutor.execute(new RunConnection(name, service, 0, dead));
+    } else if (mActivityThread != null) {
+        mActivityThread.post(new RunConnection(name, service, 0, dead));
+    } else {
+        doConnected(name, service, dead);
+    }
+}
+</code></pre>
+<pre><code class="language-java">public void doConnected(ComponentName name, IBinder service, boolean dead) {
+    ServiceDispatcher.ConnectionInfo old;
+    ServiceDispatcher.ConnectionInfo info;
+ 
+    // ....
+    // If there was an old service, it is now disconnected.
+    if (old != null) {
+        mConnection.onServiceDisconnected(name);
+    }
+    if (dead) {
+        mConnection.onBindingDied(name);
+    }
+    // If there is a new viable service, it is now connected.
+    if (service != null) {
+        // 回调定义的onServiceConnected 方法
+        mConnection.onServiceConnected(name, service);
+    } else {
+        // The binding machinery worked, but the remote returned null from onBind().
+        mConnection.onNullBinding(name);
+    }
+}
+</code></pre>
+
+                    </div>
+                    <div class="essaySuffix-box">
+                        <div class="essaySuffix-box-left"><img
+                                src="/images/avatar.png" alt="">
+                        </div>
+                        <div class="essaySuffix-box-right"><span
+                                class="essaySuffix-right-title">本文作者</span>：<strong><span style="font-size: 12px;"><a
+                                        href="/about"
+                                        target="_blank">Xiaowu</a></span></strong> <br><span
+                                style="font-weight: bold; white-space:nowrap;">本文链接</span>：<a
+                                href="https://jxiaow.gitee.io/posts/40026fc8/"
+                                target="_blank">https://jxiaow.gitee.io/posts/40026fc8/</a><br><span
+                                class="essaySuffix-right-title">版权声明</span>：本博客所有文章除特别声明外，均采用 <a
+                                href="https://creativecommons.org/licenses/by-nc-nd/4.0/" alt="BY-NC-SA"
+                                title="BY-NC-SA" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</div>
+                        <div style="clear: both;"></div>
+                    </div>
+                </div>
+                <!-- </div> -->
+                <div class="toc-container">
+                    <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#aidl%E7%BC%96%E5%86%99">AIDL编写</a>
+<ul>
+<li><a href="#%E5%88%9B%E5%BB%BAmodel%E5%AF%B9%E8%B1%A1">创建model对象</a></li>
+<li><a href="#%E5%88%9B%E5%BB%BAaidl%E6%96%87%E4%BB%B6">创建AIDL文件</a></li>
+<li><a href="#make-project">make project</a></li>
+<li><a href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8">客户端使用</a></li>
+</ul>
+</li>
+<li><a href="#%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E6%B5%81%E7%A8%8B">源码分析流程</a>
+<ul>
+<li><a href="#activitybindservice">Activity#bindService</a></li>
+<li><a href="#contextwrapperbindservice">ContextWrapper#bindService</a></li>
+<li><a href="#contextimplbindservice">ContextImpl#bindService</a></li>
+<li><a href="#contextimplbindservicecommon">ContextImpl#bindServiceCommon</a></li>
+<li><a href="#activitymanagergetservice">ActivityManager#getService</a></li>
+<li><a href="#activitymanagerservicebindisolatedservice">ActivityManagerService#bindIsolatedService</a></li>
+<li><a href="#activieservicebindservicelocked">ActivieService#bindServiceLocked</a></li>
+<li><a href="#activieservicebringupservicelocked">ActivieService#bringUpServiceLocked</a></li>
+<li><a href="#activieservicesendserviceargslocked">ActivieService#sendServiceArgsLocked</a></li>
+<li><a href="#acitivieservicerealstartservicelocked">AcitivieService#realStartServiceLocked</a></li>
+<li><a href="#activitythreadhandlecreateservice">ActivityThread#handleCreateService</a></li>
+<li><a href="#activitythreadhandlebindservice">ActivityThread#handleBindService</a></li>
+<li><a href="#activitymanagerservicepublishservice">ActivityManagerService#publishService</a></li>
+<li><a href="#activeservicespublishservicelocked">ActiveServices#publishServiceLocked</a></li>
+<li><a href="#contextimplbindservicecommon-2">ContextImpl#bindServiceCommon</a></li>
+<li><a href="#loadapkgetservicedispatchercommon">LoadApk#getServiceDispatcherCommon</a></li>
+<li><a href="#innerconnection">InnerConnection</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+                </div>
+            </article>
+            <!-- </div> -->
+
+          
+
+            
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://jxiaow.gitee.io/posts/5daabb/" class="post-title gt-a-link">
+                    Handler机制
+                </a>
+            </div>
+            
+
+            
+
+            
+            <script src='https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js'></script>
+
+<style>
+	div#vcomments{
+		width:100%;
+		max-width: 1000px;
+		padding: 2.5%
+	}
+</style>
+
+
+	<div id="vcomments"></div>
+
+<script>
+	new Valine({
+		el: '#vcomments',
+		appId: 'CAmH4sFTLPMg3inDkFSqWsuL-gzGzoHsz',
+		appKey: '3Mh9SPxWQ7QbJjxmX7EU26z4',
+		avatar: 'mp',
+		pageSize: 5,
+		recordIp: true,
+		placeholder: '快来吐槽吧~',
+		visitor: true,
+	});
+</script>
+
+            
+
+            <div class="site-footer gt-c-content-color-first">
+
+  <div class="social-container">
+
+    <a href="https://github.com/jxiaow" target="_blank" title="https://github.com/jxiaow">
+      <i class="fab fa-github gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://www.cnblogs.com/xiaowj" target="_blank" title="https://www.cnblogs.com/xiaowj">
+      <i class="fas fa-blog gt-c-content-color-first"></i>
+    </a>
+
+    <a href="https://blog.csdn.net/xiaowu_zhu" target="_blank" title="https://blog.csdn.net/xiaowu_zhu">
+      <i class="fab fa-cuttlefish gt-c-content-color-first"></i>
+    </a>
+
+    <a href="mailto:jxiaow@126.com" title="jxiaow@126.com">
+      <i class="fas fa-envelope gt-c-content-color-first"></i>
+    </a>
+
+  </div>
+  <div class="slogan gt-c-content-color-first">心若没有栖息的地方，到哪里都是在流浪</div>
+  
+  <div>
+    <div>
+      Theme by <a href="https://github.com/jxiaow/gridea-theme-pure-fashion" target="_blank">jxiaow</a>, Powered by <a
+              href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://jxiaow.gitee.io/atom.xml" target="_blank">RSS</a></a>
+  </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+            <script>
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+  
+  if (mainNavLinks == null || mainNavLinks.length == 0) {
+    let tocContainer = document.querySelector(".toc-container");
+    tocContainer.classList.remove("toc-container")
+    // tocContainer.parentElement.firstElementChild.style.width = "100%"
+    console.log("隐藏大纲")
+  } else {
+
+    // This should probably be throttled.
+    // Especially because it triggers during smooth scrolling.
+    // https://lodash.com/docs/4.17.10#throttle
+    // You could do like...
+    // window.addEventListener("scroll", () => {
+    //    _.throttle(doThatStuff, 100);
+    // });
+    // Only not doing it here to keep this Pen dependency-free.
+
+
+    window.addEventListener("scroll", event => {
+      let fromTop = window.scrollY;
+
+      mainNavLinks.forEach((link, index) => {
+        let section = document.getElementById(decodeURI(link.hash).substring(1));
+        let nextSection = null
+        if (mainNavLinks[index + 1]) {
+          nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+        }
+        if (section.offsetTop <= fromTop) {
+          if (nextSection) {
+            if (nextSection.offsetTop > fromTop) {
+              link.classList.add("current");
+            } else {
+              link.classList.remove("current");
+            }
+          } else {
+            link.classList.add("current");
+          }
+        } else {
+          link.classList.remove("current");
+        }
+      });
+    });
+  }
+
+
+
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+
+<script>
+  let images = document.querySelectorAll("figure > img");
+  //   debugger
+  //   console.log("dddd: "+ images);
+  images.forEach(image => {
+    var parent = image.parentElement;
+    parent.removeChild(image);
+    var aelem = document.createElement('a');
+    aelem.href = image.src;
+    aelem.dataset['fancybox'] = 'gallery';
+    aelem.classList.add('fancybox');
+    aelem.appendChild(image);
+    parent.appendChild(aelem);
+  })
+
+//   <a data-fancybox="gallery" href="big_1.jpg"><img src="small_1.jpg"></a>
+// <a data-fancybox="gallery" href="big_2.jpg"><img src="small_2.jpg"></a>
+</script>
+        </div>
+    </div>
+
+</body>
+
+</html>

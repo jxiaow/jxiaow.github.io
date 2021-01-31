@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2021-01-27T13:26:36.837Z</updated>
+    <updated>2021-01-31T13:33:40.190Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jxiaow.gitee.io"/>
     <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
@@ -10,6 +10,928 @@
     <logo>https://jxiaow.gitee.io/images/avatar.png</logo>
     <icon>https://jxiaow.gitee.io/favicon.ico</icon>
     <rights>All rights reserved 2021, Xiaowu</rights>
+    <entry>
+        <title type="html"><![CDATA[Binder解析]]></title>
+        <id>https://jxiaow.gitee.io/posts/7425384b/</id>
+        <link href="https://jxiaow.gitee.io/posts/7425384b/">
+        </link>
+        <updated>2021-01-31T13:32:11.000Z</updated>
+        <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/27/cbe191fcba5fc5e06c7cd120d4f6a437-Binder-0748cb.png" alt="Binder" loading="lazy"></figure>
+<ol>
+<li>
+<p>Binder 是什么？</p>
+<blockquote>
+<p>ipc通信方式</p>
+</blockquote>
+</li>
+<li>
+<p>什么时候需要用到进程间通信？</p>
+<blockquote>
+<p>webview访问，图片加载，推送 ，比较耗内存，单开一个会比较有保障， 系统的一些服务，如通话，闹钟，输入法服务等等</p>
+</blockquote>
+</li>
+<li>
+<p>为什么要多进程？</p>
+<blockquote>
+<p>虚拟机分配给各个应用的每个进程内存都是有限制的，耗内存的服务，如果不开一个服务，app的主进程内存会很快耗尽，会出现OOM</p>
+</blockquote>
+</li>
+<li>
+<p>进程间通信为什么需要用到Binder?</p>
+<p>本篇主题。</p>
+</li>
+</ol>
+<h3 id="linux进程空间划分">Linux进程空间划分</h3>
+<ul>
+<li>
+<p>一个进程空间分为 <strong>用户空间</strong> &amp; <strong>内核空间(Kernel)</strong>，即把进程内 用户 &amp; 内核 隔离开来</p>
+</li>
+<li>
+<p>二者区别：</p>
+<ul>
+<li>进程间，用户空间的数据不可共享，所以用户空间 = 不可共享空间</li>
+<li>进程间，内核空间的数据可共享，所以内核空间 = 可共享空间</li>
+</ul>
+<blockquote>
+<p>所有进程共用1个内核空间</p>
+</blockquote>
+</li>
+<li>
+<p>进程内 用户空间 &amp; 内核空间 进行交互 需通过 <strong>系统调用</strong>，主要通过函数：</p>
+<blockquote>
+<ol>
+<li>copy_from_user（）：将用户空间的数据拷贝到内核空间</li>
+<li>copy_to_user（）：将内核空间的数据拷贝到用户空间</li>
+</ol>
+</blockquote>
+</li>
+</ul>
+<figure data-type="image" tabindex="2"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/27/d103f9c5352bb3fec41d063bd4e935d6-linux%E8%BF%9B%E7%A8%8B%E7%A9%BA%E9%97%B4-e559ed.png" alt="linux进程空间" loading="lazy"></figure>
+<h4 id="进程隔离-跨进程通信-ipc">进程隔离 &amp; 跨进程通信（ IPC ）</h4>
+<ul>
+<li>
+<p>进程隔离</p>
+<blockquote>
+<p>为了保证 安全性 &amp; 独立性，一个进程 不能直接操作或者访问另一个进程，即Android的进程是相互独立、隔离的</p>
+</blockquote>
+</li>
+<li>
+<p>跨进程通信（ IPC ）</p>
+<blockquote>
+<p>即进程间需进行数据交互、通信</p>
+</blockquote>
+</li>
+<li>
+<p>跨进程通信的基本原理</p>
+</li>
+</ul>
+<figure data-type="image" tabindex="3"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/27/061dff9688cb48d2f1fbb6a3d2e0b038-%E8%B7%A8%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86-98ac4b.svg" alt="跨进程通信基本原理" loading="lazy"></figure>
+<h4 id="内存映射mmap">内存映射mmap</h4>
+<p><code>mmap</code>是一种<strong>内存映射文件</strong>的方法，即<strong>将一个文件或者其它对象映射到进程的地址空间，实现文件磁盘地址和进程虚拟地址空间中一段虚拟地址的一一对映关系。</strong> 实现这样的映射关系后，进程就可以采用指针的方式读写操作这一段内存，而系统会自动回写脏页面到对应的文件磁盘上，即完成了对文件的操作而不必再调用<code>read</code>,<code>write</code>等系统调用函数。相反，内核空间对这段区域的修改也直接反映用户空间，从而可以实现不同进程间的文件共享。</p>
+<h3 id="binder到底是什么">Binder到底是什么？</h3>
+<ul>
+<li>中文即 粘合剂，意思为粘合了两个不同的进程</li>
+<li>需要从不同的角度去看</li>
+</ul>
+<figure data-type="image" tabindex="4"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/27/47a83ac9213dc05510ac96abd35abcde-Binder%E6%98%AF%E4%BB%80%E4%B9%88-6634e3.svg" alt="Binder是什么" loading="lazy"></figure>
+<h4 id="binder-跨进程通信机制-模型">Binder 跨进程通信机制 模型</h4>
+<ul>
+<li>Binder 跨进程通信机制 模型 基于 Client - Server 模式</li>
+</ul>
+<figure data-type="image" tabindex="5"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/27/cac5b18e137aa0e0157a7d51dd1a76f3-Binder%E8%B7%A8%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6%E6%A8%A1%E5%9E%8B-fd77ab.png" alt="binder_cs.png" loading="lazy"></figure>
+<p>模型组成角色说明</p>
+<figure data-type="image" tabindex="6"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/27/a034f6a21009072f7ad7b1acd2c5cf68-Binder%E8%B7%A8%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E8%A7%92%E8%89%B2%E8%AF%B4%E6%98%8E-87985d.png" alt="binder_proc.png" loading="lazy"></figure>
+<h4 id="binder驱动的作用-原理">Binder驱动的作用 &amp; 原理</h4>
+<figure data-type="image" tabindex="7"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/27/01d62af6f5ce296329782cae1b99a40d-Binder%E9%A9%B1%E5%8A%A8-4d23b0.svg" alt="Binder驱动.svg" loading="lazy"></figure>
+<ul>
+<li>跨进程通信的核心原理</li>
+</ul>
+<figure data-type="image" tabindex="8"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/27/2f8331d74a12e7ce9869c1f126450a16-Binder%E9%80%9A%E4%BF%A1%E7%9A%84%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86-f552dc.png" alt="binder_work.png" loading="lazy"></figure>
+<ul>
+<li>模型原理步骤说明</li>
+</ul>
+<figure data-type="image" tabindex="9"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/27/0750bc30e4595f0a396d77d72b5ae039-Binder%E6%A0%B8%E5%BF%83%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E6%AD%A5%E9%AA%A4%E8%AF%B4%E6%98%8E-e42259.png" alt="binder_work_liucheng.png" loading="lazy"></figure>
+<h4 id="注意">注意</h4>
+<p>说明1：Client进程、Server进程 &amp; Service Manager 进程之间的交互 都必须通过Binder驱动（使用 open 和 ioctl文件操作函数），而非直接交互 原因：</p>
+<ol>
+<li>Client进程、Server进程 &amp; Service Manager进程属于进程空间的用户空间，不可进行进程间交互</li>
+<li>Binder驱动 属于 进程空间的 内核空间，可进行进程间 &amp; 进程内交互</li>
+</ol>
+<p>所以，原理图可表示为以下：</p>
+<blockquote>
+<p>虚线表示并非直接交互</p>
+</blockquote>
+<figure data-type="image" tabindex="10"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/27/8d1394e3d34347df5f25b8edeadcb97f-Binder%E4%BA%A4%E4%BA%92%E5%8E%9F%E7%90%86%E5%9B%BE-ce3e7f.png" alt="binder_yuanli.png" loading="lazy"></figure>
+<p>说明2： Binder驱动 &amp; Service Manager进程 属于 Android基础架构（即系统已经实现好了）；而Client 进程 和 Server 进程 属于Android应用层（需要开发者自己实现） 所以，在进行跨进程通信时，开发者只需自定义Client &amp; Server 进程 并 显式使用上述3个步骤，最终借助 Android的基本架构功能就可完成进程间通信</p>
+<figure data-type="image" tabindex="11"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/27/f39430084d6be6162454436eb499376d-Android%E6%9E%B6%E6%9E%84binder%E9%80%9A%E4%BF%A1%E5%9B%BE-da3449.png" alt="binder_yuanli1.png" loading="lazy"></figure>
+<p>说明3：Binder请求的线程管理 Server进程会创建很多线程来处理Binder请求 Binder模型的线程管理 采用Binder驱动的线程池，并由Binder驱动自身进行管理</p>
+<blockquote>
+<p>而不是由Server进程来管理的</p>
+</blockquote>
+<p>一个进程的Binder线程数默认最大是16，超过的请求会被阻塞等待空闲的Binder线程。</p>
+<blockquote>
+<p>所以，在进程间通信时处理并发问题时，如使用ContentProvider时，它的CRUD（创建、检索、更新和删除）方法只能同时有16个线程同时工作</p>
+</blockquote>
+<h3 id="binder机制-在android中的具体实现原理">Binder机制 在Android中的具体实现原理</h3>
+<figure data-type="image" tabindex="12"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/27/96134364cd18b64284736fb7976c2322-Binder%E6%9C%BA%E5%88%B6%E5%9C%A8Android%E4%B8%AD%E7%9A%84%E5%85%B7%E4%BD%93%E5%8E%9F%E7%90%86-020a3f.webp" alt="java_binder.webp" loading="lazy"></figure>
+<ul>
+<li>IMyService接口由 AIDL 文件生成；</li>
+<li>Stub 和 Proxy 则是IMyService的内部类，分别是 Binder 类和 BinderProxy 类的子类（Proxy 类虽然是用组合方式来持有 BinderProxy 的，但实际就是在直接用这个类，只不过做了一层封装，让其更易使用而已），Stub 和 Proxy 都实现了 IMyService；</li>
+<li>IMyService是一个用于表达 Service 提供的功能的一个契约，也就是说 IInterface 里有的方法，Service 都能提供，调用者你别管用的是 BinderProxy 还是什么，只要拿到 IInterface，你就可以直接调用里面的方法，它就是一个接口；</li>
+<li>同时 Stub 虽然实现了 IMyService，但是并没有实现厘米的任何方法，它是一个抽象类，开发者需要自己子类化 Stub 去实现具体的功能；</li>
+<li>Proxy 实现了 IMyService，并且实现了里面的方法；</li>
+<li>为什么 IMyService 要分 Stub 和 Proxy 呢？这是为了要适用于本地调用和远程调用两种情况。如果 Service 运行在同一个进程，那就直接用 Stub，因为它直接实现了 Service 提供的功能，不需要任何 IPC 过程。如果 Service 运行在其他进程，那客户端使用的就是 Proxy，这里这个 Proxy 的功能大家应该能想到了吧，就是把参数封装后发送给 Binder 驱动，然后执行一系列 IPC 操作最后再取出结果返回。</li>
+<li>Stub 是继承自 Binder 并重写了onTransact函数，这个函数三个重要参数：int code、Parcel data、Parcel reply，分别对应了被调函数编号、参数包、响应包。当 Proxy 发起了一个请求，服务端中相应的响应线程就会通过 JNI 调用到 Stub 类，然后执行里面的 execTransact 方法，进而转到 onTransact 方法。</li>
+</ul>
+<h3 id="为什么android-要使用-binder">为什么Android 要使用 Binder ？</h3>
+<p>Android 系统是基于 Linux 内核的，Linux 已经提供了管道、消息队列、共享内存和 Socket 等 IPC 机制。那为什么 Android 还要提供 Binder 来实现 IPC 呢？主要是基于性能、稳定性和安全性几方面的原因。</p>
+<h4 id="性能">性能</h4>
+<ol>
+<li>Socket 作为一款通用接口，其传输效率低，开销大，主要用在跨网络的进程间通信和本机上进程间的低速通信。</li>
+<li>消息队列和管道采用存储-转发方式，即数据先从发送方缓存区拷贝到内核开辟的缓存区中，然后再从内核缓存区拷贝到接收方缓存区，至少有两次拷贝过程。</li>
+<li>共享内存虽然无需拷贝，但控制复杂，难以使用。Binder 只需要一次数据拷贝，性能上仅次于共享内存。</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>IPC方式</th>
+<th style="text-align:center">数据拷贝次数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>共享内存</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td>Binder</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td>Socket/管道/消息队列</td>
+<td style="text-align:center">2</td>
+</tr>
+</tbody>
+</table>
+<h4 id="稳定性">稳定性</h4>
+<p>Binder 基于 C/S 架构，客户端（Client）有什么需求就丢给服务端（Server）去完成，架构清晰、职责明确又相互独立，自然稳定性更好。共享内存虽然无需拷贝，但是控制负责，难以使用。从稳定性的角度讲，Binder 机制是优于内存共享的。</p>
+<h4 id="安全性">安全性</h4>
+<p>Android 作为一个开放性的平台，市场上有各类海量的应用供用户选择安装，因此安全性对于 Android 平台而言极其重要。</p>
+<ol>
+<li>传统的 IPC 接收方无法获得对方可靠的进程用户ID/进程ID（UID/PID），从而无法鉴别对方身份。Android 为每个安装好的 APP 分配了自己的 UID，故而进程的 UID 是鉴别进程身份的重要标志。</li>
+<li>传统的 IPC 只能由用户在数据包中填入 UID/PID，但这样不可靠，容易被恶意程序利用。可靠的身份标识只有由 IPC 机制在内核中添加。</li>
+<li>传统的 IPC 访问接入点是开放的，只要知道这些接入点的程序都可以和对端建立连接，不管怎样都无法阻止恶意程序通过猜测接收方地址获得连接。同时 Binder 既支持实名 Binder，又支持匿名 Binder，安全性高。</li>
+</ol>
+<p>基于上述原因，Android 需要建立一套新的 IPC 机制来满足系统对稳定性、传输性能和安全性方面的要求，这就是 Binder。</p>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th style="text-align:center">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>性能</td>
+<td style="text-align:center">只需要一次数据拷贝，性能上仅次于共享内存</td>
+</tr>
+<tr>
+<td>稳定性</td>
+<td style="text-align:center">基于C/S架构，职责明确、架构清晰，因此稳定性好</td>
+</tr>
+<tr>
+<td>安全性</td>
+<td style="text-align:center">为每个App分配UID，进程的UID是鉴别进程身份的重要标志</td>
+</tr>
+</tbody>
+</table>
+<h3 id="binder-通信中的代理模式">Binder 通信中的代理模式</h3>
+<p>我们已经解释清楚 Client、Server 借助 Binder 驱动完成跨进程通信的实现机制了，但是还有个问题会让我们困惑。A 进程想要 B 进程中某个对象（object）是如何实现的呢？毕竟它们分属不同的进程，A 进程 没法直接使用 B 进程中的 object。</p>
+<p>前面我们介绍过跨进程通信的过程都有 Binder 驱动的参与，因此在数据流经 Binder 驱动的时候驱动会对数据做一层转换。当 A 进程想要获取 B 进程中的 object 时，驱动并不会真的把 object 返回给 A，而是返回了一个跟 object 看起来一模一样的代理对象 objectProxy，这个 objectProxy 具有和 object 一摸一样的方法，但是这些方法并没有 B 进程中 object 对象那些方法的能力，这些方法只需要把把请求参数交给驱动即可。对于 A 进程来说和直接调用 object 中的方法是一样的。</p>
+<p>当 Binder 驱动接收到 A 进程的消息后，发现这是个 objectProxy 就去查询自己维护的表单，一查发现这是 B 进程 object 的代理对象。于是就会去通知 B 进程调用 object 的方法，并要求 B 进程把返回结果发给自己。当驱动拿到 B 进程的返回结果后就会转发给 A 进程，一次通信就完成了。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[AIDL文件编写及源码分析]]></title>
+        <id>https://jxiaow.gitee.io/posts/40026fc8/</id>
+        <link href="https://jxiaow.gitee.io/posts/40026fc8/">
+        </link>
+        <updated>2021-01-30T14:38:06.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="aidl编写">AIDL编写</h2>
+<p>Binder被用来实现进程间的通信，基本使用步骤如下：</p>
+<ol>
+<li>创建AIDL文件，编写接口方法；</li>
+<li>如果有自定义的model对象，则在aidl下创建包名一致且名称与model名一致的aidl文件；</li>
+<li>make project</li>
+<li>编写相应的代码，启动服务发送和接收数据。</li>
+</ol>
+<p>具体操作：</p>
+<p><strong>以下例子来源于 <a href="https://gitee.com/jxiaow/practiseCodeAndroid/tree/master/FrameWork/BinderSample">FrameWork/BinderSample</a></strong></p>
+<h3 id="创建model对象">创建model对象</h3>
+<p><code>Person</code> 实现 <code>Parcelable</code> 接口 （如果不需要自定义model，则不需要）</p>
+<pre><code class="language-java">package com.github.jxiaow.sample.model;
+import android.os.Parcel;
+import android.os.Parcelable;
+ 
+public class Personal implements Parcelable {
+   public String name;
+   public int age;
+ 
+   public Personal(String name, int age) {
+      this.name = name;
+      this.age = age;
+   }
+   // .....
+}
+</code></pre>
+<h3 id="创建aidl文件">创建AIDL文件</h3>
+<p>如果有自定义model对象并且与AIDL接口文件的包名不一致时需要创建一个<code>AIDL</code>文件表示</p>
+<pre><code class="language-java">// IPersonal.aidl
+// 包名必须与model的一致
+package com.github.jxiaow.sample.model;
+ 
+// Declare any non-default types here with import statements
+// 自定义的model需要使用parcelable进行声明
+parcelable Personal;
+</code></pre>
+<p>编写AIDL接口文件</p>
+<pre><code class="language-java">// ILeoAidl.aidl
+package com.github.jxiaow.sample;
+// Declare any non-default types here with import statements
+// 导入model对应的aidl文件
+import com.github.jxiaow.sample.model.IPersonal;
+ 
+interface IPersonalAidlInterface {
+    // 自己定义的model 需要添加in修饰
+    void addPersonal(in Personal person);
+    List&lt;Personal&gt; getPersonalList();
+}
+</code></pre>
+<h3 id="make-project">make project</h3>
+<p>通过Android studio 的 make project 后生成java版本的aidl接口类。代码结构：</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/28/0e5e4f7da463171b64417ed0ba4492d8-image-20210128112830363-ea556a.png" alt="image-20210128112830363" loading="lazy"></figure>
+<p>生成的重要部分代码如下：</p>
+<pre><code class="language-java">package com.github.jxiaow.sample;
+ 
+public interface IPersonalAidlInterface extends android.os.IInterface {
+    /**
+     * Local-side IPC implementation stub class.
+     * Stub 用于数据服务接收端，该抽象方法由服务接收端实现
+     *  通过asInterface 返回一个proxy给数据发送端
+     */
+    public static abstract class Stub extends android.os.Binder
+           implements com.github.jxiaow.sample.IPersonalAidlInterface {
+        // 通过该字段区分binder
+        private static final java.lang.String DESCRIPTOR =
+            &quot;com.github.jxiaow.sample.IPersonalAidlInterface&quot;;
+ 
+        /**
+         * Construct the stub at attach it to the interface.
+         */
+        public Stub() {
+            this.attachInterface(this, DESCRIPTOR);
+        }
+ 
+        /**
+         * Cast an IBinder object into an com.github.jxiaow.sample.IPersonalAidlInterface interface,
+         * generating a proxy if needed.
+         */
+        public static com.github.jxiaow.sample.IPersonalAidlInterface asInterface(android.os.IBinder obj) {
+            if ((obj == null)) {
+                return null;
+            }
+            // 如果服务端和客户端不在同一进程，那么obj.queryLocalInterface(DESCRIPTOR)为null
+            android.os.IInterface iin = obj.queryLocalInterface(DESCRIPTOR);
+            if (((iin != null) &amp;&amp; (iin instanceof com.github.jxiaow.sample.IPersonalAidlInterface))) {
+                return ((com.github.jxiaow.sample.IPersonalAidlInterface) iin);
+            }
+            // 返回一个服务端代理，用于客户端远程调用服务端的方法
+            return new com.github.jxiaow.sample.IPersonalAidlInterface.Stub.Proxy(obj);
+        }
+ 
+        @Override
+        public android.os.IBinder asBinder() {
+            return this;
+        }
+        // onTransact 复写了Binder中的onTransact
+        // 客户端调用代理执行相应的方法后会调用到服务端的此方法上进行相应的方法调用
+        // 数据发送端proxy调用transact后通过binder会调用stub的onTransact
+        @Override
+        public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+                    throws android.os.RemoteException {
+            java.lang.String descriptor = DESCRIPTOR;
+            switch (code) {
+                case INTERFACE_TRANSACTION: {
+                    reply.writeString(descriptor);
+                    return true;
+                }
+                case TRANSACTION_addPersonal: {
+                    data.enforceInterface(descriptor);
+                    com.github.jxiaow.sample.model.Personal _arg0;
+                    if ((0 != data.readInt())) {
+                        _arg0 = com.github.jxiaow.sample.model.Personal.CREATOR.createFromParcel(data);
+                    } else {
+                        _arg0 = null;
+                    }
+                    this.addPersonal(_arg0);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_getPersonalList: {
+                    data.enforceInterface(descriptor);
+                    java.util.List&lt;com.github.jxiaow.sample.model.Personal&gt; _result = this.getPersonalList();
+                    reply.writeNoException();
+                    reply.writeTypedList(_result);
+                    return true;
+                }
+                default: {
+                    return super.onTransact(code, data, reply, flags);
+                }
+            }
+        }
+        // 代理静态内部类，用于发送数据到服务端
+        private static class Proxy implements com.github.jxiaow.sample.IPersonalAidlInterface {
+            private android.os.IBinder mRemote;
+ 
+            Proxy(android.os.IBinder remote) {
+                mRemote = remote;
+            }
+ 
+            @Override
+            public android.os.IBinder asBinder() {
+                return mRemote;
+            }
+ 
+            public java.lang.String getInterfaceDescriptor() {
+                return DESCRIPTOR;
+            }
+ 
+            @Override
+            public void addPersonal(com.github.jxiaow.sample.model.Personal person)
+                throws android.os.RemoteException {
+                // _data 是发送的数据
+                // _reply 接收的数据              
+                android.os.Parcel _data = android.os.Parcel.obtain();
+                android.os.Parcel _reply = android.os.Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    if ((person != null)) {
+                        _data.writeInt(1);
+                        person.writeToParcel(_data, 0);
+                    } else {
+                        _data.writeInt(0);
+                    }
+                    // mRemote.transact方法会调用到服务端的onTransact，然后进行方法标记分发
+                    boolean _status = mRemote.transact(Stub.TRANSACTION_addPersonal, _data, _reply, 0);
+                    if (!_status &amp;&amp; getDefaultImpl() != null) {
+                        getDefaultImpl().addPersonal(person);
+                        return;
+                    }
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+ 
+            @Override
+            public java.util.List&lt;com.github.jxiaow.sample.model.Personal&gt; getPersonalList()
+                throws android.os.RemoteException {
+                android.os.Parcel _data = android.os.Parcel.obtain();
+                android.os.Parcel _reply = android.os.Parcel.obtain();
+                java.util.List&lt;com.github.jxiaow.sample.model.Personal&gt; _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    boolean _status = mRemote.transact(Stub.TRANSACTION_getPersonalList, _data, _reply, 0);
+                    if (!_status &amp;&amp; getDefaultImpl() != null) {
+                        return getDefaultImpl().getPersonalList();
+                    }
+                    _reply.readException();
+                    _result = _reply.createTypedArrayList(com.github.jxiaow.sample.model.Personal.CREATOR);
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+ 
+            public static com.github.jxiaow.sample.IPersonalAidlInterface sDefaultImpl;
+        }
+        // 每个方法的标志
+        static final int TRANSACTION_addPersonal = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
+        static final int TRANSACTION_getPersonalList = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
+ 
+    }
+ 
+    // 此方法有继承自Stub的子类实现
+    public void addPersonal(com.github.jxiaow.sample.model.Personal person)
+        throws android.os.RemoteException;
+ 
+    public java.util.List&lt;com.github.jxiaow.sample.model.Personal&gt; getPersonalList()
+        throws android.os.RemoteException;
+}
+</code></pre>
+<h3 id="客户端使用">客户端使用</h3>
+<pre><code class="language-java">// 8.0 以后，不允许service后台运行，所以如果将service至于后台，bindService会报错
+// W/ActivityManager: Unable to start service Intent
+// { cmp=com.github.jxiaow.binderservice/.MyService } U=0: not found
+val intent = Intent()
+intent.setClassName(
+    &quot;com.github.jxiaow.binderservice&quot;,
+    &quot;com.github.jxiaow.binderservice.MyService&quot;
+)
+bindService(intent, conn, Context.BIND_AUTO_CREATE)
+</code></pre>
+<p>通过asInterface 获取使用。</p>
+<pre><code class="language-java">private val conn = object : ServiceConnection {
+    override fun onServiceConnected(name: ComponentName, service: IBinder) {
+        Log.d(&quot;Personal&quot;, &quot;onServiceConnected: &quot;)
+        personalInterface = IPersonalAidlInterface.Stub.asInterface(service)
+    }
+ 
+    override fun onServiceDisconnected(name: ComponentName) {
+        personalInterface = null
+    }
+}
+</code></pre>
+<h2 id="源码分析流程">源码分析流程</h2>
+<blockquote>
+<p>源码基于API 30</p>
+</blockquote>
+<h3 id="activitybindservice">Activity#bindService</h3>
+<p>在<code>Acitivity</code>中绑定或启动<code>Service</code>时，经常会使用下面的方式，我们就以下面的方式进行源码调用分析。</p>
+<pre><code class="language-kotlin">val intent = Intent(this, PersonalService::class.java)
+bindService(intent, conn, Context.BIND_AUTO_CREATE)
+</code></pre>
+<h3 id="contextwrapperbindservice">ContextWrapper#bindService</h3>
+<pre><code class="language-java">@Override
+public boolean bindService(Intent service, ServiceConnection conn, int flags) {
+    return mBase.bindService(service, conn, flags);
+}
+</code></pre>
+<p>以上方法中调用了<code>mBase.bindService</code>，而我们可以知道<code>mBase</code>就是<code>ContextImpl</code>的实例。</p>
+<h3 id="contextimplbindservice">ContextImpl#bindService</h3>
+<pre><code class="language-java">@Override
+public boolean bindService(Intent service, ServiceConnection conn, int flags) {
+    warnIfCallingFromSystemProcess();
+    return bindServiceCommon(service, conn, flags, null, mMainThread.getHandler(), null, getUser());
+}
+</code></pre>
+<h3 id="contextimplbindservicecommon">ContextImpl#bindServiceCommon</h3>
+<p><code>bindServiceCommon</code>通过<code>ActivityManagerService</code>进行<code>Service</code>的相关操作。</p>
+<pre><code class="language-java">private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags,
+                                  String instanceName, Handler handler, Executor executor, UserHandle user) {
+        // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser.
+        // ....
+        try {
+            IBinder token = getActivityToken();
+            if (token == null &amp;&amp; (flags&amp;BIND_AUTO_CREATE) == 0 &amp;&amp; mPackageInfo != null
+                &amp;&amp; mPackageInfo.getApplicationInfo().targetSdkVersion
+                &lt; android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                flags |= BIND_WAIVE_PRIORITY;
+            }
+            service.prepareToLeaveProcess(this);
+            // 重点, 此处调用了ActivityManagerService中的方法
+            // 用于service的相关生命周期处理
+            int res = ActivityManager.getService().bindIsolatedService(
+                mMainThread.getApplicationThread(), getActivityToken(), service,
+                service.resolveTypeIfNeeded(getContentResolver()),
+                sd, flags, instanceName, getOpPackageName(), user.getIdentifier());
+            if (res &lt; 0) {
+                throw new SecurityException(
+                    &quot;Not allowed to bind to service &quot; + service);
+            }
+            return res != 0;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+}
+</code></pre>
+<h3 id="activitymanagergetservice">ActivityManager#getService</h3>
+<pre><code class="language-java">// 获取一个IActivityManager AIDL接口实现proxy实例
+// 由于android 8.0 采用的AIDL模板生成代码的方式，无法在Andorid Studio中看到生成的代码Proxy
+// 返回一个单例 ActivityMangerService的Binder代理类
+@UnsupportedAppUsage
+public static IActivityManager getService() {
+    return IActivityManagerSingleton.get();
+}
+ 
+@UnsupportedAppUsage
+private static final Singleton&lt;IActivityManager&gt; IActivityManagerSingleton =
+    new Singleton&lt;IActivityManager&gt;() {
+    @Override
+    protected IActivityManager create() {
+        // 通过ServiceManager获取IActivityManager服务端（ActivityManagerService)的代理类
+        final IBinder b = ServiceManager.getService(Context.ACTIVITY_SERVICE);
+        // 通过Stub.asInterface 获取AIDL接口生成代码中的proxy实例
+        // 此处获取的就是AIDL中的proxy, 如果有疑问，去看一下前面的创建AIDL文件处的代码
+        final IActivityManager am = IActivityManager.Stub.asInterface(b);
+        return am;
+    }
+};
+</code></pre>
+<p>具体的解析，请看上面代码中的注释，<code>ActivityManager.getService()</code>获取到的是一个<code>IActivityManagerService</code>的代理类。</p>
+<pre><code class="language-java">public class ActivityManagerService extends IActivityManager.Stub
+       implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback{}
+</code></pre>
+<h3 id="activitymanagerservicebindisolatedservice">ActivityManagerService#bindIsolatedService</h3>
+<pre><code class="language-java">public int bindIsolatedService(IApplicationThread caller, IBinder token, Intent service,
+                            String resolvedType, IServiceConnection connection,
+                            int flags, String instanceName,
+                            String callingPackage, int userId)
+    throws TransactionTooLargeException {
+     // ....
+     synchronized(this) {
+         return mServices.bindServiceLocked(caller, token, service,
+              resolvedType, connection, flags, instanceName, callingPackage, userId);
+     }
+}
+</code></pre>
+<h3 id="activieservicebindservicelocked">ActivieService#bindServiceLocked</h3>
+<p>如果service已经存在则直接绑定，如果不存在则先创建然后再绑定</p>
+<pre><code class="language-java">int bindServiceLocked(IApplicationThread caller, IBinder token, Intent service,
+                      String resolvedType, final IServiceConnection connection, int flags,
+                      String instanceName, String callingPackage, final int userId)
+    throws TransactionTooLargeException {
+    // ....
+    final boolean callerFg = callerApp.setSchedGroup != ProcessList.SCHED_GROUP_BACKGROUND;
+    final boolean isBindExternal = (flags &amp; Context.BIND_EXTERNAL_SERVICE) != 0;
+    final boolean allowInstant = (flags &amp; Context.BIND_ALLOW_INSTANT) != 0;
+    // 获取Service信息缓存(serivceInfo)，如果缓存不存在则创建
+    // 如果启动一个未启动的service，那么此处是没有缓存的
+    // 如果启动的是一个已经启动了的service，那么缓存是存在的
+    ServiceLookupResult res =
+        retrieveServiceLocked(service, instanceName, resolvedType, callingPackage,
+                              Binder.getCallingPid(), Binder.getCallingUid(), userId, true,
+                              callerFg, isBindExternal, allowInstant);
+    if (res == null) {
+        return 0;
+    }
+    if (res.record == null) {
+        return -1;
+    }
+    ServiceRecord s = res.record;
+    final long origId = Binder.clearCallingIdentity();
+    try {
+        // ....
+        if ((flags&amp;Context.BIND_AUTO_CREATE) != 0) {
+            s.lastActivity = SystemClock.uptimeMillis();
+            // 创建和绑定service
+            if (bringUpServiceLocked(s, service.getFlags(), callerFg, false,
+                                     permissionsReviewRequired) != null) {
+                return 0;
+            }
+        }
+        // 由于service的创建最终是通过handler转发的，那么创建的时间一般情况下会晚于下面的代码执行
+        // b.intent.received 未执行绑定操作时，默认情况下是 false,  publishService中置为true
+        if (s.app != null &amp;&amp; b.intent.received) {
+            // Service is already running, so we can immediately
+            // publish the connection.
+            try {
+                // 调用的是ServiceDispatcher中的相关方法间接调用onServiceConnection
+                c.conn.connected(s.name, b.intent.binder, false);
+            } catch (Exception e) {
+                Slog.w(TAG, &quot;Failure sending service &quot; + s.shortInstanceName
+                       + &quot; to connection &quot; + c.conn.asBinder()
+                       + &quot; (in &quot; + c.binding.client.processName + &quot;)&quot;, e);
+            }
+ 
+            // If this is the first app connected back to this binding,
+            // and the service had previously asked to be told when
+            // rebound, then do so.
+            // b.intnet.doRebind 默认是false
+            if (b.intent.apps.size() == 1 &amp;&amp; b.intent.doRebind) {
+                // 检查是否需要重新绑定
+                requestServiceBindingLocked(s, b.intent, callerFg, true);
+            }
+        } 
+        // 默认是false,绑定成功后为true，
+        // 如果bringUpServiceLocked能执行到realStartService中,则b.intent.requested = true
+        else if (!b.intent.requested) { 
+            // 请求绑定service
+            requestServiceBindingLocked(s, b.intent, callerFg, false);
+        }
+        getServiceMapLocked(s.userId).ensureNotStartingBackgroundLocked(s);
+    }
+    // ...
+    return 1;
+}
+</code></pre>
+<h3 id="activieservicebringupservicelocked">ActivieService#bringUpServiceLocked</h3>
+<p><code>bringUpServiceLocked</code>中 先判断<code>service</code>是否已经创建，如果创建调用<code>sendServiceArgsLocked</code>方法进行相关操作，否则</p>
+<p>调用<code>realStartServiceLocked</code>进行<code>service</code>创建和绑定。</p>
+<pre><code class="language-java">private String bringUpServiceLocked(ServiceRecord r, int intentFlags, boolean execInFg,
+                                    boolean whileRestarting, boolean permissionsReviewRequired)
+    throws TransactionTooLargeException {
+    // 如果service已经启动调用sendServiceArgsLocked方法通过远程服务执行onStartCommon
+    if (r.app != null &amp;&amp; r.app.thread != null) {
+        sendServiceArgsLocked(r, execInFg, false);
+        return null;
+    }
+    // ....
+    // 判断每次启动Service时是否需要独立开启一个进程，此属性是通过 android:isolatedProcess=&quot;false&quot; 设置
+    // 默认false
+    final boolean isolated = (r.serviceInfo.flags&amp;ServiceInfo.FLAG_ISOLATED_PROCESS) != 0;
+    if (!isolated) {
+        app = mAm.getProcessRecordLocked(procName, r.appInfo.uid, false);
+        if (DEBUG_MU) Slog.v(TAG_MU, &quot;bringUpServiceLocked: appInfo.uid=&quot; + r.appInfo.uid
+                             + &quot; app=&quot; + app);
+        // 启动服务的app是否为null
+        if (app != null &amp;&amp; app.thread != null) {
+            try {
+                app.addPackage(r.appInfo.packageName, r.appInfo.longVersionCode, mAm.mProcessStats);
+                // 重点, 创建并绑定service
+                // 此方法
+                realStartServiceLocked(r, app, execInFg);
+                return null;
+            }
+            // ...
+        }
+    }
+    // ....
+    return null;
+}
+</code></pre>
+<h3 id="activieservicesendserviceargslocked">ActivieService#sendServiceArgsLocked</h3>
+<pre><code class="language-java">private final void sendServiceArgsLocked(ServiceRecord r, boolean execInFg,
+                                         boolean oomAdjusted) throws TransactionTooLargeException {
+    // r.pendingStarts在service执行完onStartCommon后为空
+    // 在startServiceLocked中添加service到pendingStarts中 （startService方式启动service）
+    // 在realStartServiceLocked中也会添加 (bindService 方式启动service)
+    final int N = r.pendingStarts.size();
+    // 此处可以判断可以说明 onStartCommon只会执行一次
+    if (N == 0) {
+        return;
+    }
+    // ...
+    ParceledListSlice&lt;ServiceStartArgs&gt; slice = new ParceledListSlice&lt;&gt;(args);
+    slice.setInlineCountLimit(4);
+    Exception caughtException = null;
+    try {
+        // 调用 applicationThread中的scheduleServiceArgs
+        r.app.thread.scheduleServiceArgs(r, slice);
+    }
+    // ...
+}
+</code></pre>
+<h3 id="acitivieservicerealstartservicelocked">AcitivieService#realStartServiceLocked</h3>
+<p><code>realStartServiceLocked</code>方法中主要完成了2件事：1. 在<code>ApplicationThread</code>中调用<code>scheduleCreateService</code>进行 Service的创建；2. 请求绑定Service。</p>
+<pre><code class="language-java">private final void realStartServiceLocked(ServiceRecord r,
+                                          ProcessRecord app, boolean execInFg) throws RemoteException {
+    // ....
+    boolean created = false;
+    try {
+        //....
+        // app.thread ===&gt; ApplicationThread
+        // 1. AplicationThread 创建Service
+        app.thread.scheduleCreateService(r, r.serviceInfo,
+                                         mAm.compatibilityInfoForPackage(r.serviceInfo.applicationInfo),
+                                         app.getReportedProcState());
+        r.postNotification();
+        created = true;
+    }
+    // ....
+    // 2. 请求绑定Service
+    requestServiceBindingsLocked(r, execInFg);
+ 
+    // 3. 如果是startService方式，service恢复时调用onStartCommon方法
+    // 正好验证了bindService() 不会调用onStartCommon方法
+    // If the service is in the started state, and there are no
+    // pending arguments, then fake up one so its onStartCommand() will
+    // be called.
+    if (r.startRequested &amp;&amp; r.callStart &amp;&amp; r.pendingStarts.size() == 0) {
+        r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
+                                                        null, null, 0));
+    }
+    sendServiceArgsLocked(r, execInFg, true);
+}
+</code></pre>
+<h3 id="activitythreadhandlecreateservice">ActivityThread#handleCreateService</h3>
+<p>在<code>AcitivieService#realStartServiceLocked()</code>中调用<code>ApplicationThread#scheduleCreateService</code>后，<code>scheduleCreateService</code> 通过Handler发送what为<code>CREATE_SERVICE</code>的事件，然后在会调用<code>ActivityThread#handlerCreateService</code>进行Service 创建。</p>
+<pre><code class="language-java">// 创建Service
+@UnsupportedAppUsage
+private void handleCreateService(CreateServiceData data) {
+    // If we are getting ready to gc after going to the background, well
+    // we are back active so skip it.
+    unscheduleGcIdler();
+    LoadedApk packageInfo = getPackageInfoNoCheck(
+        data.info.applicationInfo, data.compatInfo);
+    // 反射创建
+    Service service = null;
+    try {
+        java.lang.ClassLoader cl = packageInfo.getClassLoader();
+        service = packageInfo.getAppFactory()
+            .instantiateService(cl, data.info.name, data.intent);
+    } catch (Exception e) {
+    }
+    try {
+        // ....
+        // 调用service的onCreate
+        service.onCreate();
+        mServices.put(data.token, service);
+       // ...
+    } catch (Exception e) {
+        // ....
+    }
+}
+</code></pre>
+<h3 id="activitythreadhandlebindservice">ActivityThread#handleBindService</h3>
+<p>在<code>AcitivieService#realStartServiceLocked</code>中Service创建成功后，会调用<code>requestServiceBindingsLocked</code>进行Service的绑定，最终调用到<code>ActivityThread#handleBindService</code>。</p>
+<pre><code class="language-java">// 绑定Service
+private void handleBindService(BindServiceData data) {
+    Service s = mServices.get(data.token);
+    // ...
+    if (s != null) {
+        try {
+            data.intent.setExtrasClassLoader(s.getClassLoader());
+            data.intent.prepareToEnterProcess();
+            try {
+                if (!data.rebind) {
+                    // onBind方法返回binder
+                    IBinder binder = s.onBind(data.intent);
+                    // 调用activityManagerService 的publishService
+                    // 调用ServiceConnection的conn
+                    ActivityManager.getService().publishService(
+                        data.token, data.intent, binder);
+                } else {
+                    // 重新绑定
+                    s.onRebind(data.intent);
+                    ActivityManager.getService().serviceDoneExecuting(
+                        data.token, SERVICE_DONE_EXECUTING_ANON, 0, 0);
+                }
+            } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
+            }
+        } catch (Exception e) {
+            // ....
+        }
+    }
+}
+</code></pre>
+<h3 id="activitymanagerservicepublishservice">ActivityManagerService#publishService</h3>
+<pre><code class="language-java">public void publishService(IBinder token, Intent intent, IBinder service) {
+    // ...
+    synchronized(this) {
+        if (!(token instanceof ServiceRecord)) {
+            throw new IllegalArgumentException(&quot;Invalid service token&quot;);
+        }
+        mServices.publishServiceLocked((ServiceRecord)token, intent, service);
+    }
+}
+</code></pre>
+<h3 id="activeservicespublishservicelocked">ActiveServices#publishServiceLocked</h3>
+<ol>
+<li>通过<code>intent</code>进行过滤获取<code>IntentBindRecord</code>并对<code>request</code>、<code>received</code>赋值为true；</li>
+<li>遍历<code>connections</code>，调用<code>c.conn.connected</code>。</li>
+</ol>
+<pre><code class="language-java">void publishServiceLocked(ServiceRecord r, Intent intent, IBinder service) {
+    final long origId = Binder.clearCallingIdentity();
+    try {
+        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, &quot;PUBLISHING &quot; + r
+                                  + &quot; &quot; + intent + &quot;: &quot; + service);
+        if (r != null) {
+            // 通过intent过滤获取IntentBindRecord
+            Intent.FilterComparison filter
+                = new Intent.FilterComparison(intent);
+            IntentBindRecord b = r.bindings.get(filter);
+            if (b != null &amp;&amp; !b.received) {
+                b.binder = service;
+                b.requested = true;
+                b.received = true;
+                ArrayMap&lt;IBinder, ArrayList&lt;ConnectionRecord&gt;&gt; connections = r.getConnections();
+                for (int conni = connections.size() - 1; conni &gt;= 0; conni--) {
+                    ArrayList&lt;ConnectionRecord&gt; clist = connections.valueAt(conni);
+                    for (int i=0; i&lt;clist.size(); i++) {
+                        ConnectionRecord c = clist.get(i);
+                        // ...
+                        try {
+                            c.conn.connected(r.name, service, false);
+                        } catch (Exception e) {
+                            // ...
+                        }
+                    }
+                }
+            }
+            serviceDoneExecutingLocked(r, mDestroyingServices.contains(r), false);
+        }
+    } finally {
+        Binder.restoreCallingIdentity(origId);
+    }
+}
+</code></pre>
+<h3 id="contextimplbindservicecommon-2">ContextImpl#bindServiceCommon</h3>
+<p>前面对<code>service</code>启动和绑定的分析完毕后，在来看看是如何回调<code>ServiceConnection</code>的相关方法的。</p>
+<pre><code class="language-java">private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags,
+                                  String instanceName, Handler handler, Executor executor, UserHandle user) {
+    // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser.
+    IServiceConnection sd;
+    ....
+        if (mPackageInfo != null) {
+            if (executor != null) {
+                // IServiceConnection 来源
+                sd = mPackageInfo.getServiceDispatcher(conn, getOuterContext(), executor, flags);
+            } else {
+                sd = mPackageInfo.getServiceDispatcher(conn, getOuterContext(), handler, flags);
+            }
+        } else {
+            throw new RuntimeException(&quot;Not supported in system context&quot;);
+        }
+    ....
+}
+</code></pre>
+<h3 id="loadapkgetservicedispatchercommon">LoadApk#getServiceDispatcherCommon</h3>
+<p>创建<code>ServiceDispatcher</code>（对ServiceConnect实例进行包装和增强）。</p>
+<pre><code class="language-java">private IServiceConnection getServiceDispatcherCommon(ServiceConnection c,
+                                                      Context context, Handler handler,
+                                                      Executor executor, int flags) {
+    synchronized (mServices) {
+        ....
+            if (sd == null) {
+                if (executor != null) {
+                    sd = new ServiceDispatcher(c, context, executor, flags);
+                } else {
+                    sd = new ServiceDispatcher(c, context, handler, flags);
+                }
+                if (DEBUG) Slog.d(TAG, &quot;Creating new dispatcher &quot; + sd + &quot; for conn &quot; + c);
+                if (map == null) {
+                    map = new ArrayMap&lt;&gt;();
+                    mServices.put(context, map);
+                }
+                map.put(c, sd);
+            } else {
+                sd.validate(context, handler, executor);
+            }
+        return sd.getIServiceConnection();
+    }
+}
+</code></pre>
+<pre><code class="language-java">@UnsupportedAppUsage
+ServiceDispatcher(ServiceConnection conn,
+                  Context context, Handler activityThread, int flags) {
+    // connection的实际类型
+    mIServiceConnection = new InnerConnection(this);
+    mConnection = conn;
+    mContext = context;
+    mActivityThread = activityThread;
+    mActivityExecutor = null;
+    mLocation = new ServiceConnectionLeaked(null);
+    mLocation.fillInStackTrace();
+    mFlags = flags;
+}
+</code></pre>
+<h3 id="innerconnection">InnerConnection</h3>
+<p><code>InnerConnection</code>继承自 <code>AIDL</code>中生成的<code>Stub</code>类。</p>
+<pre><code class="language-java">private static class InnerConnection extends IServiceConnection.Stub {
+    @UnsupportedAppUsage
+    final WeakReference&lt;LoadedApk.ServiceDispatcher&gt; mDispatcher;
+ 
+    InnerConnection(LoadedApk.ServiceDispatcher sd) {
+        mDispatcher = new WeakReference&lt;LoadedApk.ServiceDispatcher&gt;(sd);
+    }
+ 
+    public void connected(ComponentName name, IBinder service, boolean dead)
+        throws RemoteException {
+        LoadedApk.ServiceDispatcher sd = mDispatcher.get();
+        if (sd != null) {
+            sd.connected(name, service, dead);
+        }
+    }
+}
+</code></pre>
+<pre><code class="language-java">public void connected(ComponentName name, IBinder service, boolean dead) {
+    if (mActivityExecutor != null) {
+        mActivityExecutor.execute(new RunConnection(name, service, 0, dead));
+    } else if (mActivityThread != null) {
+        mActivityThread.post(new RunConnection(name, service, 0, dead));
+    } else {
+        doConnected(name, service, dead);
+    }
+}
+</code></pre>
+<pre><code class="language-java">public void doConnected(ComponentName name, IBinder service, boolean dead) {
+    ServiceDispatcher.ConnectionInfo old;
+    ServiceDispatcher.ConnectionInfo info;
+ 
+    // ....
+    // If there was an old service, it is now disconnected.
+    if (old != null) {
+        mConnection.onServiceDisconnected(name);
+    }
+    if (dead) {
+        mConnection.onBindingDied(name);
+    }
+    // If there is a new viable service, it is now connected.
+    if (service != null) {
+        // 回调定义的onServiceConnected 方法
+        mConnection.onServiceConnected(name, service);
+    } else {
+        // The binding machinery worked, but the remote returned null from onBind().
+        mConnection.onNullBinding(name);
+    }
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Handler机制]]></title>
         <id>https://jxiaow.gitee.io/posts/5daabb/</id>
@@ -1304,694 +2226,6 @@ CharSequence label = resolveInfo.loadLabel(packageManager);
 </code></pre>
 <p><strong>注意：</strong> 由于这个插件安装过程中需要下载字体，会导致下载特别慢，尽可能使用代理。</p>
 <p><strong>website:</strong> <a href="https://xiaowujiang.cn">xiaowujiang.cn</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[360加固Gradle插件实现]]></title>
-        <id>https://jxiaow.gitee.io/posts/6c01e784/</id>
-        <link href="https://jxiaow.gitee.io/posts/6c01e784/">
-        </link>
-        <updated>2020-09-07T16:14:31.000Z</updated>
-        <content type="html"><![CDATA[<p>最近码了一个基于360加固的流程实现的Gradle插件，在自动编译打包后进行360加固流程操作。只需要配置一些参数后，就可以实现自动打包编译和加固。</p>
-<p>项目地址:https://github.com/jxiaow/android-gradle-plugin</p>
-<h3 id="使用步骤">使用步骤</h3>
-<h4 id="1-添加依赖">1. 添加依赖</h4>
-<ul>
-<li>在根<code>build.gradle</code>中添加：</li>
-</ul>
-<pre><code class="language-groovy">allprojects {
-    repositories {
-        maven { url &quot;https://jitpack.io&quot; }
-    }
-}
-
-dependencies {
-    ...
-    classpath 'com.github.jxiaow:android-gradle-plugin:$version'
-}
-</code></pre>
-<p>(请替换 <code>$version</code>为最新的版本号:<a href="https://jitpack.io/#jxiaow/android-gradle-plugin"><img src="https://jitpack.io/v/jxiaow/android-gradle-plugin.svg" alt="" loading="lazy"></a>)</p>
-<ul>
-<li>在<code>app</code>的模块<code>build.gradle</code>中添加：</li>
-</ul>
-<pre><code class="language-groovy">apply plugin: 'com.github.jxiaow.jiagu'
-</code></pre>
-<h4 id="2-参数配置">2. 参数配置</h4>
-<p>使用这款插件需要在<code>app</code>的<code>build.gradle</code>中添加一些配置信息，如下：</p>
-<pre><code class="language-groovy">jiagu {
-    home '../360jiagu' // 360加固软件的根目录
-    buildTypes 'release', 'debug' // 需要加固的编译类型
-    configs '-crashlog' // 选择360的可选配置服务
-    username 'user' // 360加固用户名
-    password 'password' // 360加固密码
-    charsetName 'GBK' // 360加固控制台输出字符编码
-    // apk签名文件， 如果在Android中配置了签名文件，此项可以不用配置，插件会自动读取名为'release'的签名文件
-    signingConfig { 
-        key_alias         : KEY_ALIAS, 
-        key_password      : KEY_PASSWORD,
-        key_store_password: KEY_STORE_PASSWORD,
-        key_store_file    : KEY_STORE_FILE
-    }
-}
-</code></pre>
-<h4 id="3-开始加固">3. 开始加固</h4>
-<p>确认上述参数无误后，就可以在控制台中切换到当前项目根目录执行</p>
-<pre><code class="language-shell"># 各个系统的控制台gradle命令可能不一样： ./gradlew 或 gradlew 
-./gradlew clean jiaGuApk 
-</code></pre>
-<h3 id="文档">文档</h3>
-<p><a href="https://jxiaow.github.io/android-gradle-plugin/plugin/com.github.jxiaow.jiagu/index.html">android-gradle-plugin</a></p>
-<h3 id="360加固助手">360加固助手</h3>
-<p><a href="https://jiagu.360.cn/#/global/download">360加固助手</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Http框架封装]]></title>
-        <id>https://jxiaow.gitee.io/posts/84a009ed/</id>
-        <link href="https://jxiaow.gitee.io/posts/84a009ed/">
-        </link>
-        <updated>2020-04-26T02:03:07.000Z</updated>
-        <summary type="html"><![CDATA[<p>用过了现有的一些<code>http</code>请求框架，决定自己也来简单的封装一个。本文只是基于一些http请求框架二次封装的，高手勿喷。<a href="https://github.com/ixiaow/ppjoke/tree/master/network/src/main/java/com/mooc/network">源码</a></p>
-]]></summary>
-        <content type="html"><![CDATA[<p>用过了现有的一些<code>http</code>请求框架，决定自己也来简单的封装一个。本文只是基于一些http请求框架二次封装的，高手勿喷。<a href="https://github.com/ixiaow/ppjoke/tree/master/network/src/main/java/com/mooc/network">源码</a></p>
-<!-- more -->
-<h2 id="http的请求和响应">http的请求和响应</h2>
-<p>一个http的请求通常包含请求头、请求体、响应头和响应体，考虑到这些因素，<code>HttpConfig</code>和 <code>ApiResponse</code>就诞生了: <a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/http/HttpConfig.java">HttpConfig</a></p>
-<h3 id="httpconfig">HttpConfig</h3>
-<p>http参数配置类，应该包含如下属性:</p>
-<ul>
-<li>baseUrl/url</li>
-</ul>
-<p>如果使用restful形式，baseUrl是不能为空并且url为业务path, 如果是非restful,url必须为请求全路径</p>
-<ul>
-<li>GET/POST</li>
-</ul>
-<p>有了url，接下来需要有请求的方法类型，由于我这边只用到了<code>GET</code>和<code>POST</code>,所以只对此做了封装。</p>
-<p><strong>特别说明：</strong> POST 有三种提交方式（form表单、json形式和 复杂形式）</p>
-<pre><code class="language-java">FORM_DATA(&quot;application/x-www-form-urlencoded;charset=utf-8&quot;),
-JSON_DATA(&quot;application/json;charset=utf-8&quot;),
-MULTI_PART_DATA(&quot;multipart/form-data;charset=utf-8&quot;);
-</code></pre>
-<ul>
-<li>headers</li>
-</ul>
-<p>http的请求头封装，采用<code>(Map&lt;String,String&gt;)</code>集合</p>
-<ul>
-<li>params</li>
-</ul>
-<p>http的请求参数，采用<code>(Map&lt;String,Object&gt;)</code>如果请求方法是<code>GET</code>形式，那么采用拼接字符串的形式将参数拼接到url中; 如果请求方法是<code>POST</code>形式，则需要根据提交参数的方式不同，会有不同的请求体。</p>
-<ul>
-<li>cacheStrategy</li>
-</ul>
-<p>考虑到App的使用交互和服务器减压，我们要考虑有一些请求可以做一些缓存，那么常用的缓存策略有<code>CACHE_ONLY</code>、<code>CACHE_FIRST</code>、<code>NET_ONLY</code>和<code>NET_CACHE</code></p>
-<ul>
-<li>type</li>
-</ul>
-<p>type是响应数据的type,这个主要用在Http请求结果返回后将json转为bean对象的映射类型，需要考虑泛型和非泛型（Class和ParamizableType）</p>
-<ul>
-<li>tag</li>
-</ul>
-<p>给每一个请求链接打一个标签，可用于一些其它的操作，如根据tag取消请求</p>
-<ul>
-<li>isAsync</li>
-</ul>
-<p>当前请求是同步执行还是异步执行的标志，异步执行会在子线程中进行http请求，同步执行在当前线程中执行http请求。</p>
-<h4 id="apiresponset">ApiResponse<T></h4>
-<p>使用<a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/ApiResponse.java">ApiResponse</a>的原因是为了规范请求结果返回的表现形式，他有一个<code>T</code>类型的数据。</p>
-<ul>
-<li>code</li>
-</ul>
-<p>状态码,与http请求响应状态码一致，200~300 请求成功，304 使用缓存</p>
-<ul>
-<li>message</li>
-</ul>
-<p>请求响应的错误信息</p>
-<ul>
-<li>data</li>
-</ul>
-<p>响应的数据，泛型T, 根据<code>httpConfig</code>中的type,映射 json--&gt; bean</p>
-<h2 id="http引擎">Http引擎</h2>
-<p><a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/http/IHttpEngine.java">IHttpEngine</a>是一个接口，使用者可以根据实际的情况做具体的实现。</p>
-<pre><code class="language-java">public interface IHttpEngine {
-
-    // 开始执行 http请求
-    &lt;T&gt; execute(HttpConfig config, MultableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData);
-    // 根据tag取消
-    void cancel(Object tag);
-}
-</code></pre>
-<p>由于http请求有同步和异步两种情况并且又牵扯到了缓存策略问题（如果先进行缓存返回在执行网络请求并返回数据），在异步回调的情况下这些问题可以通过回调解决，但是在同步情况下，这些问题并不能很好的处理，曾经有使用过将当前请求<code>clone</code>,然后再次调用请求服务器的方法，但是在使用过<code>jetpack</code>的<code>LiveData</code>框架后这些问题都可以解决了。</p>
-<h2 id="okhttpengine">OkhttpEngine</h2>
-<p>Android开发目前来说大多数项目使用的都是<code>Okhttp</code>来做请求，本次我使用的默认引擎也是使用它来作为默认的实现。<a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/http/okhttp/OkHttpEngine.java">OkHttpEngine</a></p>
-<h3 id="okhttp简单配置">okhttp简单配置</h3>
-<p>对okhttp进行一些简单的配置就可以进行网络请求了，如下：</p>
-<ul>
-<li>创建okHttpClient</li>
-</ul>
-<pre><code class="language-java"> private static final OkHttpClient OK_HTTP_CLIENT;
-
- // 添加日志拦截器
- HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
- loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
- OK_HTTP_CLIENT = new OkHttpClient.Builder()
-               .connectTimeout(15, TimeUnit.SECONDS)
-               .readTimeout(15, TimeUnit.SECONDS)
-               .writeTimeout(15, TimeUnit.SECONDS)
-               .addInterceptor(loggingInterceptor)
-               .build();
-</code></pre>
-<ul>
-<li>添加证书管理</li>
-</ul>
-<pre><code class="language-java">TrustManager[] trustManagers = new TrustManager[]{
-    new X509TrustManager() {
-        @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
-        @Override
-        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
-        @Override
-        public X509Certificate[] getAcceptedIssuers() {
-            return new X509Certificate[0];
-        }
-     }
-};
-
-SSLContext sslContext = SSLContext.getInstance(&quot;SSL&quot;);
-sslContext.init(null, trustManagers, new SecureRandom());
-HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -&gt; true);
-</code></pre>
-<h3 id="实现http请求">实现Http请求</h3>
-<p>IHttpEngine中的<code>execute</code>方法是具体的http请求方法，所有实现<code>IHttpEngine</code>的方法都需要实现此方法。</p>
-<pre><code class="language-java">@NonNull
-@Override
-public &lt;T&gt; void execute(@NonNull Config config, 
-                        @NonNull MutableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData) {
-    Request request = generateRequest(config);
-    Call call = OK_HTTP_CLIENT.newCall(request);
-    if (!config.isAsync) {
-        execute(call, config, liveData);
-    } else {
-        enqueue(call, config, liveData);
-    }
-}
-</code></pre>
-<p><code>execute</code>方法中大致需要做以下事：</p>
-<ul>
-<li>创建request--&gt; genearteRequest</li>
-<li>发送http请求 ---&gt; execute/enqueue</li>
-</ul>
-<h4 id="创建httprequest">创建httpRequest</h4>
-<p><code>generateRequest()</code>根据<code>HttpConfig</code>中的请求方式来创建不同的http请求。</p>
-<pre><code class="language-java">/**
- * 根据配置信息生成request
- *
- * @param config 配置信息
- * @return request
- */
- @NonNull
- private Request generateRequest(@NonNull Config config) {
-    switch (config.method) {
-       case Config.GET:
-           return generateGetRequest(config);
-       case Config.POST:
-           return generatePostRequest(config);
-
-       default:
-           throw new IllegalStateException(&quot;this request method invalidate: &quot; + config.method);
-    }
-}
-</code></pre>
-<h5 id="get请求的创建方式">GET请求的创建方式</h5>
-<p><code>genearteGetReques()</code>方法，利用okhttp的Request类创建request实例，并利用<a href="https://github.com/ixiaow/ppjoke/blob/master/network/src/main/java/com/mooc/network/http/UrlCreator.java">UrlCreator</a>将参数拼接到url中。Url拼接时需要注意使用<code>UrlEncoder</code>编码，不然可能会造成服务器和客户端解析数据不一致的情况。</p>
-<pre><code class="language-java">/**
- * 生成get方式的请求
- *
- * @param config 请求配置
- * @return 返回get方式的request
- */
-@NonNull
-private Request generateGetRequest(@NonNull Config config) {
-   Request.Builder builder = new Request.Builder().get();
-   builder.tag(config.tag);
-   addHeader(builder, config);
-   String url = UrlCreator.generateUrlForParams(config.url(), config.getParams());
-   return builder.url(url).build();
-}
-</code></pre>
-<h5 id="post请求的创建方式">POST请求的创建方式</h5>
-<p>POST请求方式提交内容时相对于GET方式要复杂许多，他需要根据提交方式的不同添加不同的<code>header</code>和内容<code>body</code>, 在<code>generatePostRequest()</code>方法中先利用okhttp的request类创建request实例，根据调用者在<code>HttpConfig</code>中设置<code>formData</code>来创建不同形式的<code>body</code>。</p>
-<pre><code class="language-java">/**
- * 生成post请求
- *
- * @param config http请求配置信息
- * @return 请求request
- */
-@NonNull
-private Request generatePostRequest(@NonNull Config config) {
-   Request.Builder builder = new Request.Builder().url(config.url());
-   builder.tag(config.tag);
-   addHeader(builder, config);
-
-   // 根据提交方式添加header信息
-   Pair&lt;String, String&gt; header = config.formData.getHeader();
-   builder.addHeader(header.first, header.second);
-
-   // 创建body
-   RequestBody body = generatePostRequestBody(config);
-   return builder.post(body).build();
-}
-</code></pre>
-<p>判断<code>formData</code>类型，创建不同的<code>request body</code>。</p>
-<pre><code class="language-java">/**
- * 获取post提交体
- *
- * @param config 请求配置信息
- * @return RequestBody
- */
-@NonNull
-private RequestBody generatePostRequestBody(@NonNull Config config) {
-   FormData formData = config.formData;
-   switch (formData) {
-       case FORM_DATA:
-           return getFormDataRequestBody(config);
-       case JSON_DATA:
-           return getJsonDataRequestBody(config);
-       case MULTI_PART_DATA:
-           return getMultiDataRequestBody(config);
-       default:
-           throw new IllegalArgumentException(&quot;post formData is invalidate: &quot; + formData);
-   }
-}
-</code></pre>
-<h6 id="创建formdata表单">创建FormData(表单)</h6>
-<p>form表单形式比较简单，只需要创建一个okhttp的FormBody并将param添加，需要注意的是添加param时调用的是<code>addEncoded</code>方法。</p>
-<pre><code class="language-java">/**
- * 生成form data形式的post数据
- *
- * @param config 请求配置
- * @return FromBody
- */
- @NonNull
- private RequestBody getFormDataRequestBody(@NonNull Config config) {
-     FormBody.Builder builder = new FormBody.Builder(StandardCharsets.UTF_8);
-     Map&lt;String, Object&gt; params = config.getParams();
-     for (Map.Entry&lt;String, Object&gt; entry : params.entrySet()) {
-          builder.addEncoded(entry.getKey(), String.valueOf(entry.getValue()));
-     }
-     return builder.build();
- }
-</code></pre>
-<h6 id="json形式">json形式</h6>
-<p>利用okHttp中的<code>RequestBody.create()</code>方法创建一个json形式的body,需要传递json和json形式的header。</p>
-<pre><code class="language-java">/**
- * 生成json形式的post数据
- *
- * @param config 请求配置
- * @return RequestBody
- */
- @NonNull
- private RequestBody getJsonDataRequestBody(@NonNull Config config) {
-   if (config.getParams().isEmpty()) {
-        throw new IllegalArgumentException(&quot;json data is null&quot;);
-   }
-   Object json = config.getParams().get(Config.JSON_KEY);
-   return RequestBody.create(String.valueOf(json), MediaType.parse(config.formData.getValue()));
- }
-</code></pre>
-<h6 id="复杂形式的body">复杂形式的body</h6>
-<p>复杂形式的body，主要是用在文件上传这一块儿。它需要判断当前param是普通key-value、单文件和多文件。</p>
-<p>利用okhttp的MultiparBody创建body对象并根据内容类型调用的不同的body,然后调用<code>addFormDataPart</code>添加到MultipartBody中。</p>
-<pre><code class="language-java">/**
- * 获取复杂的post提交体
- *
- * @param config 请求配置信息
- * @return MultipartBody
- */
-@NonNull
-@SuppressWarnings(&quot;unchecked&quot;)
-private RequestBody getMultiDataRequestBody(@NonNull Config config) {
-
-    MultipartBody.Builder builder = new MultipartBody.Builder();
-    builder.setType(MultipartBody.FORM);
-
-    for (Map.Entry&lt;String, Object&gt; entry : config.getParams().entrySet()) {
-        String key = entry.getKey();
-        Object value = entry.getValue();
-
-        if (value instanceof File) {
-            File file = (File) value;
-            RequestBody requestBody = MultipartBody.create(file, getFileMediaType(file));
-            builder.addFormDataPart(key, file.getName(), requestBody);
-        } else if (value instanceof List) {
-            List&lt;File&gt; files = (List&lt;File&gt;) value;
-            for (int i = 0; i &lt; files.size(); i++) {
-                File file = files.get(i);
-                RequestBody requestBody = MultipartBody.create(file, getFileMediaType(file));
-                builder.addFormDataPart(key + i, file.getName(), requestBody);
-            }
-        } else {
-            builder.addFormDataPart(key, String.valueOf(value));
-        }
-    }
-    return builder.build();
-}
-</code></pre>
-<p>添加文件时需要有文件的类型，文件类型的获取方式是通过<code>UrlConnection</code>的getFileNameMap方法获取。</p>
-<pre><code class="language-java">/**
- * 获取文件的type类型
- *
- * @param file 文件
- * @return MediaType
- */
-@Nullable
-private MediaType getFileMediaType(@NonNull File file) {
-    FileNameMap fileNameMap = URLConnection.getFileNameMap();
-    String contentTypeFor = fileNameMap.getContentTypeFor(file.getAbsolutePath());
-    if (contentTypeFor == null) {
-        contentTypeFor = &quot;application/octet-stream&quot;;
-    }
-    return MediaType.parse(contentTypeFor);
-</code></pre>
-<p>通过以上的几种方式就可以创建一个http请求了，接下来需要发送请求了，发送请求需要通过httpConfig中的<code>isAsync</code>来判断是开启一个子线程还是在当前线程中执行操作（同步与异步）。</p>
-<h4 id="发送http请求">发送http请求</h4>
-<p>发送http请求会有同步请求(execute)和异步请求(enqueue), 同步请求是在当前线程中发送http请求，异步请求采用okhttp线程池发送请求。处理请求时在合适的地方需要判断该请求是否被取消。</p>
-<pre><code class="language-java"> if (call.isCanceled()) {
-    return;
- }
-</code></pre>
-<h5 id="同步请求execute">同步请求(execute)</h5>
-<p>在发送http请求时会根据缓存策略进行响应的处理，而同步请求没有办法做到<code>return</code>后可以继续进行网络请求，所以引入了<code>LiveData</code>来发送数据。</p>
-<p>目前缓存策略有四种，我们需要根据判断来进行不同的操作，关于缓存的创建和获取后续会有说明，这块儿只有根据缓存策略处理数据。</p>
-<pre><code class="language-java">/**
- * 同步执行的方法
- */
-@SuppressWarnings(&quot;unchecked&quot;)
-private &lt;T&gt; void execute(Call call, Config config, MutableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData) {
-    ApiResponse&lt;T&gt; apiResponse;
-    Logs.d(&quot;execute before cache: &quot; + Thread.currentThread().getName());
-    // 只访问本地数据
-    if (config.cacheStrategy == Config.CACHE_ONLY) {
-        apiResponse = readCache(call.request().url().toString());
-        liveData.postValue(apiResponse);
-        return;
-    }
-
-    // 先访问本地数据，然后再发起网络请求
-    if (config.cacheStrategy == Config.CACHE_FIRST) {
-        apiResponse = readCache(call.request().url().toString());
-        liveData.postValue(apiResponse);
-    }
-
-    Logs.d(&quot;execute current thread: &quot; + Thread.currentThread().getName());
-    // ..... 此处开始进行http网络请求
-
-
-    if (call.isCanceled()) {
-        return;
-    }
-    // liveData发送数据
-    liveData.postValue(apiResponse);
-    if (config.cacheStrategy != Config.NET_ONLY) {
-        saveCache(call.request().url().toString(), apiResponse);
-    }
-}
-</code></pre>
-<p>使用okhttp的<code>execute</code>方法发送http请求,并利用<code>ConvertFactory</code>进行数据解析，ConvertFactory后续会介绍。</p>
-<pre><code class="language-java"> try {
-      Response response = call.execute();
-      IConvert&lt;Response, T&gt; convert = ConvertFactory.create();
-      apiResponse = convert.convert(response, config.type);
- } catch (IOException e) {
-      e.printStackTrace();
-      apiResponse = new ApiResponse&lt;&gt;();
-      apiResponse.status = 500;
-      apiResponse.message = e.getMessage();
- }
-</code></pre>
-<h5 id="异步请求enqueue">异步请求(enqueue)</h5>
-<p>异步请求与同步请求一样也需要进行缓存策略进行缓存处理，这块儿的处理逻辑一致，所以下面的代码块将这部分省略。使用okhttp的<code>enqueue</code>方法发送http请求,在<code>onResponse</code>中并利用<code>ConvertFactory</code>进行数据的解析，在<code>onFailure</code>中自定义错误信息的返回。</p>
-<pre><code class="language-java">private &lt;T&gt; void enqueue(Call call, Config config, MutableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData) {
-        //... 缓存策略判断数据处理返回
-        ...
-        // 开始请求服务器
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                if (call.isCanceled()) {
-                    return;
-                }
-                ApiResponse&lt;T&gt; apiResponse = new ApiResponse&lt;&gt;();
-                apiResponse.status = 500;
-                apiResponse.message = e.getMessage();
-                liveData.postValue(apiResponse);
-            }
-
-            @SuppressWarnings(&quot;unchecked&quot;)
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                if (call.isCanceled()) {
-                    return;
-                }
-                IConvert&lt;Response, T&gt; convert = ConvertFactory.create();
-                ApiResponse&lt;T&gt; apiResponse = convert.convert(response, config.type);
-                liveData.postValue(apiResponse);
-                if (config.cacheStrategy != Config.NET_ONLY) {
-                    saveCache(call.request().url().toString(), apiResponse);
-                }
-            }
-        });
-    }
-</code></pre>
-<h3 id="取消请求">取消请求</h3>
-<p><code>cancle()</code>方法中，利用Okhttp来取消请求，主要是比对tag, 如下：</p>
-<pre><code class="language-java">@Override
-public void cancel(@NonNull Object tag) {
-    if (OK_HTTP_CLIENT == null) {
-        return;
-    }
-
-    //查找当前需要取消的tag是否在未执行的请求中
-    for (Call call : OK_HTTP_CLIENT.dispatcher().queuedCalls()) {
-        if (tag.equals(call.request().tag())) {
-            call.cancel();
-        }
-    }
-
-    //查找当前需要请求的tag是否在正在执行的请求中
-    for (Call call : OK_HTTP_CLIENT.dispatcher().runningCalls()) {
-        if (tag.equals(call.request().tag())) {
-            call.cancel();
-        }
-    }
-}
-</code></pre>
-<h2 id="响应数据转换">响应数据转换</h2>
-<p>从服务器返回数据后，需要将数据格式进行转换成数据模型bean，由于数据返回的形式有多种，所以解析方式也会有多种，所以这块儿可以考虑使用数据解析工厂类去做数据解析，不同的解析数据做不同的逻辑实现，达到解偶。</p>
-<p>定义一个<code>Convert</code>类，利用泛型的方式进行参数传递。</p>
-<pre><code class="language-java">public interface IConvert&lt;T, R&gt; {
-    // 数据的返回形式必须是ApiResponse, type即为泛型T的类型
-    @NonNull
-    ApiResponse&lt;R&gt; convert(@NonNull T t, @NonNull Type type);
-}
-</code></pre>
-<p>这边提供了一种简单的convert调用方式，后面可以要考虑进行扩展选择：</p>
-<pre><code class="language-java"> IConvert&lt;Response, T&gt; convert = ConvertFactory.create();
- apiResponse = convert.convert(response, config.type);
-</code></pre>
-<p><code>ConverFactory</code>为<code>IConvert</code>的实现类。</p>
-<pre><code class="language-java">public class ConvertFactory&lt;R&gt; implements IConvert&lt;Response, R&gt; {
-    private static ConvertFactory convertFactory;
-
-
-    public static ConvertFactory create() {
-        if (convertFactory == null) {
-            convertFactory = new ConvertFactory();
-        }
-        return convertFactory;
-    }
-
-    ...........
-}
-</code></pre>
-<h2 id="本地缓存">本地缓存</h2>
-<p>数据缓存采用的是<code>Room</code>数据库进行数据的存储，room是jetpack中的一种组件。它的创建方式也很简单。</p>
-<h3 id="创建数据库表">创建数据库表</h3>
-<pre><code class="language-java">// Entity 表示该对象是一张数据库表
-@Entity(tableName = &quot;cache&quot;)
-public class Cache {
-    // primarykey表示表的主键
-    @PrimaryKey
-    @NonNull
-    public String key;
-    // ColumnInfo表示该字段在表中显示的字段名
-    @ColumnInfo(name = &quot;_data&quot;)
-    public byte[] data;
-}
-</code></pre>
-<h3 id="创建数据库">创建数据库</h3>
-<pre><code class="language-java">// entities 表示 需要在该数据库中创建的表，可以创建多张
-// version 数据库的版本号
-// exportSchema 导出表创建的语句
-@Database(entities = Cache.class, version = 1, exportSchema = true)
-public abstract class CacheDatabase extends RoomDatabase {
-    private static final CacheDatabase cacheDatabase;
-
-    static {
-        Application application = AppGlobals.getApplication();
-        cacheDatabase = Room.databaseBuilder(application, CacheDatabase.class, &quot;net_cache.db&quot;)
-                .allowMainThreadQueries()
-                .build();
-    }
-
-    // 数据库与Dao关联
-    public abstract CacheDao getCacheDao();
-
-    public static CacheDatabase get() {
-        return cacheDatabase;
-    }
-} 
-</code></pre>
-<h3 id="创建数据库表操作类dao">创建数据库表操作类Dao</h3>
-<pre><code class="language-java">// Dao 用来表示当前类是数据库表的操作类
-@Dao
-public interface CacheDao {
-    // Insert 表示增加一条记录到数据库表中
-    // onConflict 表示如果添加数据时出现冲突的解决策略
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void save(@NonNull Cache cache);
-
-    // Delete 表示删除一条记录
-    @Delete
-    int delete(@NonNull Cache cache);
-
-    // Update 表示更新一条记录
-    // onConflict 表示如果更新数据时出现冲突的解决策略
-    @Update(onConflict = OnConflictStrategy.REPLACE)
-    int update(@NonNull Cache cache);
-
-    // Query 查找一条记录
-    @Query(&quot;SELECT * FROM cache WHERE `key`=:key&quot;)
-    Cache query(@NonNull String key);
-}
-</code></pre>
-<h2 id="type类型">Type类型</h2>
-<p>由于java中的泛型在编译完毕后会擦除该类型，所以我们无法在同步执行或者多级泛型嵌套的情况下拿到泛型的实际类型。目前的解决方式有两种。</p>
-<h3 id="调用者传入实际类型">调用者传入实际类型</h3>
-<p>提供可以传入实际类型的方法，调用处将明确类型传递。</p>
-<h3 id="利用子类实现的方式获取实际类型">利用子类实现的方式获取实际类型</h3>
-<p>Java代码在编译成字节码class文件时会保留子类的泛型信息。所以大部分的json数据解析都是采用的此方法，如：Gson中的TypeToken 以及fasjson中的TypeReference。</p>
-<pre><code class="language-java">public abstract class TypeToken&lt;T&gt; {
-    // 泛型T的实际类型
-    protected Type type;
-
-    public TypeToken() {
-        Type superClass = getClass().getGenericSuperclass();
-        // 获取泛型的实际类型
-        Type oriType = ((ParameterizedType) superClass).getActualTypeArguments()[0];
-
-        if (oriType instanceof Class) {
-            type = oriType;
-        } else {
-            //修复在安卓环境中问题
-            type = putCacheTypeIfAbsent(oriType);
-        }
-    }
-}
-</code></pre>
-<p>由于本次封装的返回的数据类型是<code>ApiResponse&lt;T&gt;</code>所以需要对泛型进行二次解析，所以新建了一个ApiResponseToken。</p>
-<pre><code class="language-java">public abstract class ApiResponseToken&lt;T&gt; extends TypeToken&lt;T&gt; {
-
-    public ApiResponseToken() {
-        Type superClass = getClass().getGenericSuperclass();
-
-        Type oriType = ((ParameterizedType) superClass).getActualTypeArguments()[0];
-
-        if (oriType instanceof Class) {
-            type = oriType;
-        } else {
-            // 解决ApiResponse&lt;T&gt;这种情况
-            if (oriType instanceof ParameterizedType) {
-                oriType = ((ParameterizedType) oriType).getActualTypeArguments()[0];
-            }
-            type = putCacheTypeIfAbsent(oriType);
-        }
-    }
-}
-</code></pre>
-<p>由于本次框架的数据返回使用了<code>LiveData&lt;T&gt;</code>的形式，并通过订阅的方式实现数据返回，所以又添加了一个类型，用于自行获取type。</p>
-<pre><code class="language-java">public abstract class HttpObserver&lt;T&gt; extends ApiResponseToken&lt;T&gt; 
-        implements Observer&lt;T&gt; {
-}
-</code></pre>
-<p>在使用LiveData的observe方法订阅时，在创建一个HttpObserserver实例，在构造方法中就可以解析出T的类型，就不需要我们手动传入T的真实类型了。</p>
-<pre><code class="language-java"> /**
- * 开始订阅请求网络数据
- */
-public &lt;T&gt; void observe(LifecycleOwner owner,
-                        HttpObserver&lt;ApiResponse&lt;T&gt;&gt; observer) {
-    // 由于HttpObserver是继承ApiResponseToken的，
-    // 所以可以快速的获取到泛型T的实际类型
-    Type type = observer.getType();
-    mConfig.type = type;
-    Logs.e(&quot;type: &quot; + type);
-}
-</code></pre>
-<p>使用方式：</p>
-<pre><code class="language-java">.observe(owner, 
-        // 通过new HtppObserver的方式就可以拿到具体的泛型值
-         new HttpObserver&lt;ApiResponse&lt;JSONObject&gt;&gt;() {
-             @Override
-             public void onChanged(ApiResponse&lt;JSONObject&gt; apiResponse) {
-                  .....
-              }
-        }
-);
-</code></pre>
-<h2 id="http请求入口类">Http请求入口类</h2>
-<p>LiveHttp的封装，LiveHttp主要提供了以下功能：</p>
-<ul>
-<li>
-<p>持有一个默认的http引擎</p>
-</li>
-<li>
-<p>可支持设置baseUrl和设置引擎的入口</p>
-</li>
-<li>
-<p>设置HttpConfig中的参数</p>
-</li>
-<li>
-<p>执行Http请求入口</p>
-</li>
-<li>
-<p>提供取消http请求的入口</p>
-</li>
-<li>
-<p>支持链式调用</p>
-</li>
-</ul>
-<p>以上几点都很简单，主要是来说一下执行http请求入口：</p>
-<pre><code class="language-java">/**
- * 开始订阅请求网络数据
- */
-public &lt;T&gt; void observe(LifecycleOwner owner,
-                        HttpObserver&lt;ApiResponse&lt;T&gt;&gt; observer) {
-    // 获取泛型实际类型
-    Type type = observer.getType();
-    mConfig.type = type;
-    Logs.d(&quot;type: &quot; + type);
-
-    if (TextUtils.isEmpty(mConfig.url())) {
-        throw new IllegalArgumentException(&quot;请求路径不能为空&quot;);
-    }
-
-    MutableLiveData&lt;ApiResponse&lt;T&gt;&gt; liveData = new MutableLiveData&lt;&gt;();
-    // liveData的订阅必须是要在主线程中
-    TaskExecutor.get().postToMain(() -&gt; liveData.observe(owner, observer));
-    sHttpEngine.execute(mConfig, liveData);
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>
