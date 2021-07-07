@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://jxiaow.github.io</id>
+    <id>https://jxiaow.gitee.io</id>
     <title>Xiaowu</title>
-    <updated>2021-07-07T02:08:52.344Z</updated>
+    <updated>2021-07-07T02:13:30.235Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://jxiaow.github.io"/>
-    <link rel="self" href="https://jxiaow.github.io/atom.xml"/>
+    <link rel="alternate" href="https://jxiaow.gitee.io"/>
+    <link rel="self" href="https://jxiaow.gitee.io/atom.xml"/>
     <subtitle>心若没有栖息的地方，到哪里都是在流浪</subtitle>
-    <logo>https://jxiaow.github.io/images/avatar.png</logo>
-    <icon>https://jxiaow.github.io/favicon.ico</icon>
+    <logo>https://jxiaow.gitee.io/images/avatar.png</logo>
+    <icon>https://jxiaow.gitee.io/favicon.ico</icon>
     <rights>All rights reserved 2021, Xiaowu</rights>
     <entry>
         <title type="html"><![CDATA[Git 基本使用]]></title>
-        <id>https://jxiaow.github.io/posts/b8d683be/</id>
-        <link href="https://jxiaow.github.io/posts/b8d683be/">
+        <id>https://jxiaow.gitee.io/posts/b8d683be/</id>
+        <link href="https://jxiaow.gitee.io/posts/b8d683be/">
         </link>
         <updated>2021-03-17T08:26:14.000Z</updated>
         <content type="html"><![CDATA[<blockquote>
@@ -124,8 +124,8 @@ git push origin new_branch:new_branch
     </entry>
     <entry>
         <title type="html"><![CDATA[Binder解析]]></title>
-        <id>https://jxiaow.github.io/posts/7425384b/</id>
-        <link href="https://jxiaow.github.io/posts/7425384b/">
+        <id>https://jxiaow.gitee.io/posts/7425384b/</id>
+        <link href="https://jxiaow.gitee.io/posts/7425384b/">
         </link>
         <updated>2021-01-31T13:32:11.000Z</updated>
         <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://cdn.jsdelivr.net/gh/jxiaow/cdn-images@latest/blog-images/2021/01/27/cbe191fcba5fc5e06c7cd120d4f6a437-Binder-0748cb.png" alt="Binder" loading="lazy"></figure>
@@ -325,8 +325,8 @@ git push origin new_branch:new_branch
     </entry>
     <entry>
         <title type="html"><![CDATA[AIDL文件编写及源码分析]]></title>
-        <id>https://jxiaow.github.io/posts/40026fc8/</id>
-        <link href="https://jxiaow.github.io/posts/40026fc8/">
+        <id>https://jxiaow.gitee.io/posts/40026fc8/</id>
+        <link href="https://jxiaow.gitee.io/posts/40026fc8/">
         </link>
         <updated>2021-01-30T14:38:06.000Z</updated>
         <content type="html"><![CDATA[<h2 id="aidl编写">AIDL编写</h2>
@@ -1046,8 +1046,8 @@ ServiceDispatcher(ServiceConnection conn,
     </entry>
     <entry>
         <title type="html"><![CDATA[Handler机制]]></title>
-        <id>https://jxiaow.github.io/posts/5daabb/</id>
-        <link href="https://jxiaow.github.io/posts/5daabb/">
+        <id>https://jxiaow.gitee.io/posts/5daabb/</id>
+        <link href="https://jxiaow.gitee.io/posts/5daabb/">
         </link>
         <updated>2021-01-27T10:03:10.000Z</updated>
         <content type="html"><![CDATA[<h2 id="handler的作用">handler的作用</h2>
@@ -1443,8 +1443,8 @@ void checkThread() {
     </entry>
     <entry>
         <title type="html"><![CDATA[屏幕适配]]></title>
-        <id>https://jxiaow.github.io/posts/9233ed3f/</id>
-        <link href="https://jxiaow.github.io/posts/9233ed3f/">
+        <id>https://jxiaow.gitee.io/posts/9233ed3f/</id>
+        <link href="https://jxiaow.gitee.io/posts/9233ed3f/">
         </link>
         <updated>2021-01-21T15:00:41.000Z</updated>
         <content type="html"><![CDATA[<h2 id="dp-和-sp">dp 和 sp</h2>
@@ -1471,8 +1471,8 @@ void checkThread() {
     </entry>
     <entry>
         <title type="html"><![CDATA[Android属性动画]]></title>
-        <id>https://jxiaow.github.io/posts/c521d2cf/</id>
-        <link href="https://jxiaow.github.io/posts/c521d2cf/">
+        <id>https://jxiaow.gitee.io/posts/c521d2cf/</id>
+        <link href="https://jxiaow.gitee.io/posts/c521d2cf/">
         </link>
         <updated>2021-01-21T12:51:11.000Z</updated>
         <content type="html"><![CDATA[<p>属性动画整理的脑图如下：</p>
@@ -1586,8 +1586,8 @@ animatorSet.start()
     </entry>
     <entry>
         <title type="html"><![CDATA[使用Klint格式化代码]]></title>
-        <id>https://jxiaow.github.io/posts/745cbbe1/</id>
-        <link href="https://jxiaow.github.io/posts/745cbbe1/">
+        <id>https://jxiaow.gitee.io/posts/745cbbe1/</id>
+        <link href="https://jxiaow.gitee.io/posts/745cbbe1/">
         </link>
         <updated>2021-01-05T02:13:13.000Z</updated>
         <content type="html"><![CDATA[<p><a href="https://github.com/shyiko/ktlint">ktlint</a> 是一款用来检查Kotlin代码风格的工具，在Android Studio 中可以使用 <a href="https://github.com/diffplug/spotless">spotless</a>。</p>
@@ -1623,8 +1623,8 @@ spotless {
     </entry>
     <entry>
         <title type="html"><![CDATA[Android 事件分发机制]]></title>
-        <id>https://jxiaow.github.io/posts/149503c8/</id>
-        <link href="https://jxiaow.github.io/posts/149503c8/">
+        <id>https://jxiaow.gitee.io/posts/149503c8/</id>
+        <link href="https://jxiaow.gitee.io/posts/149503c8/">
         </link>
         <updated>2021-01-04T05:53:01.000Z</updated>
         <content type="html"><![CDATA[<h1 id="android事件分发机制">Android事件分发机制</h1>
@@ -2161,8 +2161,8 @@ actionMasked比action更全面，无论处理简单拖拽还是复杂的多指�
     </entry>
     <entry>
         <title type="html"><![CDATA[UI绘制合集]]></title>
-        <id>https://jxiaow.github.io/posts/b1e45c68/</id>
-        <link href="https://jxiaow.github.io/posts/b1e45c68/">
+        <id>https://jxiaow.gitee.io/posts/b1e45c68/</id>
+        <link href="https://jxiaow.gitee.io/posts/b1e45c68/">
         </link>
         <updated>2020-12-17T09:33:22.000Z</updated>
         <summary type="html"><![CDATA[<p>最近正在整理以前总结的关于 <strong>Android高级UI</strong> 相关的知识，本篇文章只是一个目录，用于进行文章归档。</p>
@@ -2190,8 +2190,8 @@ actionMasked比action更全面，无论处理简单拖拽还是复杂的多指�
     </entry>
     <entry>
         <title type="html"><![CDATA[Android通过Intent简单实现分享功能]]></title>
-        <id>https://jxiaow.github.io/posts/73a6d0c4/</id>
-        <link href="https://jxiaow.github.io/posts/73a6d0c4/">
+        <id>https://jxiaow.gitee.io/posts/73a6d0c4/</id>
+        <link href="https://jxiaow.gitee.io/posts/73a6d0c4/">
         </link>
         <updated>2020-12-04T16:03:24.000Z</updated>
         <summary type="html"><![CDATA[<p>现在大多数App的分享功能基本上使用的都是微信、QQ、微博的分享sdk或者是集成友盟分享sdk，如果想简单快速的实现分享功能，可以考虑通过<code>Intent</code>方式打开在系统中安装的具有分享功能的App的分享页面。</p>
